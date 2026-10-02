@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-511fHAG2A8nn+64j7HTrtNYGH99YVqAeGUNi8SltmUc='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-HkL2IOf7dv9mMykL+pes22TqTkswhCLkuigV9cXaGPE='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -218,7 +218,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:89be16250a1e34d7 —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:c80de364198ab5ab —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -2157,6 +2157,8 @@
     cfgAllReadonlyHint: { zh: "本项在后台只读，不能在这一页修改。", en: "This item is read-only in the admin console." },
     errSolePrincipalForbidden: { zh: "独任负责人例外已不可用：目前在职负责人不止您一位（或您不是负责人）。请改走两步审批：运营提出 → 另一位负责人核准。", en: "The sole-principal exception is no longer available: there is now more than one active principal (or you are not a principal). Please use two-step approval: operations proposes, another principal approves." },
     errComplianceKeyNotInScope: { zh: "这个参数不在合规两步审批范围内，不能在后台提交或直接生效。", en: "This parameter is outside the compliance two-step approval scope and cannot be submitted or applied from the admin console." },
+    cfgSaveDirect: { zh: "保存（单人即改，留痕）", en: "Save (single-person change, logged)" },
+    cfgNeedNonRevEditPerm: { zh: "你无「修改运营参数」权限（需运营岗）——可以查看，不能修改。", en: "You don't have permission to change operational parameters (operations position required). View only." },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -4325,6 +4327,20 @@ const CFG_TYPES = {
     check: (v) => v === null ? null
       : (!Number.isFinite(v) ? 'notNumber' : v < 0 ? 'negative' : null),
   },
+  USD: { // 🔴 TD-305：美元金额（平台 AI 止损阈值）。⚠️ 原借用 T8（外部单价快照）⇒ 标签显示「US$ / 百万」误导；输入⛔ 换算
+    unit: () => 'US$', prefix: true, input: 'number', step: '0.01',
+    toInput: (v) => (v === null || v === undefined ? '' : String(v)),
+    parse: (s) => (s.trim() === '' ? null : Number(s)),
+    check: (v) => v === null ? null
+      : (!Number.isFinite(v) ? 'notNumber' : v < 0 ? 'negative' : null),
+  },
+  DEC: { // 🔴 TD-305：无单位小数（如周止损系数 0.8）。⛔ 用 NUM（它要求 ≥1）；区间⛔ 写死（GOV-1）
+    unit: () => '', input: 'number', step: '0.01',
+    toInput: (v) => (v === null || v === undefined ? '' : String(v)),
+    parse: (s) => (s.trim() === '' ? null : Number(s)),
+    check: (v) => v === null ? null
+      : (!Number.isFinite(v) ? 'notNumber' : v < 0 ? 'negative' : null),
+  },
   NUM: { // ⭐ `markupMultiplier` 这种「数字 ≥ 1」—— D1 §四C 单列，⛔ 属 8 种之一
     unit: (f) => pick(f.unit), input: 'number', step: '0.1',
     toInput: (v) => (v === null || v === undefined ? '' : String(v)),
@@ -5413,12 +5429,12 @@ const CFG_SPEC = {
     group: 'C', label: { zh: osT('cfgAiBudgetGroup'), en: osT('cfgAiBudgetGroup') },
     notice: { zh: osT('cfgAiBudgetNotice'), en: osT('cfgAiBudgetNotice') },
     fields: [
-      { path: 'daily_warn_usd',  label: { zh: osT('cfgAiBudgetDailyWarn'),  en: osT('cfgAiBudgetDailyWarn')  }, type: 'T8', affects: 'liability' },
-      { path: 'daily_stop_usd',  label: { zh: osT('cfgAiBudgetDailyStop'),  en: osT('cfgAiBudgetDailyStop')  }, type: 'T8', affects: 'liability' },
-      { path: 'weekly_warn_usd', label: { zh: osT('cfgAiBudgetWeeklyWarn'), en: osT('cfgAiBudgetWeeklyWarn') }, type: 'T8', affects: 'liability' },
-      { path: 'weekly_stop_usd', label: { zh: osT('cfgAiBudgetWeeklyStop'), en: osT('cfgAiBudgetWeeklyStop') }, type: 'T8', affects: 'liability' },
-      { path: 'monthly_warn_usd', label: { zh: osT('cfgAiBudgetMonthlyWarn'), en: osT('cfgAiBudgetMonthlyWarn') }, type: 'T8', affects: 'liability' },
-      { path: 'weekly_factor', label: { zh: osT('cfgAiBudgetWeeklyFactor'), en: osT('cfgAiBudgetWeeklyFactor') }, type: 'T8', affects: 'liability' },
+      { path: 'daily_warn_usd',  label: { zh: osT('cfgAiBudgetDailyWarn'),  en: osT('cfgAiBudgetDailyWarn')  }, type: 'USD', affects: 'liability' },
+      { path: 'daily_stop_usd',  label: { zh: osT('cfgAiBudgetDailyStop'),  en: osT('cfgAiBudgetDailyStop')  }, type: 'USD', affects: 'liability' },
+      { path: 'weekly_warn_usd', label: { zh: osT('cfgAiBudgetWeeklyWarn'), en: osT('cfgAiBudgetWeeklyWarn') }, type: 'USD', affects: 'liability' },
+      { path: 'weekly_stop_usd', label: { zh: osT('cfgAiBudgetWeeklyStop'), en: osT('cfgAiBudgetWeeklyStop') }, type: 'USD', affects: 'liability' },
+      { path: 'monthly_warn_usd', label: { zh: osT('cfgAiBudgetMonthlyWarn'), en: osT('cfgAiBudgetMonthlyWarn') }, type: 'USD', affects: 'liability' },
+      { path: 'weekly_factor', label: { zh: osT('cfgAiBudgetWeeklyFactor'), en: osT('cfgAiBudgetWeeklyFactor') }, type: 'DEC', affects: 'liability' },
     ],
   },
   'ops.ai_nonessential_functions': {
@@ -5939,9 +5955,14 @@ function cfgReadField(el) {
 }
 
 // ==================== `E1` 收入参数界面 ====================
-async function renderRevenueConfigSection(host, configs, myPerms) {
+// 🔴 TD-306：saveOutcome ＝ renderConfigTab 里的 TD-60 `cfgSaveOutcome`（同一判据，⛔ 抄一份）
+async function renderRevenueConfigSection(host, configs, myPerms, saveOutcome) {
   const byKey = Object.fromEntries(configs.map((c) => [c.key, c]));
   const canPropose = myPerms.permissions.includes('config.revenue.propose');
+  // 🔴 TD-306：运营档／成本档（operational／cost）＝单人即改（服务端 fn_admin_config_update，需 config.nonrevenue.edit）；
+  //   ⚠️ 旧版卡片一律走 action:'submit'（收入申请通道）⇒ 运营档被 CCR_NOT_REVENUE_KEY 拒（F 组紧急开关、O 组收件人等）。
+  const canEditNonRev = myPerms.permissions.includes('config.nonrevenue.edit');
+  const isDirect = (cfg) => cfg && (cfg.revenue_class === 'operational' || cfg.revenue_class === 'cost');
   // 🔴 TD-301：独任负责人例外 —— 只在「在职负责人恰 1 人且是本人」时显示（⛔ 安全边界，服务端另核）
   const canSole = myPerms.solePrincipal === true && myPerms.permissions.includes('config.compliance.approve');
 
@@ -5969,6 +5990,8 @@ async function renderRevenueConfigSection(host, configs, myPerms) {
           // ⭐ 全部字段只读 ⇒ ⛔ 给提交按钮（点了也只会报「没有改动」）
           const allRo = fields.length > 0 && fields.every((f) => f.readonly);
           const soleHere = canSole && spec.group === 'D' && !allRo;
+          const direct = isDirect(cfg);
+          const canAct = direct ? canEditNonRev : canPropose;
           return `
             <div class="cfg-card" data-card="${escapeHtml(k)}">
               <div class="cfg-card-head">
@@ -5977,14 +6000,15 @@ async function renderRevenueConfigSection(host, configs, myPerms) {
               </div>
               ${spec.notice ? `<p class="cfg-notice">${escapeHtml(pickNotice(spec.notice, { value: cfg.value, all: byKey }))}</p>` : ''}
               <div class="cfg-fields">${fields.map((f) => cfgFieldInput(k, f, cfg.value, !canPropose, byKey)).join('')}</div>
-              ${allRo ? `<p class="hint">${escapeHtml(osT('cfgAllReadonlyHint'))}</p>` : (canPropose || soleHere) ? `
+              ${allRo ? `<p class="hint">${escapeHtml(osT('cfgAllReadonlyHint'))}</p>` : (canAct || soleHere) ? `
                 ${soleHere ? `<p class="cfg-notice">${escapeHtml(osT('cfgSoleApplyHint'))}</p>` : ''}
                 <div class="cfg-card-actions">
                   <input type="text" class="cfg-reason" placeholder="${escapeHtml(osT('cfgReasonPh'))}" />
-                  ${canPropose ? `<button class="cfg-submit" data-submit="${escapeHtml(k)}">${escapeHtml(osT('cfgSubmitRequest'))}</button>` : ''}
+                  ${canAct && direct ? `<button class="cfg-submit" data-direct="${escapeHtml(k)}">${escapeHtml(osT('cfgSaveDirect'))}</button>` : ''}
+                  ${canAct && !direct ? `<button class="cfg-submit" data-submit="${escapeHtml(k)}">${escapeHtml(osT('cfgSubmitRequest'))}</button>` : ''}
                   ${soleHere ? `<button class="cfg-submit ghost-btn" data-sole-apply="${escapeHtml(k)}">${escapeHtml(osT('cfgSoleApplyBtn'))}</button>` : ''}
                   <span class="status cfg-status"></span>
-                </div>` : `<p class="hint">${escapeHtml(osT('cfgNeedProposePerm'))}</p>`}
+                </div>` : `<p class="hint">${escapeHtml(osT(direct ? 'cfgNeedNonRevEditPerm' : 'cfgNeedProposePerm'))}</p>`}
               <details class="cfg-raw"><summary>${escapeHtml(osT('cfgRawJson'))}</summary><pre class="mono">${escapeHtml(JSON.stringify(cfg.value, null, 2))}</pre></details>
             </div>`;
         }).join('')}
@@ -6015,11 +6039,12 @@ async function renderRevenueConfigSection(host, configs, myPerms) {
       </section>` : ''}
   `;
 
-  if (!canPropose && !canSole) return;
-  host.querySelectorAll('[data-submit],[data-sole-apply]').forEach((btn) => {
+  if (!canPropose && !canSole && !canEditNonRev) return;
+  host.querySelectorAll('[data-submit],[data-sole-apply],[data-direct]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const sole = btn.dataset.soleApply != null;
-      const key = sole ? btn.dataset.soleApply : btn.dataset.submit;
+      const direct = btn.dataset.direct != null;
+      const key = sole ? btn.dataset.soleApply : direct ? btn.dataset.direct : btn.dataset.submit;
       const card = host.querySelector(`[data-card="${CSS.escape(key)}"]`);
       const statusEl = card.querySelector('.cfg-status');
       const reason = card.querySelector('.cfg-reason').value.trim();
@@ -6102,6 +6127,31 @@ async function renderRevenueConfigSection(host, configs, myPerms) {
           statusEl.classList.add('error');
           statusEl.textContent = e.message;
         }
+        return;
+      }
+
+      // 🔴 TD-306：运营档／成本档 ⇒ 单人即改（与底部「其他运营参数」编辑弹窗同一条服务端路径），⭐ 回读核对
+      if (direct) {
+        statusEl.textContent = osT('adminCommonSaving');
+        let resp;
+        try {
+          resp = await callFn('sfk-admin-config-update', { key, newValue, reason });
+        } catch (e) {
+          statusEl.classList.add('error');
+          statusEl.textContent = osT('adminCommonSaveFailed') + e.message;
+          return;
+        }
+        // ⭐ TD-60 ④：⛔ 信回执，信回读
+        const { data: rb, error: rbErr } = await supabase.from('platform_config').select('value').eq('key', key).maybeSingle();
+        const outcome = saveOutcome(resp, { row: rb, error: rbErr }, newValue);
+        if (outcome === 'mismatch') {
+          statusEl.classList.add('error');
+          statusEl.textContent = osT('adminCfgReadbackMismatch').replace('{key}', key);
+          return;
+        }
+        byKey[key].value = rb.value;   // ⭐ 回读值为准，后续再改从它出发
+        statusEl.classList.toggle('error', outcome === 'saved_no_audit');
+        statusEl.textContent = osT(outcome === 'saved_no_audit' ? 'adminCfgSavedNoAudit' : 'adminCfgSavedVerified').replace('{key}', key);
         return;
       }
 
@@ -6577,7 +6627,7 @@ async function renderConfigTab(el) {
   // ⭐ 每段之前都重新取宿主 ＋ 查号 —— ⚠️ 📌 中途被重渲染就**⛔ 不再往下写**
   const host = (id) => (stale() ? null : document.getElementById(id));
   const h1 = host('revenueCfgHost');
-  if (h1) await renderRevenueConfigSection(h1, configs, myPerms);
+  if (h1) await renderRevenueConfigSection(h1, configs, myPerms, cfgSaveOutcome);
   const h2 = host('govCfgHost');
   if (h2) await renderGovernanceSections(h2, myPerms, boot?.requests);
   const h3 = host('posCfgHost');
