@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-XhHg8vJFaHasjf1+ci8h6lyDnDtUehfI1ndG0uMCMYw='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-511fHAG2A8nn+64j7HTrtNYGH99YVqAeGUNi8SltmUc='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -218,7 +218,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:c7d9e41edad9a606 —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:89be16250a1e34d7 —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -2149,6 +2149,14 @@
     adminSetPwNoSession: { zh: "这个链接的登录状态已失效（可能已过期或已用过）。请联系负责人在后台重新发送邀请。", en: "This link is no longer valid (it may have expired or already been used). Please ask the principal to resend the invitation from the admin console." },
     adminLinkExpired: { zh: "这个邀请或重设链接已过期或已用过。请联系负责人在后台重新发送邀请。", en: "This invitation or reset link has expired or was already used. Please ask the principal to resend the invitation from the admin console." },
     adminLinkInvalid: { zh: "这个链接无效。请联系负责人在后台重新发送邀请。", en: "This link is invalid. Please ask the principal to resend the invitation from the admin console." },
+    cfgSoleApplyBtn: { zh: "独任负责人例外：直接生效", en: "Sole-principal exception: apply now" },
+    cfgSoleApplyHint: { zh: "⚠️ 目前全公司只有您一位在职负责人，两步审批（运营提出 → 负责人核准）无法由两人完成。可用「独任负责人例外」直接生效：会留痕、发 P1 告警并标为待独立复核；第二位负责人到岗后此入口自动失效。", en: "⚠️ You are currently the only active principal, so the two-step approval (operations proposes → principal approves) cannot be completed by two people. The sole-principal exception applies the change directly: it is logged, raises a P1 alert and is marked for independent review. This option disappears once a second principal is appointed." },
+    cfgSoleApplyConfirm: { zh: "这是「独任负责人例外」：不经第二人核准，直接生效。\n\n将会：留痕、发 P1 告警（compliance_sole_principal_change）、标为待独立复核。\n\n确定直接生效吗？", en: "This is the sole-principal exception: the change takes effect without a second person's approval.\n\nIt will be logged, raise a P1 alert (compliance_sole_principal_change) and be marked for independent review.\n\nApply now?" },
+    cfgSoleApplied: { zh: "已按独任负责人例外生效（已留痕、已发 P1、待独立复核）。", en: "Applied under the sole-principal exception (logged, P1 raised, pending independent review)." },
+    cfgCcrMigrationOnly: { zh: "只读：这是审批机制自身的参数，不纳入两步审批；只经迁移修改（TD-299）。", en: "Read-only: this parameter governs the approval mechanism itself and is outside two-step approval; it changes only via a database migration (TD-299)." },
+    cfgAllReadonlyHint: { zh: "本项在后台只读，不能在这一页修改。", en: "This item is read-only in the admin console." },
+    errSolePrincipalForbidden: { zh: "独任负责人例外已不可用：目前在职负责人不止您一位（或您不是负责人）。请改走两步审批：运营提出 → 另一位负责人核准。", en: "The sole-principal exception is no longer available: there is now more than one active principal (or you are not a principal). Please use two-step approval: operations proposes, another principal approves." },
+    errComplianceKeyNotInScope: { zh: "这个参数不在合规两步审批范围内，不能在后台提交或直接生效。", en: "This parameter is outside the compliance two-step approval scope and cannot be submitted or applied from the admin console." },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -2299,7 +2307,10 @@ async function callFn(name, body) {
         ROSTER_VALIDITY_OUT_OF_RANGE: 'errRosterValidity', ROSTER_PENDING_EXISTS: 'errRosterPendingExists',
         ROSTER_PURPOSE_INVALID: 'errRosterInput', ROSTER_NOTE_REQUIRED: 'errRosterInput', ROSTER_REASON_REQUIRED: 'errRosterInput',
         ROSTER_USER_NOT_FOUND: 'errRosterNotFound', ROSTER_ENTRY_NOT_FOUND: 'errRosterNotFound',
-        ROSTER_NOT_PENDING: 'errRosterState', ROSTER_ALREADY_REVOKED: 'errRosterState' };
+        ROSTER_NOT_PENDING: 'errRosterState', ROSTER_ALREADY_REVOKED: 'errRosterState',
+        // TD-301：独任负责人例外 —— 页面打开期间第二位负责人到岗 ⇒ 服务端拒（页面按钮只是显隐，⛔ 安全边界）
+        SOLE_PRINCIPAL_EXCEPTION_FORBIDDEN: 'errSolePrincipalForbidden',
+        CCR_COMPLIANCE_KEY_NOT_IN_SCOPE: 'errComplianceKeyNotInScope' };
       if (LIC_ERR[ctx?.error]) msg = osT(LIC_ERR[ctx.error]);
     } catch {
       // 响应体不是 JSON 就用默认 message，不阻断流程
@@ -4694,13 +4705,17 @@ const CFG_SPEC = {
     group: 'D', label: osT('cfgBreakGlassReviewLabel'),
     notice: osT('cfgBreakGlassReviewNotice'),
     fields: [
-      { path: 'hours', label: osT('cfgBreakGlassReviewField'), type: 'T4', unit: osT('cfgUnitHours'), affects: 'compliance' },
+      // 🔴 TD-299（10-02 裁定）：审批机制自身的参数 ⛔ 纳入两步审批 ⇒ 只读，只经迁移改
+      { path: 'hours', label: osT('cfgBreakGlassReviewField'), type: 'T4', unit: osT('cfgUnitHours'), affects: 'compliance',
+        readonly: true, fieldNotice: osT('cfgCcrMigrationOnly') },
     ],
   },
   'ops.ccr_pending_expire_days': {
     group: 'D', label: osT('cfgCcrExpireLabel'),
     fields: [
-      { path: 'days', label: osT('cfgCcrExpireField'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      // 🔴 TD-299（10-02 裁定）：同上，只读，只经迁移改
+      { path: 'days', label: osT('cfgCcrExpireField'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance',
+        readonly: true, fieldNotice: osT('cfgCcrMigrationOnly') },
     ],
   },
   'sfk_os.default_market': {
@@ -5927,6 +5942,8 @@ function cfgReadField(el) {
 async function renderRevenueConfigSection(host, configs, myPerms) {
   const byKey = Object.fromEntries(configs.map((c) => [c.key, c]));
   const canPropose = myPerms.permissions.includes('config.revenue.propose');
+  // 🔴 TD-301：独任负责人例外 —— 只在「在职负责人恰 1 人且是本人」时显示（⛔ 安全边界，服务端另核）
+  const canSole = myPerms.solePrincipal === true && myPerms.permissions.includes('config.compliance.approve');
 
   // 🔴 **覆盖率自检** —— ⚠️ 这一段⛔ 不是装饰
   // 📌 `GOV-1` 完成判据①要求**全部** revenue 键都有具名输入框。
@@ -5949,6 +5966,9 @@ async function renderRevenueConfigSection(host, configs, myPerms) {
           const spec = CFG_SPEC[k];
           const cfg = byKey[k];
           const fields = spec.dynamic ? buildDynamicFields(spec, cfg.value) : spec.fields;
+          // ⭐ 全部字段只读 ⇒ ⛔ 给提交按钮（点了也只会报「没有改动」）
+          const allRo = fields.length > 0 && fields.every((f) => f.readonly);
+          const soleHere = canSole && spec.group === 'D' && !allRo;
           return `
             <div class="cfg-card" data-card="${escapeHtml(k)}">
               <div class="cfg-card-head">
@@ -5957,10 +5977,12 @@ async function renderRevenueConfigSection(host, configs, myPerms) {
               </div>
               ${spec.notice ? `<p class="cfg-notice">${escapeHtml(pickNotice(spec.notice, { value: cfg.value, all: byKey }))}</p>` : ''}
               <div class="cfg-fields">${fields.map((f) => cfgFieldInput(k, f, cfg.value, !canPropose, byKey)).join('')}</div>
-              ${canPropose ? `
+              ${allRo ? `<p class="hint">${escapeHtml(osT('cfgAllReadonlyHint'))}</p>` : (canPropose || soleHere) ? `
+                ${soleHere ? `<p class="cfg-notice">${escapeHtml(osT('cfgSoleApplyHint'))}</p>` : ''}
                 <div class="cfg-card-actions">
                   <input type="text" class="cfg-reason" placeholder="${escapeHtml(osT('cfgReasonPh'))}" />
-                  <button class="cfg-submit" data-submit="${escapeHtml(k)}">${escapeHtml(osT('cfgSubmitRequest'))}</button>
+                  ${canPropose ? `<button class="cfg-submit" data-submit="${escapeHtml(k)}">${escapeHtml(osT('cfgSubmitRequest'))}</button>` : ''}
+                  ${soleHere ? `<button class="cfg-submit ghost-btn" data-sole-apply="${escapeHtml(k)}">${escapeHtml(osT('cfgSoleApplyBtn'))}</button>` : ''}
                   <span class="status cfg-status"></span>
                 </div>` : `<p class="hint">${escapeHtml(osT('cfgNeedProposePerm'))}</p>`}
               <details class="cfg-raw"><summary>${escapeHtml(osT('cfgRawJson'))}</summary><pre class="mono">${escapeHtml(JSON.stringify(cfg.value, null, 2))}</pre></details>
@@ -5993,10 +6015,11 @@ async function renderRevenueConfigSection(host, configs, myPerms) {
       </section>` : ''}
   `;
 
-  if (!canPropose) return;
-  host.querySelectorAll('[data-submit]').forEach((btn) => {
+  if (!canPropose && !canSole) return;
+  host.querySelectorAll('[data-submit],[data-sole-apply]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      const key = btn.dataset.submit;
+      const sole = btn.dataset.soleApply != null;
+      const key = sole ? btn.dataset.soleApply : btn.dataset.submit;
       const card = host.querySelector(`[data-card="${CSS.escape(key)}"]`);
       const statusEl = card.querySelector('.cfg-status');
       const reason = card.querySelector('.cfg-reason').value.trim();
@@ -6065,6 +6088,21 @@ async function renderRevenueConfigSection(host, configs, myPerms) {
             .replace('{label}', o.label).replace('{val}', o.val)
             .replace('{min}', o.min).replace('{max}', o.max)).join('\n'));
         if (!window.confirm(msg)) { statusEl.textContent = ''; return; }
+      }
+
+      // 🔴 TD-301：独任负责人例外 —— 再确认一次，写明这是例外、会留痕＋P1＋待独立复核
+      if (sole) {
+        if (!window.confirm(osT('cfgSoleApplyConfirm'))) { statusEl.textContent = ''; return; }
+        statusEl.textContent = osT('adminCommonSubmitting');
+        try {
+          await callFn('sfk-admin-config-update', { action: 'compliance_sole_apply', key, newValue, reason });
+          statusEl.classList.remove('error');
+          statusEl.textContent = osT('cfgSoleApplied');
+        } catch (e) {
+          statusEl.classList.add('error');
+          statusEl.textContent = e.message;
+        }
+        return;
       }
 
       statusEl.textContent = osT('adminCommonSubmitting');
@@ -6461,7 +6499,7 @@ async function renderConfigTab(el) {
   stage('cfgLoadingPerms');
   try {
     boot = await callFn('sfk-admin-config-update', { action: 'admin_config_bootstrap' });
-    myPerms = { positions: boot.positions || [], permissions: boot.permissions || [] };
+    myPerms = { positions: boot.positions || [], permissions: boot.permissions || [], solePrincipal: boot.solePrincipal === true };
   } catch (e) {
     // ⚠️ 取⛔ 不到 ⇒ **按⛔ 无权限渲染**（只读）—— 📌 失效方向在「拒」那一侧
     console.error('admin_config_bootstrap failed:', e.message);
