@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-HkL2IOf7dv9mMykL+pes22TqTkswhCLkuigV9cXaGPE='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-YO4culluAgTgvf5Fs8ewvWgUkbqOhjYV5ecYSSU2bNc='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -218,7 +218,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:c80de364198ab5ab —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:64f48d0049044ec6 —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -2159,6 +2159,8 @@
     errComplianceKeyNotInScope: { zh: "这个参数不在合规两步审批范围内，不能在后台提交或直接生效。", en: "This parameter is outside the compliance two-step approval scope and cannot be submitted or applied from the admin console." },
     cfgSaveDirect: { zh: "保存（单人即改，留痕）", en: "Save (single-person change, logged)" },
     cfgNeedNonRevEditPerm: { zh: "你无「修改运营参数」权限（需运营岗）——可以查看，不能修改。", en: "You don't have permission to change operational parameters (operations position required). View only." },
+    cfgPlatformStatus: { zh: "平台状态", en: "Platform status" },
+    cfgPlatformStatusNotice: { zh: "翻成 active 前，上面五项必须都已填写（系统会检查）；市场要等平台 active 之后才能翻 active。可以随时翻回 pending。", en: "Before switching to active, all five fields above must be filled (the system checks this); a market can only become active after its platform is active. You can switch back to pending at any time." },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -4259,6 +4261,10 @@ const PLATROW_FIELDS = [
   { path: 'secret_key_env',      label: () => osT('cfgPlatformSecretKeyEnv'), envName: true },
   { path: 'webhook_secret_env',  label: () => osT('cfgPlatformWebhookSecretEnv'), envName: true },
 ];
+// 🔴 TD-311（10-03）：平台状态下拉框。⚠️ 原先页面只渲染上面五个文字框、读回时保留原 status ⇒ 后台无处能把平台翻 active。
+//   ⭐ 能否翻成 active 仍由数据库判（`fn_org2_assert_active_readiness`：五项齐 ⇒ ORG2_PLATFORM_NOT_READY；先平台后市场 ⇒ ORG2_MARKET_PLATFORM_NOT_ACTIVE），页面⛔ 重判。
+//   库里若是这两个以外的值（如 retired），下拉框会原样多列一项，⛔ 被悄悄改掉。
+const PLATROW_STATUSES = ['pending', 'active'];
 
 const CFG_ISO4217 = {
   SG: 'sgd', MY: 'myr', TH: 'thb', ID: 'idr', PH: 'php',
@@ -5785,6 +5791,13 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
             <span class="cfg-plat-key">${escapeHtml(pk)}</span>
             <span class="${act ? 'cfg-affects' : 'cfg-notice-inline'}">${escapeHtml(
               act ? osT('cfgPlatformActiveHint') : osT('cfgPlatformPendingHint'))}</span>
+          </div>
+          <div class="cfg-plat-field">
+            <label>${escapeHtml(osT('cfgPlatformStatus'))}</label>
+            <select class="cfg-plat-status" ${ro}>${PLATROW_STATUSES.concat(
+              PLATROW_STATUSES.includes(p0.status) || p0.status == null ? [] : [p0.status]).map((s) =>
+              `<option value="${escapeHtml(s)}"${s === (p0.status ?? 'pending') ? ' selected' : ''}>${escapeHtml(s)}</option>`).join('')}</select>
+            <span class="cfg-notice-inline">${escapeHtml(osT('cfgPlatformStatusNotice'))}</span>
           </div>` + PLATROW_FIELDS.map((f) => {
             const v0 = p0[f.path];
             // 🔴 「未设定」与空串必须一眼可分（`GOV-1` 达标线③）——
@@ -5933,6 +5946,9 @@ function cfgReadField(el) {
         const txt = inp.value.trim();
         merged[inp.dataset.f] = txt === '' ? null : txt;   // ⭐ 空 ⇒ null（未设定），⛔ 是空串
       });
+      // 🔴 TD-311：平台状态取自下拉框（其余未在界面上的字段仍按 base 合并保留）
+      const st = b.querySelector('.cfg-plat-status');
+      if (st) merged.status = st.value;
       o[pk] = merged;
     });
     v = t.parse(o);
