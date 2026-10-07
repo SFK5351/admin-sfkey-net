@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-YO4culluAgTgvf5Fs8ewvWgUkbqOhjYV5ecYSSU2bNc='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-c6gULs4VeGcSZJVBHVenu5W4swIPyxbvFKTGe7OkFrc='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -218,7 +218,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:64f48d0049044ec6 —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:8409bd1cac5416ed —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -502,6 +502,8 @@
     payoutStNotStartedDesc: { zh: "顾客目前无法在线支付你的预约——需要先开通收款账户。", en: "Customers can't pay for your bookings online yet — you need to set up a payout account first." },
     payoutStPending: { zh: "开通中", en: "In progress" },
     payoutStPendingDesc: { zh: "Stripe 那边的入驻资料还没填完。继续填完才能开始收款。", en: "Your onboarding details on Stripe's side aren't finished. Complete them to start receiving payments." },
+    payoutStUnderReview: { zh: "审核中", en: "Under review" },
+    payoutStUnderReviewDesc: { zh: "Stripe 正在审核最终受益所有者资料，通过后即可收款。这一步无需你操作。", en: "Stripe is reviewing your ultimate beneficial owner information. You can start receiving payments once it's approved. No action is needed from you." },
     payoutStComplete: { zh: "已开通", en: "Active" },
     payoutStCompleteDesc: { zh: "顾客可以在线支付预约。下方可以查看余额与到账记录、自助更换银行账户。", en: "Customers can pay for bookings online. Below you can view your balance and payout history, and update your bank account yourself." },
     payoutStRestricted: { zh: "受限", en: "Restricted" },
@@ -600,7 +602,7 @@
     errNothingToRecover: { zh: "没有可恢复的额度——可能已经恢复过了，刷新看看。", en: "There's nothing to restore — you may have already done it. Try refreshing." },
     errRecoveryDeadlinePassed: { zh: "恢复期限已经过了，这笔额度无法再恢复。", en: "The recovery window has passed — these credits can't be restored." },
     errRecoverFallback: { zh: "恢复失败了，请稍后重试或联系机构。", en: "Restore failed — please try again later or contact the organization." },
-    errInstitutionNotReadyForPayment: { zh: "这家机构还没有开通在线收款，暂时无法在线支付——请到店支付，或直接联系机构确认付款方式。", en: "This organization hasn't set up online payments yet, so you can't pay online — please pay in store, or contact them to confirm how to pay." },
+    errInstitutionNotReadyForPayment: { zh: "这家机构还没有开通在线收款，暂时无法在线支付——请到店付款，或直接联系机构确认付款方式。", en: "This organization hasn't set up online payments yet, so you can't pay online — please pay at the venue, or contact them to confirm how to pay." },
     errPaymentAlreadyInProgress: { zh: "这笔预约已经付过款或正在支付中了，刷新页面看看最新状态。", en: "This booking has already been paid or is being paid — refresh to see the latest status." },
     errBookingCancelled: { zh: "这笔预约已经取消，不需要再支付。", en: "This booking was cancelled — no payment is needed." },
     errBookingNotFound: { zh: "找不到这笔预约，刷新页面重试。", en: "We couldn't find this booking — please refresh and try again." },
@@ -1693,7 +1695,7 @@
     cfgSeatOverageOff: { zh: "⚠️ 已决定暂不计费（`sfk_os.seat_billing_enabled = false`）⇒ 本单价当前不生效", en: "Billing is deliberately off (sfk_os.seat_billing_enabled = false); this price is not in effect." },
     cfgSeatOverageOn: { zh: "✅ 已启用席位超额计费（`sfk_os.seat_billing_enabled = true`）⇒ 本单价生效", en: "Seat overage billing is on (sfk_os.seat_billing_enabled = true); this price is in effect." },
     orgPayoutNotOpenHint: { zh: "本国暂未开放在线收款，可先使用订阅功能。", en: "Online payments are not yet available in your country. You can still use your subscription." },
-    errCurrencyNotConfigured: { zh: "这家机构所在国家/地区还没有开通在线收款的结算币种，暂时无法在线支付——请到店支付，或直接联系机构确认付款方式。", en: "This organization’s country/region does not yet have a settlement currency enabled for online payments, so you cannot pay online right now — please pay in store, or contact the organization to arrange payment." },
+    errCurrencyNotConfigured: { zh: "这家机构所在国家/地区还没有开通在线收款的结算币种，暂时无法在线支付——请到店付款，或直接联系机构确认付款方式。", en: "This organization’s country/region does not yet have a settlement currency enabled for online payments, so you cannot pay online right now — please pay at the venue, or contact the organization to arrange payment." },
     walkinCurrencyNotConfigured: { zh: "这家商家所在地区还没有开通在线收款", en: "Online payment is not yet enabled in this merchant’s region" },
     orgPayAtVenueOnly: { zh: "你所在地区暂未开通在线收款，所以这里开不了扫码付款单。顾客仍可正常预约，到店付款即可。", en: "Online payment is not enabled in your region yet, so a scan-to-pay bill can’t be created here. Customers can still book as usual and pay at your venue." },
     errPayAtVenueOnly: { zh: "这家商家所在地区还没有开通在线收款，您的预约已经成立，到店付款即可。", en: "Online payment is not yet enabled in this merchant’s region. Your booking is confirmed — please pay at the venue." },
@@ -2161,6 +2163,176 @@
     cfgNeedNonRevEditPerm: { zh: "你无「修改运营参数」权限（需运营岗）——可以查看，不能修改。", en: "You don't have permission to change operational parameters (operations position required). View only." },
     cfgPlatformStatus: { zh: "平台状态", en: "Platform status" },
     cfgPlatformStatusNotice: { zh: "翻成 active 前，上面五项必须都已填写（系统会检查）；市场要等平台 active 之后才能翻 active。可以随时翻回 pending。", en: "Before switching to active, all five fields above must be filled (the system checks this); a market can only become active after its platform is active. You can switch back to pending at any time." },
+    cfgSubRebateLabel: { zh: "机构订阅返还 Token", en: "Org subscription Token rebate" },
+    cfgSubRebateNotice: { zh: "机构每付一张订阅费发票，按「实付 × 返还比例」折算成 Token 返给机构负责人（1 Token = S$0.01，向下取整）。填 0 ＝ 不返还。⚠️ 两项任一未设定 ⇒ 不返还并发 P1 告警；设定并核准后可在 Stripe 重发那张发票的事件补发。只支持新币发票。", en: "For each paid subscription invoice, the org owner receives Tokens worth “amount paid × rebate rate” (1 Token = S$0.01, rounded down). 0 = no rebate. ⚠️ If either field is unset, no rebate is given and a P1 alert is raised; after setting and approval, resend that invoice event in Stripe to backfill. SGD invoices only." },
+    cfgSubRebateRateField: { zh: "返还比例", en: "Rebate rate" },
+    cfgSubRebateAppliesField: { zh: "返还范围", en: "Applies to" },
+    cfgSubRebateEveryInvoice: { zh: "每期都返", en: "Every paid invoice" },
+    cfgSubRebateFirstInvoice: { zh: "仅首期返", en: "First invoice only" },
+    bookingSucceededAtVenue: { zh: "预约成功，状态：{status}。到店付款即可，无需在线支付。", en: "Booked. Status: {status}. Pay at the venue — no online payment needed." },
+    payoutStNotStartedAtVenueDesc: { zh: "你所在地区暂未开通在线收款，顾客预约后到店付款即可。你仍可以先开通收款账户，等本地区开通在线收款后就能直接收款。", en: "Online payment isn’t enabled in your region yet — customers pay at the venue after booking. You can still set up a payout account now, so you can take payments as soon as online payment opens in your region." },
+    wkOrderAtVenueRegionNote: { zh: "你所在地区暂未开通在线收款，这里开不了扫码付款单。顾客到店付款即可，可以用下方「登记散客线下付款」记下这笔收款。", en: "Online payment isn’t enabled in your region yet, so a scan-to-pay bill can’t be created here. Customers pay at the venue — use “Record an offline walk-in payment” below to log it." },
+    adminInstPendingBadge: { zh: "待审核的新注册机构", en: "Newly registered organizations awaiting review" },
+    tokenDistributeBlockedByRefundDebt: { zh: "你的机构有 Token 退款欠款未还（采购或订阅退款后，按比例收回的 Token 超过了当时的余额），还清前暂停向顾客投放 Token。下次采购 Token 入账时会自动先还欠款。", en: "Your organization has an outstanding Token refund balance (after a purchase or subscription refund, the Tokens to be reclaimed exceeded what was left). Giving Tokens to customers is paused until it is cleared — it is repaid automatically from your next Token purchase." },
+    clawHeading: { zh: "人工冲回机构 Token", en: "Manually reclaim organization Tokens" },
+    clawIntro: { zh: "用于 Stripe 退款没能自动收回、或对账发现多发的情形。运营提出，财务核准后立即执行；余额不够的部分记为机构欠款，欠款期间该机构暂停投放与已赚取抵扣，下次采购入账时自动先还。", en: "For refunds that were not reclaimed automatically, or over-issued Tokens found in reconciliation. Operations proposes; it runs as soon as finance approves. Any shortfall becomes an organization debt: giving Tokens and using earned Tokens are paused until it is repaid automatically from the next purchase." },
+    clawDebtsHeading: { zh: "未还清的退款欠款", en: "Outstanding refund debts" },
+    clawDebtsEmpty: { zh: "没有未还清的欠款", en: "No outstanding debts" },
+    clawInstitution: { zh: "机构", en: "Organization" },
+    clawPool: { zh: "从哪里扣", en: "Deduct from" },
+    clawPoolPurchase: { zh: "采购库存", en: "Purchased stock" },
+    clawPoolEarned: { zh: "已赚取余额", en: "Earned balance" },
+    clawTokens: { zh: "冲回 Token 数", en: "Tokens to reclaim" },
+    clawReason: { zh: "理由（必填）", en: "Reason (required)" },
+    clawTicket: { zh: "工单号（选填）", en: "Ticket no. (optional)" },
+    clawSubmit: { zh: "提出冲回", en: "Propose" },
+    clawEmpty: { zh: "暂无冲回单", en: "No reclaim requests" },
+    clawApprove: { zh: "核准并执行", en: "Approve and run" },
+    clawReject: { zh: "驳回", en: "Reject" },
+    clawCancel: { zh: "撤回", en: "Withdraw" },
+    clawNotePh: { zh: "核准或驳回说明（驳回必填）", en: "Note (required to reject)" },
+    clawResult: { zh: "结果：收回 {clawed} Token，记欠款 {outstanding} Token", en: "Result: reclaimed {clawed} Tokens, debt {outstanding} Tokens" },
+    regRegistrationNumber: { zh: "公司注册号", en: "Company registration number" },
+    regRegistrationNumberHint: { zh: "新加坡请填 UEN（如 53012345A、200912345A、T09LL0001B）；其他国家／地区填当地的公司注册号。同一家公司的多家门店填同一个号即可。", en: "In Singapore, enter your UEN (e.g. 53012345A, 200912345A, T09LL0001B); elsewhere, your local company registration number. Branches of the same company use the same number." },
+    regErrRegistrationRequired: { zh: "请填写公司注册号。", en: "Please enter your company registration number." },
+    regErrUenInvalid: { zh: "UEN 格式不对：应为 9 或 10 位，例如 53012345A、200912345A 或 T09LL0001B。", en: "That UEN doesn’t look right: it should be 9 or 10 characters, e.g. 53012345A, 200912345A or T09LL0001B." },
+    regErrRegistrationInvalid: { zh: "公司注册号格式不对：请只填字母、数字（可含斜杠），2 到 40 位。", en: "That registration number doesn’t look right: use letters, digits (slashes allowed), 2–40 characters." },
+    adminInstRegNo: { zh: "注册号：", en: "Reg. no.: " },
+    adminInstRegDup: { zh: "重号", en: "Duplicate no." },
+    adminInstRegDupHint: { zh: "另有机构填了同一个国家＋注册号：审核时核实是同一法人的多家门店（允许），还是填错或冒用。", en: "Another organization uses the same country + registration number: check whether these are branches of the same company (allowed) or a mistake/misuse." },
+    billingTrialLabel: { zh: "体验价", en: "Intro price" },
+    billingTrialEligible: { zh: "首 {months} 个月每月 S${price}（同一家公司只有一次），之后按所选版本的正价自动续费。", en: "S${price} per month for the first {months} months (once per company), then the regular price of your plan renews automatically." },
+    billingTrialUsed: { zh: "你的公司已经用过体验价，本次按所选版本的正价开通。", en: "Your company has already used the intro price, so this subscription starts at the regular price." },
+    billingTrialNo: { zh: "本次按所选版本的正价开通（暂时无法确认你的公司能否使用体验价；如有疑问请联系客服）。", en: "This subscription starts at the regular price (we can’t confirm intro-price eligibility for your company right now — contact support if you have questions)." },
+    cfgTrialBasisLabel: { zh: "体验价资格 · 判据主体", en: "Intro price eligibility · basis" },
+    cfgTrialBasisNotice: { zh: "「同一个客户只能用一次体验价」按什么认。选「法人」＝按机构填的国家＋公司注册号，同一家公司的所有门店共用一次。⚠️ 未设定时所有机构一律按正价开通，并发 P2 告警。测试机构不受限。改动须财务核准。", en: "How “one intro price per customer” is recognised. “Legal entity” = the organization’s country + company registration number, so all branches of a company share one. ⚠️ While unset, every organization subscribes at the regular price and a P2 alert is raised. Test organizations are exempt. Changes need finance approval." },
+    cfgTrialBasisField: { zh: "判据主体", en: "Basis" },
+    cfgTrialBasisLegalEntity: { zh: "法人（国家＋公司注册号）", en: "Legal entity (country + registration no.)" },
+    trialHeading: { zh: "体验价资格", en: "Intro price eligibility" },
+    trialIntro: { zh: "每个法人（国家＋公司注册号）一生只有一次体验价。确有正当理由需要再给一次时，在这里提出重置，财务核准后生效；记录不会删除。", en: "Each legal entity (country + registration no.) gets the intro price once. If there is a genuine reason to grant it again, propose a reset here; it takes effect after finance approval. Records are never deleted." },
+    trialEmpty: { zh: "还没有法人用过体验价", en: "No legal entity has used the intro price yet" },
+    trialUsed: { zh: "已用过", en: "Used" },
+    trialResetDone: { zh: "已重置", en: "Reset" },
+    trialResetSubmit: { zh: "提出重置", en: "Propose reset" },
+    pauseLoadFailed: { zh: "读取暂停状态失败：", en: "Could not load pause status: " },
+    pauseScheduledHeadline: { zh: "已申请暂停订阅", en: "Subscription pause requested" },
+    pauseScheduledNote: { zh: "订阅将在 {end} 结束、之后进入暂停。你的机构已从目录下架；{end} 之后的时间不再接新预约，之前已有的预约照常履约。{end} 之前可以撤回。", en: "Your subscription ends on {end} and is paused after that. Your organization has been removed from the directory; no new bookings can be made for times after {end}, and existing bookings before then go ahead as normal. You can withdraw before {end}." },
+    pauseWithdraw: { zh: "撤回暂停", en: "Withdraw pause" },
+    pausePausedHeadline: { zh: "订阅暂停中", en: "Subscription paused" },
+    pausePausedNote: { zh: "自 {since} 起暂停：不扣费、不在目录中显示、后台只能查看。资料与 Token 账本都保留。", en: "Paused since {since}: no charges, not listed in the directory, and the dashboard is view-only. Your data and token ledger are kept." },
+    pauseDeregisterAt: { zh: "如未恢复，将于 {at} 转为已注销。", en: "If not resumed, the organization will be closed on {at}." },
+    pauseNoDeadline: { zh: "目前没有暂停期限。", en: "There is currently no limit on how long the pause can last." },
+    pauseResumeHint: { zh: "要恢复，在下方重新开通即可：按新订阅计价，体验价资格按公司判断，用过的按正价。", en: "To resume, subscribe again below. It is billed as a new subscription; intro-price eligibility is checked per company, and a company that has used it pays the full price." },
+    pauseIntroSummary: { zh: "暂停订阅", en: "Pause subscription" },
+    pauseIntro: { zh: "暂停后本期结束时不再续费。申请当刻起你的机构从目录下架，本期结束之后的时间不再接新预约；本期内的预约照常履约。本期结束前可以撤回。暂停期间资料与 Token 账本都保留，后台只能查看。要彻底退出请提交客服工单。", en: "After pausing, your subscription will not renew at the end of the current period. From the moment you apply, your organization is removed from the directory and no new bookings can be made for times after this period; bookings within this period go ahead as normal. You can withdraw before the period ends. While paused your data and token ledger are kept and the dashboard is view-only. To leave for good, submit a support ticket." },
+    pauseTrialForfeit: { zh: "如果你正在体验价期内，暂停后剩余的体验价优惠作废。", en: "If you are in the intro-price period, the remaining intro-price discount is forfeited when you pause." },
+    pauseBlockedFuture: { zh: "还有 {n} 个未完成的未来预约，处理完才能暂停。", en: "You still have {n} upcoming bookings; settle them before pausing." },
+    pauseRequest: { zh: "申请暂停", en: "Request pause" },
+    pauseConfirm: { zh: "确认暂停？订阅将在 {end} 结束、不再续费；你的机构会立刻从目录下架。如在体验价期内，剩余优惠作废。", en: "Confirm pause? Your subscription will end on {end} and will not renew; your organization will be removed from the directory right away. If you are in the intro-price period, the remaining discount is forfeited." },
+    pauseFailed: { zh: "操作失败：", en: "Something went wrong: " },
+    pauseErrTrial: { zh: "体验价期内暂不能暂停。", en: "Pausing is not available during the intro-price period." },
+    pauseErrNotLive: { zh: "当前没有生效中的订阅，无需暂停。", en: "You have no active subscription to pause." },
+    pauseErrAlreadyOpen: { zh: "已经申请过暂停。", en: "A pause has already been requested." },
+    pauseErrStripe: { zh: "支付平台暂时无法处理，请稍后再试。", en: "The payment provider could not process this right now. Please try again later." },
+    pauseErrNotScheduled: { zh: "没有可撤回的暂停申请。", en: "There is no pause request to withdraw." },
+    pauseErrPeriodEnded: { zh: "本期已结束，无法撤回；请重新开通。", en: "The period has ended, so the pause can no longer be withdrawn; please subscribe again." },
+    instStatusDeregistered: { zh: "已注销", en: "Closed" },
+    instDeregisteredNote: { zh: "这个机构的订阅暂停已到期，机构已注销，后台已关闭。资料没有删除。如有疑问请联系客服。", en: "This organization’s subscription pause has expired and the organization has been closed; the dashboard is no longer available. Your data has not been deleted. Please contact support with any questions." },
+    adminInstStDeregistered: { zh: "已注销", en: "Closed" },
+    cfgPauseLabel: { zh: "机构暂停订阅 · 规则", en: "Organization subscription pause · rules" },
+    cfgPauseNotice: { zh: "暂停＝本期末取消订阅＋我们这边标为暂停。「暂停最长天数」未设定时不会自动转注销；设定后，暂停满这么多天的机构自动转「已注销」（资料不删）。两个开关的初值来自决策记录 D2。改动由运营提出、财务核准后生效。", en: "Pause = cancel at the end of the current period + marked as paused on our side. While \"maximum pause days\" is unset, no organization is closed automatically; once set, organizations paused for that many days are closed automatically (data is not deleted). The two switches start at the values in decision record D2. Changes take effect after finance approves an operations proposal." },
+    cfgPauseMaxDays: { zh: "暂停最长天数", en: "Maximum pause days" },
+    cfgPauseDuringTrial: { zh: "体验价期内可否暂停", en: "Pause allowed during intro price" },
+    cfgPauseWithBookings: { zh: "有未完成的未来预约时可否暂停", en: "Pause allowed with upcoming bookings" },
+    cfgPauseAllowed: { zh: "可以", en: "Allowed" },
+    cfgPauseDenied: { zh: "不可以", en: "Not allowed" },
+    regLegalName: { zh: "公司名称（营业执照上的名称）", en: "Company name (as registered)" },
+    regErrLegalNameRequired: { zh: "请填写公司名称。", en: "Please enter the company name." },
+    chainCurrentStore: { zh: "当前门店：", en: "Current location: " },
+    chainFellBack: { zh: "上次选的门店已不在你名下，已回到默认门店。", en: "The location you last chose is no longer under your account, so we switched back to the default one." },
+    chainBackToDashboard: { zh: "返回", en: "Back" },
+    navChain: { zh: "连锁门店", en: "Locations" },
+    chainHeading: { zh: "连锁门店", en: "Your locations" },
+    chainAddStore: { zh: "添加门店", en: "Add a location" },
+    chainCurrentMark: { zh: "当前", en: "current" },
+    chainBillingHeading: { zh: "各门店订阅汇总", en: "Subscriptions across locations" },
+    chainBillingLoadFailed: { zh: "读取汇总失败：", en: "Could not load the summary: " },
+    chainReadFailed: { zh: "读取失败", en: "Could not load" },
+    chainNotSubscribed: { zh: "未订阅", en: "Not subscribed" },
+    chainEnterpriseCustom: { zh: "定制报价", en: "Custom quote" },
+    chainPriceNotSet: { zh: "价格未定", en: "Price not set" },
+    chainInTrial: { zh: "体验价期内", en: "intro price" },
+    chainColStore: { zh: "门店", en: "Location" },
+    chainColPlan: { zh: "套餐", en: "Plan" },
+    chainColStatus: { zh: "订阅状态", en: "Subscription" },
+    chainColPeriodEnd: { zh: "本期结束", en: "Period ends" },
+    chainColSeats: { zh: "席位（在用 / 含）", en: "Seats (used / included)" },
+    chainColDue: { zh: "本期应付", en: "Due this period" },
+    chainTotal: { zh: "合计：", en: "Total: " },
+    chainTotalIncomplete: { zh: "有门店读不到或价格未定，合计不完整", en: "Some locations could not be loaded or have no price set, so the total is incomplete" },
+    chainBillingNote: { zh: "按当前价目表估算；各门店各自订阅、各自付款，发票在各门店的账单页查看。", en: "Estimated from the current price list. Each location has its own subscription and payment; see each location’s billing page for invoices." },
+    adminInstEntity: { zh: "法人：", en: "Company: " },
+    adminInstEntityNone: { zh: "未挂法人", en: "No company linked" },
+    adminInstEntityReadFailed: { zh: "法人读取失败", en: "Could not load company" },
+    adminInstEntityUnverified: { zh: "待核实", en: "Unverified" },
+    adminInstEntityVerified: { zh: "已核实", en: "Verified" },
+    adminInstEntityBlocked: { zh: "已封禁", en: "Blocked" },
+    cfgOwnerStoresLabel: { zh: "同一负责人门店数 · 告警阈值", en: "Locations per owner · alert threshold" },
+    cfgOwnerStoresNotice: { zh: "同一个负责人名下门店数超过这个数时告警给运营，不拦注册。未设定时不告警。", en: "Alerts operations when one owner has more locations than this. Registration is never blocked. No alert while unset." },
+    cfgOwnerStoresField: { zh: "超过多少家告警", en: "Alert above" },
+    entHeading: { zh: "法人：负责人变更与封禁", en: "Companies: owner change and blocking" },
+    entIntro: { zh: "招商运营提出，负责人岗核准；提出人与核准人不能是同一人（公司只有一位负责人时按独任规则留痕、告警、待独立复核）。负责人变更会把这个法人下所有门店一起转给新账号。", en: "Merchant operations proposes; the principal approves. The proposer and approver must be different people (when the company has a single principal, the sole-principal rule applies: logged, alerted and queued for independent review). An owner change moves every location under the company to the new account together." },
+    entEmpty: { zh: "你负责的交易主体下还没有法人。", en: "No companies under the entities you cover yet." },
+    entKindTransfer: { zh: "负责人变更", en: "Owner change" },
+    entKindBlock: { zh: "封禁法人", en: "Block company" },
+    entKindUnblock: { zh: "解封法人", en: "Unblock company" },
+    entBlockHeading: { zh: "封禁／解封法人", en: "Block / unblock company" },
+    entBlockAction: { zh: "动作", en: "Action" },
+    entEntity: { zh: "法人", en: "Company" },
+    entNewOwnerEmail: { zh: "新负责人邮箱：", en: "New owner email: " },
+    entEvidence: { zh: "证明材料说明：", en: "Supporting documents: " },
+    entStores: { zh: "门店：", en: "Locations: " },
+    entTransferNote: { zh: "新负责人须先用该邮箱注册账号。核准后旧负责人会收到邮件通知。", en: "The new owner must first sign up with this email. After approval the previous owner is notified by email." },
+    entSubmit: { zh: "提交审批", en: "Submit for approval" },
+    pwRuleRequired: { zh: "请输入密码。", en: "Please enter a password." },
+    pwRuleTooShort: { zh: "密码至少 8 位。", en: "Password must be at least 8 characters." },
+    pwRuleComplexity: { zh: "密码需包含小写字母、大写字母、数字、符号中的至少两类。", en: "Password must include at least two of: lowercase letters, uppercase letters, numbers, symbols." },
+    pwErrPwned: { zh: "这个密码属于常见或已泄露的密码，请换一个。", en: "This password is common or has appeared in a data breach. Please choose another." },
+    pwErrWeak: { zh: "密码不符合要求：至少 8 位，并包含至少两类字符。", en: "Password does not meet the requirements: at least 8 characters, with at least two character types." },
+    aboutTitle: { zh: "SFK Technology — 关于我们", en: "SFK Technology — About us" },
+    aboutNavHome: { zh: "首页", en: "Home" },
+    aboutNavInstitutions: { zh: "机构入驻", en: "For organizations" },
+    aboutNavLogin: { zh: "登录", en: "Log in" },
+    aboutHeroEyebrow: { zh: "SFK Technology · 我们的故事", en: "SFK Technology · Our story" },
+    aboutHeroTitle: { zh: "健康的钥匙，一直握在<em>你自己</em>手里。", en: "The key to your health stays in <em>your own</em> hands." },
+    aboutHeroLede: { zh: "SFK 源自 Smart Family Key——我们同时服务两类人：想管好自己健康的<strong>个人</strong>，和想经营好自己业务的<strong>健康机构</strong>。", en: "SFK stands for Smart Family Key. We serve two groups: <strong>individuals</strong> who want to look after their own health, and <strong>wellness businesses</strong> that want to run their business well." },
+    aboutOriginEyebrow: { zh: "我们名字里的 \"Key\"", en: "The “Key” in our name" },
+    aboutOriginTitle: { zh: "为什么一家健康科技公司，会把\"钥匙\"放进名字里", en: "Why a health technology company put a “key” in its name" },
+    aboutOriginBody: { zh: "<strong>Smart Family Key</strong> 不是比喻，是我们从第一行代码就坚持的工程原则：数据主权属于用户自己——这条原则同样延伸到我们为健康机构打造的 SFK OS。", en: "<strong>Smart Family Key</strong> is not a metaphor. It is an engineering principle we have held since the first line of code: your data belongs to you. The same principle extends to SFK OS, which we build for wellness businesses." },
+    aboutProofPersonalLabel: { zh: "对个人：两条不能妥协的技术底线", en: "For individuals: two technical lines we will not cross" },
+    aboutProofE2eTitle: { zh: "你的数据，你的密钥", en: "Your data, your keys" },
+    aboutProofE2eBody: { zh: "你的健康数据——从报告中提取的结果、你的打卡记录、你与 AI 的对话——在你的设备上完成加密，密钥只有你自己持有。SFK Wellness 无法读取。", en: "Your health data — the results extracted from your reports, your check-ins, and your conversations with the AI — is encrypted on your device with a key only you hold. SFK Wellness cannot read it." },
+    aboutProofSplitTitle: { zh: "AI 数据盲切分", en: "Blind split between AI systems" },
+    aboutProofSplitBody: { zh: "负责\"读懂你数据\"的 AI 与负责\"给你建议\"的 AI，是两套互相看不到对方完整信息的系统。", en: "The AI that reads your data and the AI that gives you suggestions are two separate systems; neither can see the other’s full information." },
+    aboutProofOrgLabel: { zh: "对机构：三条真实跑通的运营能力", en: "For organizations: three capabilities that work in production" },
+    aboutProofSlotTitle: { zh: "原子级防重复预约", en: "Double-booking prevention at the database level" },
+    aboutProofSlotBody: { zh: "数据库层面用排它约束拒绝同一技师同一时段的重复预约。", en: "An exclusion constraint in the database rejects a second booking for the same practitioner at the same time." },
+    aboutProofHubTitle: { zh: "机构目录", en: "Business directory" },
+    aboutProofHubBody: { zh: "顾客可在平台目录里按距离找到你。", en: "Customers can find you in the platform directory, sorted by distance." },
+    aboutProofModeTitle: { zh: "灵活确认模式", en: "Flexible confirmation" },
+    aboutProofModeBody: { zh: "自动确认或人工审核，机构自己决定要不要在预约落地前多一道人工把关。", en: "Confirm automatically or review manually — you decide whether a person checks each booking before it is final." },
+    aboutStatSyncLabel: { zh: "健康数据双端同步", en: "Health data synced on both platforms" },
+    aboutStatKeyValue: { zh: "你的数据，你的密钥", en: "Your data, your keys" },
+    aboutStatKeyLabel: { zh: "在你的设备上完成加密，密钥只有你自己持有", en: "encrypted on your device with a key only you hold" },
+    aboutStatConflictLabel: { zh: "SFK OS 预约冲突检测响应", en: "SFK OS booking-conflict check response" },
+    aboutPosPersonalEyebrow: { zh: "对个人来说，SFK 是什么", en: "What SFK is for individuals" },
+    aboutPosPersonalQuote: { zh: "我今天状态如何？我能为它做点什么？你的日常健康管理。", en: "How am I doing today, and what can I do about it? Your wellness, every day." },
+    aboutPosOrgEyebrow: { zh: "对机构来说，SFK OS 是什么", en: "What SFK OS is for organizations" },
+    aboutPosOrgQuote: { zh: "把预约、收款、顾客和账单，放进同一个后台。", en: "Bookings, payments, customers and billing — in one back office." },
+    aboutMissionEyebrow: { zh: "我们的信念", en: "What we believe" },
+    aboutMissionQuote: { zh: "不是「我哪里出了问题？」，而是「我今天状态如何？我能为它做点什么？」", en: "Not \"what's wrong with me?\" but \"how am I doing today, and what can I do about it?\"" },
+    aboutFooterNote: { zh: "你的数据，你的密钥 · 支付由 Stripe Connect 提供支持", en: "Your data, your keys · Payments powered by Stripe Connect" },
+    agreementMethodCheckbox: { zh: "勾选同意", en: "Ticked the consent box" },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -2284,6 +2456,25 @@ function roleLabel(role) {
 // 调 sfk-admin-* 系列 Edge Function 的统一封装——自动带上当前登录
 // 会话的 JWT（supabase-js 的 functions.invoke 默认行为），错误时把
 // 后端返回的 { error: 'XXX_CODE' } 提取出来，不是只显示笼统的 HTTP 状态。
+// 🔴 TD-320：密码规则与 App（lib/login_page/login_page_widget.dart `_passwordRuleError`）一致 —— ≥8 位，小写／大写／数字／符号四类至少 2 类。
+//   只用于**新设**密码（注册、设置密码）；登录⛔ 校验，⛔ 则旧的 6 位密码账号登录不了。三端一致由 check_td320_password_rule.mjs 钉住。
+function passwordRuleError(pw) {
+  if (!pw) return 'pwRuleRequired';
+  if (pw.length < 8) return 'pwRuleTooShort';
+  let classes = 0;
+  if (/[a-z]/.test(pw)) classes++;
+  if (/[A-Z]/.test(pw)) classes++;
+  if (/[0-9]/.test(pw)) classes++;
+  if (/[^a-zA-Z0-9]/.test(pw)) classes++;
+  return classes < 2 ? 'pwRuleComplexity' : null;
+}
+// 🔴 TD-320：服务端拒密码（weak_password）说人话：属于泄露／常见密码（reasons 含 pwned）与「不满足规则」分开说
+function weakPasswordMessage(err) {
+  if (!err || (err.code !== 'weak_password' && err.name !== 'AuthWeakPasswordError')) return null;
+  const reasons = Array.isArray(err.reasons) ? err.reasons : [];
+  return osT(reasons.includes('pwned') ? 'pwErrPwned' : 'pwErrWeak');
+}
+
 async function callFn(name, body) {
   const { data, error } = await supabase.functions.invoke(name, { body });
   if (error) {
@@ -2397,6 +2588,7 @@ async function handleSession(session) {
   refreshTicketsBadge();
   refreshApprovalBadge();   // `D2` §三：待我审批 ／ 待补核
   refreshRefundsBadge();    // TD-110 §十一
+  refreshInstitutionsBadge();   // TD-312：待审核机构数
 }
 
 // ⭐ 全权 ⇒ 按等级显示全部；非全权 ⇒ 配置页，另加持机构权限点时的机构页（TD-128 最小版 ＋ TD-129 B1 ④）
@@ -2414,6 +2606,22 @@ async function refreshOpsBadge() {
     refreshTabBadgesOnly();   // ⭐ ⛔ 不重建 #tabContent（见上）
   } catch (e) {
     console.error('OPS-7a 角标拉取失败（不阻断登录）：', e.message);
+  }
+}
+
+// 🔴 TD-312：「机构管理」待审核数角标 —— 负责人岗逐个了解新注册机构（试运营约束）。
+//   ⭐ 只数 `status = 'pending_review'`（读库，⛔ 前端维护计数）；看不到机构页的人⛔ 拉。
+//   失败不阻断登录，⛔ 静默（与其他角标同口径）。
+async function refreshInstitutionsBadge() {
+  if (!TABS.some((t) => t.id === 'institutions' && tabVisible(t))) return;
+  try {
+    const { count, error } = await supabase.from('institutions')
+      .select('id', { count: 'exact', head: true }).eq('status', 'pending_review');
+    if (error) throw error;
+    state.institutionsPending = count ?? 0;
+    refreshTabBadgesOnly();
+  } catch (e) {
+    console.error('TD-312 机构待审核角标拉取失败（不阻断登录）：', e.message);
   }
 }
 
@@ -2582,12 +2790,14 @@ async function renderSetPassword(session) {
     const pw2 = document.getElementById('setPwConfirm').value;
     const statusEl = document.getElementById('setPwStatus');
     if (pw !== pw2) { statusEl.textContent = osT('adminSetPwMismatch'); return; }
+    const ruleErr = passwordRuleError(pw);   // 🔴 TD-320：与 App 同一规则（8 位＋2 类）
+    if (ruleErr) { statusEl.textContent = osT(ruleErr); return; }
     statusEl.textContent = osT('adminSetPwSaving');
     const { error } = await supabase.auth.updateUser({ password: pw });
     if (error) {
       // 会话过期（令牌失效）与服务端密码策略拒绝，都原样说清楚
       statusEl.textContent = (error.status === 401 || /expired|jwt|session/i.test(error.message || ''))
-        ? osT('adminSetPwNoSession') : osT('adminSetPwFailed') + error.message;
+        ? osT('adminSetPwNoSession') : (weakPasswordMessage(error) ?? (osT('adminSetPwFailed') + error.message));
       return;
     }
     statusEl.textContent = osT('adminSetPwDone');
@@ -2606,9 +2816,11 @@ async function renderSetPassword(session) {
 //   ⚠️ 它是一个**前端功能开关**，⛔ 不是运营参数 —— ⭐ 放 `platform_config` 意味着
 //   「运营在后台点一下就能改变 admin 面板的形状」，那⛔ 不是我们要的；
 //   ⇒ 常量最诚实：改一行、重新生成 base64、部署。
-const CS_KB_TAB_ENABLED = false;
+// ✅ 创始人 10-06 裁定打开（上线后总清单 §一.2，6d9df732）；10-06 生产只读核：cs_kb_entry 表在、sfk-admin-cs-kb 线上 815df0242bd4
+const CS_KB_TAB_ENABLED = true;
 // 🔴 `TD-190` 同上：⛔ 是运营参数，是**前端功能开关** ⇒ ⭐ 常量最诚实。
-const CS_FEEDBACK_TAB_ENABLED = false;
+// ✅ 同上打开；10-06 生产只读核三件：cs_feedback／cs_feedback_decisions 表在、sfk-admin-cs-feedback 线上 815df0242bd4、token_rules.feedback_adopted_bonus 已设定
+const CS_FEEDBACK_TAB_ENABLED = true;
 
 const TABS = [
   { id: 'config', label: osT('adminTabConfig'), minRole: 'operator' },
@@ -2701,6 +2913,9 @@ function tabBadge(tabId) {
     const stuck = state.refundsStuck
       ? ` <span class="ops-badge ops-badge--overdue" title="${escapeHtml(osT('adminRfStuckLocks'))}">${state.refundsStuck}</span>` : '';
     return `${pend}${bad}${stuck}`;
+  }
+  if (tabId === 'institutions' && state.institutionsPending) {
+    return ` <span class="ops-badge" title="${escapeHtml(osT('adminInstPendingBadge'))}">${state.institutionsPending}</span>`;
   }
   if (tabId === 'tickets' && state.ticketsOpen) {
     // ⚠️ 逾期条数**单独显示**，⛔ 不和未结数合并 ——
@@ -4657,6 +4872,14 @@ const CFG_SPEC = {
       { path: 'minResults', label: osT('cfgNearbyMin'), type: 'T4', unit: osT('cfgUnitShops') },
     ],
   },
+  // 🔴 TD-337 §十二 3：同一负责人门店数超过阈值 ⇒ 告警给运营（⛔ 拦、⛔ 上限）。未设定 ⇒ ⛔ 告警
+  'sfk_os.owner_store_count_alert_threshold': {
+    group: 'S', label: osT('cfgOwnerStoresLabel'),
+    notice: osT('cfgOwnerStoresNotice'),
+    fields: [
+      { path: 'count', label: osT('cfgOwnerStoresField'), type: 'T4', unit: osT('cfgUnitShops') },
+    ],
+  },
   'ops.client_error_spike_threshold': {
     group: 'O', label: osT('cfgErrorSpikeLabel'),
     fields: [
@@ -5172,6 +5395,25 @@ const CFG_SPEC = {
     notice: () => osT('cfgWalkinOfflineFeeNotice'),
     fields: [{ path: 'rate', label: osT('cfgWalkinOfflineFeeField'), type: 'T2', affects: 'institution' }],
   },
+  // 🔴 TD-316（决策记录 D1）：体验价「同一个客户只能用一次」按什么认。只建未设定态；未设定 ⇒ 一律正价（⛔ 挂券）＋ P2。
+  'sfk_os.trial_eligibility_basis': {
+    group: 'C', label: osT('cfgTrialBasisLabel'),
+    notice: () => osT('cfgTrialBasisNotice'),
+    fields: [{ path: 'basis', label: osT('cfgTrialBasisField'), type: 'TEXT', affects: 'institution',
+      options: ['legal_entity'], optionLabels: { legal_entity: () => osT('cfgTrialBasisLegalEntity') } }],
+  },
+  // 🔴 TD-336：机构暂停订阅规则（决策记录 D2；运营提出、财务核准）。暂停最长天数初始未设定 ⇒ ⛔ 自动转注销
+  'sfk_os.subscription_pause_policy': {
+    group: 'C', label: osT('cfgPauseLabel'),
+    notice: () => osT('cfgPauseNotice'),
+    fields: [
+      { path: 'max_paused_days', label: osT('cfgPauseMaxDays'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'institution' },
+      { path: 'during_trial', label: osT('cfgPauseDuringTrial'), type: 'TEXT', affects: 'institution',
+        options: ['allowed', 'denied'], optionLabels: { allowed: () => osT('cfgPauseAllowed'), denied: () => osT('cfgPauseDenied') } },
+      { path: 'with_future_bookings', label: osT('cfgPauseWithBookings'), type: 'TEXT', affects: 'institution',
+        options: ['allowed', 'denied'], optionLabels: { allowed: () => osT('cfgPauseAllowed'), denied: () => osT('cfgPauseDenied') } },
+    ],
+  },
   'sfk_os.token_purchase_min_quantity': {
     group: 'C', label: { zh: '机构采购 Token · 起订量', en: 'Org token purchase · minimum quantity' },
     notice: {
@@ -5419,6 +5661,18 @@ const CFG_SPEC = {
   'token_rules.referral_registration_bonus': { group: 'B', label: { zh: '邀请人得', en: 'Inviter reward' }, fields: [{ path: 'amount', type: 'T3', affects: 'liability' }] },
   'token_rules.institution_referral_consumer_bonus': { group: 'B', label: { zh: '机构推荐 · 消费者得', en: 'Org referral · consumer reward' }, fields: [{ path: 'amount', type: 'T3', affects: 'liability' }] },
   'token_rules.institution_referral_institution_bonus': { group: 'B', label: { zh: '机构推荐 · 机构得', en: 'Org referral · org reward' }, fields: [{ path: 'amount', type: 'T3', affects: 'liability' }] },
+  // 🔴 TD-325（设计窗口 2026-10-05）：机构订阅返还 Token。只建未设定态；比例按 Token 面值（1 Token = S$0.01），向下取整；
+  //   0 ＝ 不返还（合法设定值）。两项任一未设定 ⇒ 不返还 ＋ P1 告警。⛔ 由开发或设计窗口代设（运营提出、财务核准）。
+  'token_rules.institution_subscription_rebate_rate': {
+    group: 'B', label: osT('cfgSubRebateLabel'),
+    notice: () => osT('cfgSubRebateNotice'),
+    fields: [
+      { path: 'rate', label: osT('cfgSubRebateRateField'), type: 'T2', affects: 'liability' },
+      { path: 'applies_to', label: osT('cfgSubRebateAppliesField'), type: 'TEXT', affects: 'liability',
+        options: ['every_invoice', 'first_invoice_only'],
+        optionLabels: { every_invoice: () => osT('cfgSubRebateEveryInvoice'), first_invoice_only: () => osT('cfgSubRebateFirstInvoice') } },
+    ],
+  },
   'token_rules.questionnaire_complete_bonus': { group: 'B', label: { zh: '补齐问卷奖励', en: 'Questionnaire completion reward' }, fields: [{ path: 'amount', type: 'T3', affects: 'liability' }] },
   'token_rules.device_connect_bonus': { group: 'B', label: { zh: '首次连接设备奖励', en: 'First device connection reward' }, fields: [{ path: 'amount', type: 'T3', affects: 'liability' }] },
   'token_rules.health_data_connect_bonus': { group: 'B', label: { zh: '首次连接健康数据奖励', en: 'First health-data connection reward' }, fields: [{ path: 'amount', type: 'T3', affects: 'liability' }] },
@@ -5746,7 +6000,7 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
     control = `<input type="checkbox" id="${id}" ${t.toInput(raw) ? 'checked' : ''} ${ro} />`;
   } else if (t.input === 'select') {
     const opts = (f.options || (isUnset ? [] : [raw])).map((o) =>
-      `<option value="${escapeHtml(o)}" ${o === raw ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('');
+      `<option value="${escapeHtml(o)}" ${o === raw ? 'selected' : ''}>${escapeHtml(f.optionLabels?.[o] ? (typeof f.optionLabels[o] === 'function' ? f.optionLabels[o]() : pick(f.optionLabels[o])) : o)}</option>`).join('');
     control = `<select id="${id}" ${ro}><option value="">—</option>${opts}</select>`;
   } else if (t.input === 'checklist') {
     // ⭐ T7：可选项来自**当前值本身**（`optionsFrom:'currentArray'`）——
@@ -6151,7 +6405,8 @@ async function renderRevenueConfigSection(host, configs, myPerms, saveOutcome) {
         statusEl.textContent = osT('adminCommonSaving');
         let resp;
         try {
-          resp = await callFn('sfk-admin-config-update', { key, newValue, reason });
+          // 🔴 TD-308：直改显式带 action:'update' ⇒ 岗位关能按白名单（config.nonrevenue.edit）放行运营岗
+          resp = await callFn('sfk-admin-config-update', { action: 'update', key, newValue, reason });
         } catch (e) {
           statusEl.classList.add('error');
           statusEl.textContent = osT('adminCommonSaveFailed') + e.message;
@@ -6735,7 +6990,8 @@ async function renderConfigTab(el) {
       statusEl.textContent = osT('adminCommonSaving');
       let resp;
       try {
-        resp = await callFn('sfk-admin-config-update', { key: config.key, newValue, reason });
+        // 🔴 TD-308：直改显式带 action:'update'（见上）
+        resp = await callFn('sfk-admin-config-update', { action: 'update', key: config.key, newValue, reason });
       } catch (e) {
         // ⭐ 收入参数要走「提出→核准」：这是流程⛔ 是故障 ⇒ 给去处，⛔ 报「保存失败」
         if (String(e.message).includes('CONFIG_REQUIRES_APPROVAL')) { fail(osT('adminCfgNeedsApproval')); return; }
@@ -7139,12 +7395,32 @@ function renderUserResult(el, data, reload) {
 // ==================== 机构管理 ====================
 async function renderInstitutionsTab(el) {
   el.innerHTML = `<p class="loading">${escapeHtml(osT('adminCommonLoading'))}</p>`;
+  refreshInstitutionsBadge();   // TD-312：审核之后重画本页时角标随之 −1
   const { data: institutions, error } = await supabase
     .from('institutions').select('*').order('submitted_at', { ascending: false });
   if (error) {
     el.innerHTML = `<p class="error">${escapeHtml(osT('adminCommonLoadFailed'))}${escapeHtml(error.message)}</p>`;
     return;
   }
+
+  // 🔴 TD-337：门店所属法人（名称与核实状态）。读⛔ 到只影响这一列，⛔ 挡机构列表（失败照实写「法人读取失败」）
+  const { data: entities, error: entErr } = await supabase
+    .from('merchant_legal_entities').select('id, legal_name, status');
+  const entityById = Object.fromEntries((entities || []).map((e) => [e.id, e]));
+  const entityLine = (inst) => {
+    if (entErr) return `<div class="muted">${escapeHtml(osT('adminInstEntityReadFailed'))}</div>`;
+    if (!inst.merchant_entity_id) return inst.registration_number ? `<div class="muted">${escapeHtml(osT('adminInstEntityNone'))}</div>` : '';
+    const e = entityById[inst.merchant_entity_id];
+    if (!e) return '';
+    const st = { unverified: 'adminInstEntityUnverified', verified: 'adminInstEntityVerified', blocked: 'adminInstEntityBlocked' }[e.status];
+    return `<div class="muted">${escapeHtml(osT('adminInstEntity'))}${escapeHtml(e.legal_name || '—')} · `
+      + `<span class="badge badge-${e.status === 'verified' ? 'approved' : (e.status === 'blocked' ? 'rejected' : 'suspended')}">${escapeHtml(st ? osT(st) : e.status)}</span></div>`;
+  };
+
+  // 🔴 TD-335：同国别＋同注册号的机构数 ⇒ ＞1 亮「重号」（⛔ 拦：同一法人多家门店本来共用一个号；只提醒审核时核实）
+  const regKey = (i) => (i.country && i.registration_number) ? `${i.country}:${i.registration_number}` : null;
+  const regCount = {};
+  institutions.forEach((i) => { const k = regKey(i); if (k) regCount[k] = (regCount[k] || 0) + 1; });
 
   el.innerHTML = `
     <section class="panel">
@@ -7160,7 +7436,10 @@ async function renderInstitutionsTab(el) {
                    ⚠️ 本注释在模板串里 ⇒ ⛔ 许写反引号。 -->
               <td>${escapeHtml(inst.name)}${inst.account_kind && inst.account_kind !== 'real'
                 ? ` <span class="badge badge-account-kind" data-account-kind="${escapeHtml(inst.account_kind)}">${escapeHtml(accountKindLabel(inst.account_kind))}</span>`
-                : ''}</td>
+                : ''}${inst.registration_number
+                ? `<div class="muted">${escapeHtml(osT('adminInstRegNo'))}${escapeHtml(inst.country || '')} ${escapeHtml(inst.registration_number)}${(regCount[regKey(inst)] || 0) > 1
+                    ? ` <span class="badge badge-rejected" data-reg-dup="1" title="${escapeHtml(osT('adminInstRegDupHint'))}">${escapeHtml(osT('adminInstRegDup'))}</span>` : ''}</div>`
+                : ''}${entityLine(inst)}</td>
               <td>${bizTypeLabel(inst.business_type)}</td>
               <td><span class="badge badge-${inst.status}">${statusLabel(inst.status)}</span></td>
               <td>${inst.subdomain
@@ -7338,9 +7617,12 @@ async function renderInstitutionsTab(el) {
   // ⭐ 哪些是持照医疗档由服务端按配置判（⛔ 在界面里写死业态清单）；拉⛔ 到就⛔ 显示，⛔ 阻断列表
   renderLicenseStatus(el, institutions.map((i) => i.id));
   // ══════ 🔴 TD-129 B1 ③：暂停两人批／补核／申诉 ══════
-  el.insertAdjacentHTML('afterbegin', '<div id="instSuspensionPanel"></div><div id="instAppealPanel"></div>');
+  el.insertAdjacentHTML('afterbegin', '<div id="instSuspensionPanel"></div><div id="instAppealPanel"></div><div id="instTokenClawbackPanel"></div><div id="instTrialResetPanel"></div><div id="instEntityPanel"></div>');
   renderSuspensionPanel(el);
   renderAppealPanel(el);
+  renderTokenClawbackPanel(el, institutions);   // TD-309
+  renderTrialResetPanel(el, institutions);      // TD-316
+  renderEntityPanel(el);                        // TD-337 §六
   el.querySelectorAll('[data-sus-submit]').forEach((btn) => btn.addEventListener('click', async () => {
     const box = el.querySelector(`[data-suspend-for="${CSS.escape(btn.dataset.susSubmit)}"]`);
     const v = (k) => box.querySelector(`[data-sus="${k}"]`);
@@ -7429,6 +7711,223 @@ async function renderSuspensionPanel(el) {
         : { action: 'approval_decide', requestId: card.dataset.apr, decision: go, note: note || null });
       renderSuspensionPanel(el);
     } catch (e) { stEl.classList.add('error'); stEl.textContent = e.message; }
+  }));
+}
+
+// 🔴 TD-309：人工冲回机构 Token —— 运营提出、财务核准（判权、提出人≠核准人、独任例外全在服务端）；没有权限 ⇒ 整块⛔ 显示
+async function renderTokenClawbackPanel(el, institutions) {
+  const host = el.querySelector('#instTokenClawbackPanel');
+  if (!host) return;
+  let d;
+  try { d = await callFn('sfk-admin-institution-manage', { action: 'token_clawback_list' }); }
+  catch (e) { host.innerHTML = ''; return; }
+  const rows = d.requests || [];
+  const debts = d.debts || [];
+  const poolLabel = (p) => osT(p === 'earned' ? 'clawPoolEarned' : 'clawPoolPurchase');
+  const instOptions = (institutions || []).map((i) => `<option value="${escapeHtml(i.id)}">${escapeHtml(i.name)}</option>`).join('');
+  host.innerHTML = `<section class="panel"><h2>${escapeHtml(osT('clawHeading'))}</h2>
+    <p class="hint">${escapeHtml(osT('clawIntro'))}</p>
+    <h3>${escapeHtml(osT('clawDebtsHeading'))}</h3>
+    ${debts.length ? debts.map((x) => `<p>${escapeHtml(d.names?.[x.institution_id] || x.institution_id)} · ${escapeHtml(poolLabel(x.pool))} · <strong>${x.outstanding_amount}</strong> Token · ${formatDate(x.created_at)}</p>`).join('')
+      : `<p class="muted">${escapeHtml(osT('clawDebtsEmpty'))}</p>`}
+    <div class="cfg-card" id="clawForm">
+      <label>${escapeHtml(osT('clawInstitution'))} <select data-claw="inst">${instOptions}</select></label>
+      <label>${escapeHtml(osT('clawPool'))} <select data-claw="pool">
+        <option value="purchase">${escapeHtml(osT('clawPoolPurchase'))}</option><option value="earned">${escapeHtml(osT('clawPoolEarned'))}</option></select></label>
+      <label>${escapeHtml(osT('clawTokens'))} <input type="number" min="1" step="1" data-claw="tokens" /></label>
+      <label>${escapeHtml(osT('clawReason'))} <input type="text" data-claw="reason" /></label>
+      <label>${escapeHtml(osT('clawTicket'))} <input type="text" data-claw="ticket" /></label>
+      <button id="clawSubmit">${escapeHtml(osT('clawSubmit'))}</button> <span class="status" id="clawStatus"></span>
+    </div>
+    ${rows.length ? rows.map((r) => `
+      <div class="cfg-card" data-claw-apr="${escapeHtml(r.id)}">
+        <p><strong>${escapeHtml(d.names?.[r.payload?.institution_id] || r.payload?.institution_id || '')}</strong>
+          · ${escapeHtml(poolLabel(r.payload?.pool))} · ${escapeHtml(String(r.payload?.tokens ?? ''))} Token
+          <span class="badge badge-${r.status === 'pending' ? 'suspended' : 'approved'}">${escapeHtml(osT('approvalStatus_' + r.status))}</span></p>
+        <p class="hint">${formatDate(r.requested_at)} · ${escapeHtml(r.ticket_ref || '')}</p>
+        <p>${escapeHtml(r.reason)}</p>
+        ${r.execution_result && r.execution_result.clawed !== undefined ? `<p class="muted">${escapeHtml(osT('clawResult')
+          .replace('{clawed}', r.execution_result.clawed).replace('{outstanding}', r.execution_result.outstanding))}</p>` : ''}
+        ${r.decision_note ? `<p class="muted">${escapeHtml(r.decision_note)}</p>` : ''}
+        ${r.status === 'pending' ? `<div class="cfg-card-actions">
+          <input type="text" class="cfg-note" data-claw-note placeholder="${escapeHtml(osT('clawNotePh'))}" />
+          <button data-claw-go="approve">${escapeHtml(osT('clawApprove'))}</button>
+          <button class="ghost-btn" data-claw-go="reject">${escapeHtml(osT('clawReject'))}</button>
+          ${r.requested_by === d.me ? `<button class="ghost-btn" data-claw-go="cancel">${escapeHtml(osT('clawCancel'))}</button>` : ''}
+          <span class="status" data-claw-status></span></div>` : ''}
+      </div>`).join('') : `<p class="muted">${escapeHtml(osT('clawEmpty'))}</p>`}
+  </section>`;
+  host.querySelector('#clawSubmit').addEventListener('click', async () => {
+    const v = (k) => host.querySelector(`[data-claw="${k}"]`).value.trim();
+    const st = host.querySelector('#clawStatus');
+    st.classList.remove('error'); st.textContent = osT('adminCommonSubmitting');
+    try {
+      await callFn('sfk-admin-institution-manage', { action: 'token_clawback_request', institutionId: v('inst'),
+        pool: v('pool'), tokens: Number(v('tokens')), reason: v('reason'), ticketRef: v('ticket') || null });
+      renderTokenClawbackPanel(el, institutions);
+    } catch (e) { st.classList.add('error'); st.textContent = e.message; }
+  });
+  host.querySelectorAll('[data-claw-go]').forEach((b) => b.addEventListener('click', async () => {
+    const card = b.closest('[data-claw-apr]');
+    const note = card.querySelector('[data-claw-note]').value.trim();
+    const st = card.querySelector('[data-claw-status]');
+    st.classList.remove('error'); st.textContent = osT('adminCommonSubmitting');
+    try {
+      const go = b.dataset.clawGo;
+      await callFn('sfk-admin-institution-manage', go === 'cancel'
+        ? { action: 'approval_cancel', requestId: card.dataset.clawApr, note: note || null }
+        : { action: 'approval_decide', requestId: card.dataset.clawApr, decision: go, note: note || null });
+      renderTokenClawbackPanel(el, institutions);
+    } catch (e) { st.classList.add('error'); st.textContent = e.message; }
+  }));
+}
+
+// 🔴 TD-316：体验价资格 —— 法人用过的记录 ＋ 重置（运营提出、财务核准；判权与独任例外在服务端）；没有权限 ⇒ 整块⛔ 显示
+async function renderTrialResetPanel(el, institutions) {
+  const host = el.querySelector('#instTrialResetPanel');
+  if (!host) return;
+  let d;
+  try { d = await callFn('sfk-admin-institution-manage', { action: 'trial_reset_list' }); }
+  catch (e) { host.innerHTML = ''; return; }
+  const usages = d.usages || [];
+  const rows = d.requests || [];
+  const instOptions = (institutions || []).filter((i) => i.registration_number)
+    .map((i) => `<option value="${escapeHtml(i.id)}">${escapeHtml(i.name)}（${escapeHtml(i.country || '')} ${escapeHtml(i.registration_number)}）</option>`).join('');
+  host.innerHTML = `<section class="panel"><h2>${escapeHtml(osT('trialHeading'))}</h2>
+    <p class="hint">${escapeHtml(osT('trialIntro'))}</p>
+    ${usages.length ? usages.map((u) => `<p>${escapeHtml(u.country)} ${escapeHtml(u.registration_number)} · ${escapeHtml(d.names?.[u.institution_id] || u.institution_id)} · ${formatDate(u.used_at)}
+      ${u.reset_at ? `<span class="badge badge-approved">${escapeHtml(osT('trialResetDone'))} ${formatDate(u.reset_at)}</span>` : `<span class="badge badge-suspended">${escapeHtml(osT('trialUsed'))}</span>`}</p>`).join('')
+      : `<p class="muted">${escapeHtml(osT('trialEmpty'))}</p>`}
+    <div class="cfg-card">
+      <label>${escapeHtml(osT('clawInstitution'))} <select data-trial="inst">${instOptions}</select></label>
+      <label>${escapeHtml(osT('clawReason'))} <input type="text" data-trial="reason" /></label>
+      <label>${escapeHtml(osT('clawTicket'))} <input type="text" data-trial="ticket" /></label>
+      <button id="trialResetSubmit">${escapeHtml(osT('trialResetSubmit'))}</button> <span class="status" id="trialResetStatus"></span>
+    </div>
+    ${rows.map((r) => `
+      <div class="cfg-card" data-trial-apr="${escapeHtml(r.id)}">
+        <p><strong>${escapeHtml(r.payload?.country || '')} ${escapeHtml(r.payload?.registration_number || '')}</strong>
+          <span class="badge badge-${r.status === 'pending' ? 'suspended' : 'approved'}">${escapeHtml(osT('approvalStatus_' + r.status))}</span></p>
+        <p class="hint">${formatDate(r.requested_at)} · ${escapeHtml(r.ticket_ref || '')}</p>
+        <p>${escapeHtml(r.reason)}</p>
+        ${r.decision_note ? `<p class="muted">${escapeHtml(r.decision_note)}</p>` : ''}
+        ${r.status === 'pending' ? `<div class="cfg-card-actions">
+          <input type="text" class="cfg-note" data-trial-note placeholder="${escapeHtml(osT('clawNotePh'))}" />
+          <button data-trial-go="approve">${escapeHtml(osT('clawApprove'))}</button>
+          <button class="ghost-btn" data-trial-go="reject">${escapeHtml(osT('clawReject'))}</button>
+          ${r.requested_by === d.me ? `<button class="ghost-btn" data-trial-go="cancel">${escapeHtml(osT('clawCancel'))}</button>` : ''}
+          <span class="status" data-trial-status></span></div>` : ''}
+      </div>`).join('')}
+  </section>`;
+  host.querySelector('#trialResetSubmit').addEventListener('click', async () => {
+    const v = (k) => host.querySelector(`[data-trial="${k}"]`).value.trim();
+    const st = host.querySelector('#trialResetStatus');
+    st.classList.remove('error'); st.textContent = osT('adminCommonSubmitting');
+    try {
+      await callFn('sfk-admin-institution-manage', { action: 'trial_reset_request', institutionId: v('inst'),
+        reason: v('reason'), ticketRef: v('ticket') || null });
+      renderTrialResetPanel(el, institutions);
+    } catch (e) { st.classList.add('error'); st.textContent = e.message; }
+  });
+  host.querySelectorAll('[data-trial-go]').forEach((b) => b.addEventListener('click', async () => {
+    const card = b.closest('[data-trial-apr]');
+    const note = card.querySelector('[data-trial-note]').value.trim();
+    const st = card.querySelector('[data-trial-status]');
+    st.classList.remove('error'); st.textContent = osT('adminCommonSubmitting');
+    try {
+      const go = b.dataset.trialGo;
+      await callFn('sfk-admin-institution-manage', go === 'cancel'
+        ? { action: 'approval_cancel', requestId: card.dataset.trialApr, note: note || null }
+        : { action: 'approval_decide', requestId: card.dataset.trialApr, decision: go, note: note || null });
+      renderTrialResetPanel(el, institutions);
+    } catch (e) { st.classList.add('error'); st.textContent = e.message; }
+  }));
+}
+
+// 🔴 TD-337 §六：法人负责人变更（整个法人一起转）／封禁／解封 —— 招商运营提出、负责人岗核准；没有权限 ⇒ 整块⛔ 显示
+//   ⭐ 判权、提出人≠核准人、独任例外、理由与证明材料必填全在服务端；这里只收集输入、原样显示拒绝理由
+async function renderEntityPanel(el) {
+  const host = el.querySelector('#instEntityPanel');
+  if (!host) return;
+  let d;
+  try { d = await callFn('sfk-admin-institution-manage', { action: 'entity_action_list' }); }
+  catch (e) { host.innerHTML = ''; return; }
+  const ents = d.entities || [];
+  const rows = d.requests || [];
+  const entStatus = (st) => osT({ unverified: 'adminInstEntityUnverified', verified: 'adminInstEntityVerified', blocked: 'adminInstEntityBlocked' }[st] || 'adminInstEntityUnverified');
+  const entOptions = ents.map((e) => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.legal_name || '—')}（${escapeHtml(e.registration_country)} ${escapeHtml(e.registration_no_norm)} · ${escapeHtml(entStatus(e.status))}）</option>`).join('');
+  const kindLabel = (k) => osT({ merchant_entity_owner_transfer: 'entKindTransfer', merchant_entity_block: 'entKindBlock', merchant_entity_unblock: 'entKindUnblock' }[k]);
+  host.innerHTML = `<section class="panel"><h2>${escapeHtml(osT('entHeading'))}</h2>
+    <p class="hint">${escapeHtml(osT('entIntro'))}</p>
+    ${ents.length ? '' : `<p class="muted">${escapeHtml(osT('entEmpty'))}</p>`}
+    <div class="cfg-card">
+      <h3>${escapeHtml(osT('entKindTransfer'))}</h3>
+      <label>${escapeHtml(osT('entEntity'))} <select data-ent="tEnt">${entOptions}</select></label>
+      <label>${escapeHtml(osT('entNewOwnerEmail'))} <input type="email" data-ent="tEmail" /></label>
+      <label>${escapeHtml(osT('clawReason'))} <input type="text" data-ent="tReason" /></label>
+      <label>${escapeHtml(osT('entEvidence'))} <input type="text" data-ent="tEvidence" /></label>
+      <label>${escapeHtml(osT('clawTicket'))} <input type="text" data-ent="tTicket" /></label>
+      <p class="hint">${escapeHtml(osT('entTransferNote'))}</p>
+      <button id="entTransferSubmit">${escapeHtml(osT('entSubmit'))}</button> <span class="status" id="entTransferStatus"></span>
+    </div>
+    <div class="cfg-card">
+      <h3>${escapeHtml(osT('entBlockHeading'))}</h3>
+      <label>${escapeHtml(osT('entEntity'))} <select data-ent="bEnt">${entOptions}</select></label>
+      <label>${escapeHtml(osT('entBlockAction'))} <select data-ent="bAction">
+        <option value="block">${escapeHtml(osT('entKindBlock'))}</option><option value="unblock">${escapeHtml(osT('entKindUnblock'))}</option></select></label>
+      <label>${escapeHtml(osT('clawReason'))} <input type="text" data-ent="bReason" /></label>
+      <label>${escapeHtml(osT('clawTicket'))} <input type="text" data-ent="bTicket" /></label>
+      <button id="entBlockSubmit">${escapeHtml(osT('entSubmit'))}</button> <span class="status" id="entBlockStatus"></span>
+    </div>
+    ${rows.map((r) => `
+      <div class="cfg-card" data-ent-apr="${escapeHtml(r.id)}">
+        <p><strong>${escapeHtml(kindLabel(r.kind))} · ${escapeHtml(r.payload?.legal_name || '—')}（${escapeHtml(r.payload?.registration || '')}）</strong>
+          <span class="badge badge-${r.status === 'pending' ? 'suspended' : 'approved'}">${escapeHtml(osT('approvalStatus_' + r.status))}</span></p>
+        ${r.kind === 'merchant_entity_owner_transfer' ? `<p>${escapeHtml(osT('entNewOwnerEmail'))}${escapeHtml(r.payload?.new_owner_email || '')} · ${escapeHtml(osT('entStores'))}${escapeHtml(((r.payload?.stores) || []).map((x) => x.name).join('、'))}</p>
+          <p class="hint">${escapeHtml(osT('entEvidence'))}${escapeHtml(r.payload?.evidence || '')}</p>` : ''}
+        <p class="hint">${formatDate(r.requested_at)} · ${escapeHtml(r.ticket_ref || '')}</p>
+        <p>${escapeHtml(r.reason)}</p>
+        ${r.decision_note ? `<p class="muted">${escapeHtml(r.decision_note)}</p>` : ''}
+        ${r.status === 'failed' ? `<p class="error">${escapeHtml(r.execution_result?.error || '')}</p>` : ''}
+        ${r.status === 'pending' ? `<div class="cfg-card-actions">
+          <input type="text" class="cfg-note" data-ent-note placeholder="${escapeHtml(osT('clawNotePh'))}" />
+          <button data-ent-go="approve">${escapeHtml(osT('clawApprove'))}</button>
+          <button class="ghost-btn" data-ent-go="reject">${escapeHtml(osT('clawReject'))}</button>
+          ${r.requested_by === d.me ? `<button class="ghost-btn" data-ent-go="cancel">${escapeHtml(osT('clawCancel'))}</button>` : ''}
+          <span class="status" data-ent-status></span></div>` : ''}
+      </div>`).join('')}
+  </section>`;
+  const v = (k) => host.querySelector(`[data-ent="${k}"]`).value.trim();
+  host.querySelector('#entTransferSubmit').addEventListener('click', async () => {
+    const st = host.querySelector('#entTransferStatus');
+    st.classList.remove('error'); st.textContent = osT('adminCommonSubmitting');
+    try {
+      await callFn('sfk-admin-institution-manage', { action: 'entity_owner_transfer_request', entityId: v('tEnt'),
+        newOwnerEmail: v('tEmail'), reason: v('tReason'), evidence: v('tEvidence'), ticketRef: v('tTicket') || null });
+      renderEntityPanel(el);
+    } catch (e) { st.classList.add('error'); st.textContent = e.message; }
+  });
+  host.querySelector('#entBlockSubmit').addEventListener('click', async () => {
+    const st = host.querySelector('#entBlockStatus');
+    st.classList.remove('error'); st.textContent = osT('adminCommonSubmitting');
+    try {
+      await callFn('sfk-admin-institution-manage', { action: 'entity_block_request', entityId: v('bEnt'),
+        blockAction: v('bAction'), reason: v('bReason'), ticketRef: v('bTicket') || null });
+      renderEntityPanel(el);
+    } catch (e) { st.classList.add('error'); st.textContent = e.message; }
+  });
+  host.querySelectorAll('[data-ent-go]').forEach((b) => b.addEventListener('click', async () => {
+    const card = b.closest('[data-ent-apr]');
+    const note = card.querySelector('[data-ent-note]').value.trim();
+    const st = card.querySelector('[data-ent-status]');
+    st.classList.remove('error'); st.textContent = osT('adminCommonSubmitting');
+    try {
+      const go = b.dataset.entGo;
+      await callFn('sfk-admin-institution-manage', go === 'cancel'
+        ? { action: 'approval_cancel', requestId: card.dataset.entApr, note: note || null }
+        : { action: 'approval_decide', requestId: card.dataset.entApr, decision: go, note: note || null });
+      renderEntityPanel(el);
+    } catch (e) { st.classList.add('error'); st.textContent = e.message; }
   }));
 }
 
@@ -7530,7 +8029,7 @@ function bizTypeLabel(t) {
 }
 function statusLabel(s) {
   const k = { pending_review: 'adminInstStPending', approved: 'adminInstStApproved',
-    rejected: 'adminInstStRejected', suspended: 'adminInstStSuspended' }[s];
+    rejected: 'adminInstStRejected', suspended: 'adminInstStSuspended', deregistered: 'adminInstStDeregistered' }[s];
   return k ? osT(k) : s;
 }
 
