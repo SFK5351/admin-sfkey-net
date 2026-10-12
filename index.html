@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-c6gULs4VeGcSZJVBHVenu5W4swIPyxbvFKTGe7OkFrc='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-DQq5pkuCbab0hYWCKjf3b+XTKghHZx/+VeZel3CZKwU='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -136,6 +136,8 @@
   .cfg-cur-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .cfg-cur-cc { font-weight: 600; min-width: 2.5em; }
   .cfg-cur-sel { min-width: 6em; }
+  .cfg-tristate { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+  .cfg-tri-n { width: 6em; }
   .cfg-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
   .cfg-reason { flex: 1 1 240px; padding: 5px 7px; }
   .cfg-raw { margin-top: 8px; font-size: 12px; color: #888; }
@@ -218,7 +220,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:8409bd1cac5416ed —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:2978f6f0f3614fa6 —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -442,7 +444,8 @@
     ticketSubmitFailed: { zh: "提交失败：", en: "Submission failed: " },
     agentTransferring: { zh: "正在转人工...", en: "Transferring to a human…" },
     agentThinking: { zh: "SFK Agent 正在回答...", en: "SFK Agent is answering…" },
-    agentTransferred: { zh: "已经帮你转给人工同事了，他们会在 24 小时内回复你。回复会出现在下面的「技术支持工单」里。", en: "I've passed this to a human colleague — they'll get back to you within 24 hours. Their reply will appear in Support tickets below." },
+    agentTransferred: { zh: "已经帮你转给人工同事了，我们会尽快回复你。回复会出现在上方导航的「技术支持工单」里。", en: "I've passed this to a human colleague — we'll get back to you as soon as we can. Their reply will appear under Support in the top navigation." },
+    agentTransferFailed: { zh: "这次没能转给人工同事（{err}）。请在上方导航的「技术支持工单」里直接提交，人工永远免费。", en: "I couldn't pass this to a human colleague ({err}). Please submit a ticket under Support in the top navigation — humans are always free." },
     agentEmptyReply: { zh: "（没有内容）", en: "(no content)" },
     agentToHuman: { zh: "转人工同事（免费）", en: "Talk to a human (free)" },
     subStNoSubscription: { zh: "未开通", en: "Not subscribed" },
@@ -732,6 +735,7 @@
     adminKbFormHeading: { zh: "新建 / 编辑知识库条目", en: "Create / edit knowledge base entry" },
     adminKbStats: { zh: "共 {total} 条 · 累计命中 {hits} 次", en: "{total} entries · {hits} hits total" },
     adminKbWhy: { zh: "第零层直答：命中就直接回答，<b>零 AI 成本、不计用户额度</b>。每补一条，下次同样的问题就不用花钱了。", en: "Layer-zero direct answer: on a hit we reply immediately, with <b>zero AI cost and no quota consumed</b>. Every entry you add means the same question costs nothing next time." },
+    adminKbWhyInstitution: { zh: "命中的条目会作为已确认资料交给 AI 回答；会消耗机构 AI 额度。", en: "Matched entries are given to the AI as confirmed material for its answer; this uses the organization's AI quota." },
     adminKbScope: { zh: "面向谁", en: "Audience" },
     adminKbScopeConsumerFull: { zh: "C 端·客服（App 用户）", en: "Consumer · Support (app users)" },
     adminKbQuestion: { zh: "用户会怎么问（问题）", en: "How users would ask (question)" },
@@ -1148,8 +1152,11 @@
     referralCopyFailed: { zh: "复制失败，请手动选中上面的推荐码", en: "Copy failed — please select the code above manually" },
     referralShareText: { zh: "我在用 SFK Wellness 管理我的门店，推荐你也试试。注册时填我的推荐码 {code}，我们双方各得 {inst} Token。", en: "I use SFK Wellness to run my store — you should try it. Enter my referral code {code} when you sign up and we each get {inst} Tokens." },
     agentName: { zh: "SFK Agent", en: "SFK Agent" },
-    agentBlockIntro: { zh: "后台怎么用、某个功能在哪、账单怎么看 —— 直接问，SFK Agent 立刻答。答不了或你想找人，随时可以点「转人工同事」，人工永远免费。", en: "How to use the console, where a feature lives, how to read your bill — just ask; SFK Agent answers right away. If it can't help, or you'd rather talk to a person, tap \"Talk to a human\" any time — humans are always free." },
-    agentUnavailable: { zh: "SFK Agent 暂时不可用（{err}）。你可以直接在下面提交工单，人工永远免费。", en: "SFK Agent is temporarily unavailable ({err}). You can submit a ticket below instead — humans are always free." },
+    agentPrivacyNotice: { zh: "SFK Agent 由 AI 驱动。你输入的各类问题会交由第三方 AI 服务提供商处理，用于生成回答，详见隐私政策。请勿输入顾客的证件号、银行卡号、密码等敏感信息。", en: "SFK Agent is powered by AI. The questions you type are processed by third-party AI service providers to generate answers — see the Privacy Policy. Please do not enter customers' ID numbers, payment card numbers, passwords or other sensitive information." },
+    agentDockCollapse: { zh: "收起 SFK Agent", en: "Collapse SFK Agent" },
+    agentDockExpand: { zh: "SFK Agent", en: "SFK Agent" },
+    agentDockResize: { zh: "拖动调整 SFK Agent 宽度", en: "Drag to resize SFK Agent" },
+    agentUnavailable: { zh: "SFK Agent 暂时不可用（{err}）。你可以在上方导航的「技术支持工单」里直接提交工单，人工永远免费。", en: "SFK Agent is temporarily unavailable ({err}). You can submit a ticket under Support in the top navigation instead — humans are always free." },
     agentRoleMe: { zh: "我", en: "Me" },
     agentHumanTicketNote: { zh: "（机构在 SFK Agent 里点了转人工）", en: "(Organization tapped \"talk to a human\" inside SFK Agent)" },
     agentScopeInstitution: { zh: "B 端·SFK Agent", en: "B2B · SFK Agent" },
@@ -1173,7 +1180,7 @@
     billingIncludedLabel: { zh: "内含额度", en: "Included allowance" },
     billingOverageLabel: { zh: "超额计费", en: "Additional usage" },
     billingWeeklyQuotaLabel: { zh: "周额度用完即停", en: "Weekly allowance — service pauses when used up" },
-    billingWeeklyQuotaBody: { zh: "AI 额度按周核定（周一 00:00 至周日 24:00，新加坡时间）。用完当周即暂停，可购买加量包立即恢复，或等下周一自动重置。未用完的额度不结转到下周。", en: "Your AI allowance is set weekly (Monday 00:00 to Sunday 24:00, Singapore time). When it runs out, service pauses for the rest of that week — you can buy a top-up pack to resume immediately, or wait for the automatic reset on Monday. Unused allowance does not carry over." },
+    billingWeeklyQuotaBody: { zh: "AI 额度按周核定（周一 00:00 至周日 24:00，新加坡时间）。用完当周即暂停，下周一 00:00（新加坡时间）自动恢复；在那之前如果有事情要处理，可以在导航的「技术支持工单」里提交。未用完的额度不结转到下周。", en: "Your AI allowance is set weekly (Monday 00:00 to Sunday 24:00, Singapore time). When it runs out, service pauses for the rest of that week and resumes automatically on Monday at 00:00 (Singapore time). Until then, if you need something handled, you can submit it under \"Support\" in the navigation. Unused allowance does not carry over." },
     aiUsageMonthlyHeading: { zh: "本月累计 AI 用量", en: "AI usage this calendar month" },
     billingChargeLabel: { zh: "扣款方式", en: "How you're charged" },
     billingChargeBody: { zh: "由 Stripe 按月自动结算，从你预留的支付方式扣款。", en: "Billed monthly by Stripe from the payment method on file." },
@@ -2131,6 +2138,80 @@
     cfgRosterWarnDaysField: { zh: "到期前多少天在每日巡检预警", en: "Days before expiry to flag in the daily inspection" },
     errRosterForbidden: { zh: "你的岗位不能做这个操作（登记＝运营岗；核准＝负责人岗）。", en: "Your position cannot do this (register = ops; approve = principal)." },
     errRosterSelfApproval: { zh: "不能核准自己登记的条目（兼岗亦然）。", en: "You cannot approve an entry you registered (even holding several positions)." },
+    adminTabAccessReview: { zh: "权限复核", en: "Access review" },
+    arIntro: { zh: "按季度复核每个后台账号持有的岗位。审计岗只读并标记「仍需要／应撤销」；应撤销只产生待办，撤岗仍在岗位授予页走两人规则。", en: "Quarterly review of the positions each admin account holds. The auditor reads and marks keep / revoke; a revoke mark only raises a to-do — revoking still goes through the two-person rule on the positions page." },
+    arReviewerAvailable: { zh: "审计岗在任：标记为独立复核。", en: "An auditor is in post: marks count as independent review." },
+    arReviewerAbsent: { zh: "审计岗暂缺：由负责人岗代做，每条记录标注「非独立复核」，审计岗到任后进入待复核清单。", en: "No auditor in post: the principal reviews in the meantime; every record is labelled \"non-independent review\" and goes to the auditor's re-check list once an auditor is in post." },
+    arConfigUnset: { zh: "复核机制未完整设定，以下项目未设定：{keys}（在「配置 → 合规参数」设定，运营提、负责人批）。", en: "The review is not fully configured; unset: {keys} (set under Config → Compliance parameters; ops proposes, principal approves)." },
+    arNoCycle: { zh: "还没有复核周期。", en: "No review cycle yet." },
+    arCycles: { zh: "复核周期", en: "Review cycles" },
+    arColPeriod: { zh: "周期", en: "Period" },
+    arColStatus: { zh: "状态", en: "Status" },
+    arColDue: { zh: "期限", en: "Due" },
+    arColMode: { zh: "复核方式", en: "Reviewer" },
+    arColProgress: { zh: "未定／总数", en: "Pending / total" },
+    arColAccount: { zh: "账号", en: "Account" },
+    arColPositions: { zh: "岗位（授予人·时间）", en: "Positions (granted by · when)" },
+    arColLastTrace: { zh: "最近一次留痕操作", en: "Last logged action" },
+    arColRuleChecks: { zh: "规则自检", en: "Rule checks" },
+    arColDecision: { zh: "决定", en: "Decision" },
+    arColMailbox: { zh: "邮箱可读性（人工声明，系统未核验）", en: "Mailbox access (self-declared, not verified by the system)" },
+    arNoTrace: { zh: "无留痕记录", en: "No logged action" },
+    arInactive: { zh: "已停用", en: "Deactivated" },
+    arStale: { zh: "长期无留痕", en: "No logged action for a long time" },
+    arSensitive: { zh: "敏感岗", en: "Sensitive" },
+    arRuleOk: { zh: "通过", en: "OK" },
+    arRuleH3: { zh: "岗位互斥冲突", en: "Incompatible positions" },
+    arRuleH6: { zh: "邮箱不合规：{code}", en: "Email policy: {code}" },
+    arModeIndependent: { zh: "独立复核", en: "Independent" },
+    arModeNonIndependent: { zh: "非独立复核", en: "Non-independent review" },
+    arSelfReview: { zh: "自评·待独立复核", en: "Self-review · awaiting independent review" },
+    arDecisionPending: { zh: "未定", en: "Pending" },
+    arDecisionKeep: { zh: "仍需要", en: "Keep" },
+    arDecisionRevoke: { zh: "应撤销", en: "Revoke" },
+    arBtnKeep: { zh: "仍需要", en: "Keep" },
+    arBtnRevoke: { zh: "应撤销", en: "Revoke" },
+    arBtnAttest: { zh: "只有本人能读", en: "Only the holder can read it" },
+    arBtnException: { zh: "有例外", en: "Exception" },
+    arMailboxPending: { zh: "未声明", en: "Not declared" },
+    arMailboxSole: { zh: "只有本人能读", en: "Only the holder can read it" },
+    arMailboxException: { zh: "有例外", en: "Exception" },
+    arPromptRevokeNote: { zh: "为什么应撤销（必填）：", en: "Why should it be revoked (required):" },
+    arPromptKeepNote: { zh: "备注（可留空）：", en: "Note (optional):" },
+    arPromptExceptionNote: { zh: "谁还能读这个邮箱、为什么（必填）：", en: "Who else can read this mailbox, and why (required):" },
+    arPromptRecheckNote: { zh: "复核意见（必填）：", en: "Re-check note (required):" },
+    arChecklist: { zh: "本期人工核对项", en: "Manual checks for this cycle" },
+    arChecklistUnset: { zh: "未设定（只用系统自动项）", en: "Not set (system checks only)" },
+    arQueue: { zh: "待独立复核", en: "Awaiting independent review" },
+    arQueueEmpty: { zh: "没有待独立复核的事项。", en: "Nothing awaits independent review." },
+    arQueueTruncated: { zh: "（只显示最近 {shown} 条，共 {total} 条）", en: "(showing the latest {shown} of {total})" },
+    arQueueAlertAcked: { zh: "已由负责人岗代为确认（非独立复核）：{by}", en: "Acknowledged by the principal (non-independent review): {by}" },
+    arQueueAlertOpen: { zh: "未确认", en: "Not acknowledged" },
+    arBtnRecheckAlerts: { zh: "复核所选告警", en: "Re-check selected alerts" },
+    arBtnAckAlerts: { zh: "确认所选告警", en: "Acknowledge selected alerts" },
+    arBtnRecheckCycle: { zh: "完成独立复核", en: "Complete independent re-check" },
+    arTimeline: { zh: "授岗／撤岗时间线", en: "Position grants and revocations" },
+    arGrant: { zh: "授予", en: "Granted" },
+    arRevoke: { zh: "撤销", en: "Revoked" },
+    arStatusOpen: { zh: "进行中（未开始）", en: "Open" },
+    arStatusInProgress: { zh: "进行中", en: "In progress" },
+    arStatusCompleted: { zh: "已完成", en: "Completed" },
+    arStatusOverdue: { zh: "已逾期", en: "Overdue" },
+    arStatusNeedsRecheck: { zh: "待独立复核", en: "Awaiting independent re-check" },
+    arDone: { zh: "已记录。", en: "Recorded." },
+    adminAlertAckNonIndependent: { zh: "已确认。审计岗暂缺，这次确认标注为「非独立复核」，审计岗到任后会进入待复核清单（见「权限复核」页）。", en: "Acknowledged. No auditor is in post, so this is labelled \"non-independent review\" and will go to the auditor's re-check list (see the Access review tab)." },
+    cfgAccessReviewLabel: { zh: "季度权限复核", en: "Quarterly access review" },
+    cfgAccessReviewNotice: { zh: "合规参数：运营提出、负责人核准。周期月数、首个周期起点、期限天数、是否列入停用账号四项填齐才会生成复核周期；未填的项每天在运维告警里提醒一次。", en: "Compliance parameter: ops proposes, the principal approves. Cycles are only created once cadence, first cycle start, due days and the inactive-accounts switch are all set; anything unset is flagged once a day in Ops alerts." },
+    cfgArCadence: { zh: "每几个月复核一次", en: "Review every N months" },
+    cfgArFirstStart: { zh: "首个周期起点", en: "First cycle starts on" },
+    cfgArDueDays: { zh: "周期开始后几天内须完成", en: "Days to complete after the cycle starts" },
+    cfgArReminderDays: { zh: "到期前几天提醒", en: "Remind N days before due" },
+    cfgArStaleDays: { zh: "多少天无留痕操作即高亮（只提示）", en: "Highlight after N days with no logged action (hint only)" },
+    cfgArIncludeInactive: { zh: "停用账号也列入复核", en: "Include deactivated accounts" },
+    cfgArRetention: { zh: "复核记录保留月数（待法务确认）", en: "Months to keep review records (pending legal)" },
+    cfgArUnitMonths: { zh: "月", en: "months" },
+    cfgArChecklistLabel: { zh: "季度权限复核 · 人工核对项", en: "Quarterly access review · manual checks" },
+    cfgArChecklistField: { zh: "核对项（逗号或顿号分隔，按顺序）", en: "Checks (comma separated, in order)" },
     errRosterSamePosition: { zh: "核准所凭岗位不能与登记所凭岗位相同。", en: "The approving position must differ from the registering position." },
     errRosterMaxDaysNotSet: { zh: "有效期上限还未设定 ⇒ 暂不能登记或核准。请先在「配置 → 合规参数」设定。", en: "The maximum validity is not set, so entries cannot be registered or approved yet. Set it under Config → Compliance parameters first." },
     errRosterValidity: { zh: "有效期须晚于现在且不超过上限。", en: "Validity must be in the future and within the maximum." },
@@ -2333,6 +2414,29 @@
     aboutMissionQuote: { zh: "不是「我哪里出了问题？」，而是「我今天状态如何？我能为它做点什么？」", en: "Not \"what's wrong with me?\" but \"how am I doing today, and what can I do about it?\"" },
     aboutFooterNote: { zh: "你的数据，你的密钥 · 支付由 Stripe Connect 提供支持", en: "Your data, your keys · Payments powered by Stripe Connect" },
     agreementMethodCheckbox: { zh: "勾选同意", en: "Ticked the consent box" },
+    cfgTriUnlimited: { zh: "不限", en: "No limit" },
+    cfgTriLimited: { zh: "限定数量", en: "Limit to" },
+    cfgUnitSubCodes: { zh: "个", en: "sub-codes" },
+    cfgMaxDealsNotice: { zh: "每家推广商同时最多可有几家机构处于报备保护中。未设定时不限，并且每天告警一次；确实不想设上限，请选「不限」。改动由运营提出、财务核准后生效。", en: "How many providers one promoter can have under active deal protection at the same time. While not set there is no limit and an alert is raised every day; if you really want no limit, choose “No limit”. Changes take effect after Finance approves an operations proposal." },
+    cfgMaxSalesNotice: { zh: "每家推广商最多能发几个销售员子码。未设定时一个都发不出去，并会告警；确实不想设上限，请选「不限」。改动由运营提出、财务核准后生效。", en: "How many sales sub-codes one promoter can issue. While not set, none can be issued and an alert is raised; if you really want no limit, choose “No limit”. Changes take effect after Finance approves an operations proposal." },
+    cfgErrTriState: { zh: "「不限」不能同时带数量；「限定数量」须填 1 以上的整数", en: "“No limit” cannot carry a number; “Limit to” needs a whole number of 1 or more" },
+    cfgHandoffTeamLabel: { zh: "转人工 · 分配给哪个客服团队", en: "Human handoff · support team" },
+    cfgHandoffTeamNotice: { zh: "填 Chatwoot 里客服团队的编号。转人工时会把会话设为待处理并分配给这个团队。未设定时转接按失败处理：用户收到「已记下」那一句，同时告警。", en: "The Chatwoot team ID. On handoff the conversation is opened and assigned to this team. While unset, handoff counts as failed: the user gets the \"noted\" sentence and an alert is raised." },
+    cfgHandoffTeamField: { zh: "团队编号", en: "Team ID" },
+    cfgHandoffQuietLabel: { zh: "转人工后 · 再回一次「已转」的间隔", en: "After handoff · repeat interval" },
+    cfgHandoffQuietNotice: { zh: "转人工之后，AI 不再回答这个会话。用户继续发消息时，间隔满这么多分钟才再回一次「已转」那一句。未设定时一句都不回。", en: "After handoff the AI no longer answers this conversation. If the user keeps writing, the handoff sentence is repeated at most once per this many minutes. While unset, nothing is sent." },
+    cfgHandoffQuietField: { zh: "间隔", en: "Interval" },
+    cfgHandoffUnansweredLabel: { zh: "转人工后 · 无人回复告警时限", en: "After handoff · no-reply alert" },
+    cfgHandoffUnansweredNotice: { zh: "转人工后超过这么多小时仍没有人工回复，发 P1 告警。未设定时不告警（每天提示一次未设定）。", en: "Raises a P1 alert when no human has replied this many hours after handoff. While unset there is no alert (a daily reminder that it is unset)." },
+    cfgHandoffUnansweredField: { zh: "时限", en: "After" },
+    cfgHandoffTransferredLabel: { zh: "转人工成功后对用户说的话", en: "Sentence after a successful handoff" },
+    cfgHandoffTransferredNotice: { zh: "只在 Chatwoot 转接真的成功之后才发。中英各一句，每句不超过 300 字。未设定时不发，并告警。定稿文案（设计窗口 10-10）：「已转给人工同事，他们会在这个对话里回复你。人工回复需要一些时间，请耐心等候。」运营只负责在这里填入定稿原文。", en: "Sent only after the Chatwoot handoff actually succeeds. One sentence each in Chinese and English, up to 300 characters. While unset nothing is sent and an alert is raised. Approved wording (design review, 2026-10-10): “Your request has been passed to our team, and they will reply here. A human reply can take some time, so thank you for waiting.” Operations only enters the approved wording here." },
+    cfgHandoffRecordedLabel: { zh: "转人工没成功时对用户说的话", en: "Sentence when handoff did not succeed" },
+    cfgHandoffRecordedNotice: { zh: "转接没有成功时发。照实说「已记下、人工会回复」，不要写「已转人工」。中英各一句，每句不超过 300 字。未设定时不发，并告警。定稿文案（设计窗口 10-10）：「已记下你的问题，人工同事会在这个对话里回复你。回复需要一些时间，请耐心等候。」运营只负责在这里填入定稿原文。", en: "Sent when the handoff did not succeed. Say plainly that it has been noted and a person will reply; do not say it was handed off. One sentence each, up to 300 characters. While unset nothing is sent and an alert is raised. Approved wording (design review, 2026-10-10): “We have noted your question, and our team will reply here. A human reply can take some time, so thank you for your patience.” Operations only enters the approved wording here." },
+    cfgCopyZhField: { zh: "中文", en: "Chinese" },
+    cfgCopyEnField: { zh: "英文", en: "English" },
+    cfgErrTooLong: { zh: "太长了：每句不超过 300 字", en: "Too long: up to 300 characters" },
+    cfgErrMultiline: { zh: "只能填一行，不能换行", en: "One line only, no line breaks" },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -2574,10 +2678,14 @@ async function handleSession(session) {
   state.backofficeFull = !fullErr && full === true;
   // 🔴 TD-129 B1 ④：非全权但持机构权限点（子公司四岗、客服提出暂停等）⇒ 也显示机构页；看到哪些机构由 RLS 按公司过滤
   state.instScoped = false;
-  if (!state.backofficeFull) {
+  state.auditView = false;
+  {
     const { data: scope, error: scopeErr } = await supabase.rpc('fn_admin_my_scope');
     if (scopeErr) console.error('TD-129 我的范围读取失败，按无机构权限显示：', scopeErr.message);
-    state.instScoped = !scopeErr && (scope?.permissions || []).some((p) => String(p).startsWith('inst.'));
+    const perms = scopeErr ? [] : (scope?.permissions || []).map(String);
+    if (!state.backofficeFull) state.instScoped = perms.some((p) => p.startsWith('inst.'));
+    // TD-414：权限复核页只对持 audit.view 的人显示（审计岗、负责人岗）；服务端照样判
+    state.auditView = perms.includes('audit.view');
   }
   renderApp();
   if (!state.backofficeFull) return;
@@ -2593,6 +2701,7 @@ async function handleSession(session) {
 
 // ⭐ 全权 ⇒ 按等级显示全部；非全权 ⇒ 配置页，另加持机构权限点时的机构页（TD-128 最小版 ＋ TD-129 B1 ④）
 function tabVisible(t) {
+  if (t.id === 'accessreview') return state.auditView === true;
   if (state.backofficeFull) return hasRole(t.minRole);
   if (t.id === 'config') return hasRole(t.minRole);
   return t.id === 'institutions' && state.instScoped === true;
@@ -2849,6 +2958,9 @@ const TABS = [
   { id: 'partners', label: osT('adminTabPartners'), minRole: 'operator' },
   // 验收测试账号名册（设计窗口 2026-10-01）：判权在 fn_roster_*（运营岗登记、负责人岗核准），角色只是粗筛
   { id: 'roster', label: osT('adminTabRoster'), minRole: 'operator' },
+  // TD-414／TD-372：季度权限复核。看＝audit.view（审计岗、负责人岗）；判权在 fn_access_review_*。
+  //   ⚠️ 审计岗⛔ 持全部后台权限 ⇒ tabVisible 里按 state.auditView 单独放行（与机构页同一做法）
+  { id: 'accessreview', label: osT('adminTabAccessReview'), minRole: 'support' },
   // 🔴 `TD-210` 第二段步 4（`TXN-1` 决策 16 e）：到店付平台费的**单笔申诉核实**。
   //   ## ⚠️ 📌 它补的是一个**「后端做好了、⛔ 无任何界面能产生那个状态」**的缺口 ——
   //   ⭐ `disputes.status` 四个态里，`open` 由机构产生、`credited` 由 sweep 产生，
@@ -2986,6 +3098,7 @@ function renderTab(tab) {
   else if (tab === 'atvenuedisputes') renderAtVenueDisputesTab(el);
   else if (tab === 'partners') renderPartnersTab(el);
   else if (tab === 'roster') renderRosterTab(el);
+  else if (tab === 'accessreview') renderAccessReviewTab(el);
   else if (tab === 'clienterrors') renderClientErrorsTab(el);
   else if (tab === 'cskb') renderCsKbTab(el);
   else if (tab === 'csdigest') renderCsDigestTab(el);
@@ -3111,6 +3224,201 @@ async function renderRosterTab(el) {
     if (reason === null) return;
     run({ action: 'revoke', entryId: b.dataset.rsRevoke, reason });
   }));
+}
+
+// ==================== TD-414 季度权限复核 ＋ TD-372 待独立复核 ====================
+// 🔴 本页⛔ 判任何权限：能⛔ 能标、算⛔ 算独立、是⛔ 是自评，全由 fn_access_review_* 判并回 my_mark_mode。
+//   「最近使用」只给留痕口径（列头写「最近一次留痕操作」，⛔ 写「最近登录」——设计稿 §3.5）。
+async function arCall(body) {
+  return await callFn('sfk-admin-access-review', body);
+}
+
+const AR_STATUS = {
+  open: 'arStatusOpen', in_progress: 'arStatusInProgress', completed: 'arStatusCompleted',
+  overdue: 'arStatusOverdue', needs_independent_recheck: 'arStatusNeedsRecheck',
+};
+const AR_CFG_KEYS = ['cadenceMonths', 'firstCycleStart', 'dueDays', 'includeInactiveAdmins', 'reminderDays', 'staleDays', 'retentionMonths'];
+
+async function renderAccessReviewTab(el, cycleId) {
+  el.innerHTML = `<p class="loading">${escapeHtml(osT('adminCommonLoading'))}</p>`;
+  let d;
+  try {
+    d = await arCall({ action: 'overview', cycleId: cycleId ?? null });
+  } catch (e) {
+    el.innerHTML = `<p class="error">${escapeHtml(osT('adminCommonLoadFailed'))}${escapeHtml(e.message)}</p>`;
+    return;
+  }
+  const cfg = d.config ?? {};
+  const unset = AR_CFG_KEYS.filter((k) => cfg[k] === null || cfg[k] === undefined);
+  if (!Array.isArray(d.checklist)) unset.push('checklist');
+  const staleDays = Number.isInteger(cfg.staleDays) ? cfg.staleDays : null;
+  const modeLabel = (m) => escapeHtml(osT(m === 'independent' ? 'arModeIndependent' : 'arModeNonIndependent'));
+  const modeBadge = (m) => (m === 'non_independent_principal'
+    ? `<span class="badge">${modeLabel(m)}</span>` : modeLabel(m));
+  const canMark = !!d.my_mark_mode;
+
+  const cycleRows = (d.cycles ?? []).map((c) => `
+    <tr>
+      <td><a href="#" data-ar-cycle="${escapeHtml(c.id)}">${escapeHtml(c.period_label)}</a></td>
+      <td>${escapeHtml(osT(AR_STATUS[c.status] ?? c.status))}</td>
+      <td>${escapeHtml(formatDate(c.due_at))}</td>
+      <td>${modeBadge(c.reviewer_mode)}</td>
+      <td>${escapeHtml(String(c.pending))} / ${escapeHtml(String(c.items))}</td>
+    </tr>`).join('');
+
+  const cy = d.cycle;
+  const lastTrace = (snap) => {
+    const ts = [snap?.last_logged_action_at, snap?.last_logged_access_at].filter(Boolean).sort().pop();
+    if (!ts) return `<span class="muted">${escapeHtml(osT('arNoTrace'))}</span>`;
+    const ageDays = (Date.now() - new Date(ts).getTime()) / 86400000;
+    const stale = staleDays !== null && ageDays > staleDays
+      ? ` <span class="badge">${escapeHtml(osT('arStale'))}</span>` : '';
+    return `${escapeHtml(formatDate(ts))}${stale}`;
+  };
+  const ruleChecks = (snap) => {
+    const rc = snap?.rule_checks ?? {};
+    const out = [];
+    if (rc.h3_conflict) out.push(`<span class="error">${escapeHtml(osT('arRuleH3'))}</span>`);
+    if (rc.h6_email_policy) out.push(`<span class="error">${escapeHtml(osT('arRuleH6').replace('{code}', rc.h6_email_policy))}</span>`);
+    return out.length ? out.join('<br>') : escapeHtml(osT('arRuleOk'));
+  };
+  const itemRows = (cy?.items ?? []).map((i) => {
+    const s = i.snapshot ?? {};
+    const pos = (s.positions ?? []).map((p) => `${escapeHtml(p.code)}${p.sensitive ? ` <span class="badge">${escapeHtml(osT('arSensitive'))}</span>` : ''}
+      <span class="muted">${escapeHtml(p.granted_by_email ?? '—')} · ${escapeHtml(formatDate(p.granted_at))}</span>`).join('<br>') || '—';
+    const open = cy.status === 'open' || cy.status === 'in_progress' || cy.status === 'overdue';
+    const decision = i.decision === 'pending'
+      ? (open && canMark ? `<button class="ghost-btn" data-ar-keep="${escapeHtml(i.id)}">${escapeHtml(osT('arBtnKeep'))}</button>
+          <button class="ghost-btn" data-ar-revoke="${escapeHtml(i.id)}">${escapeHtml(osT('arBtnRevoke'))}</button>`
+         : escapeHtml(osT('arDecisionPending')))
+      : `${escapeHtml(osT(i.decision === 'keep' ? 'arDecisionKeep' : 'arDecisionRevoke'))}
+         <br><span class="muted">${escapeHtml(i.decided_by_email ?? '—')} · ${escapeHtml(formatDate(i.decided_at))}</span>
+         ${i.decided_mode ? `<br>${modeBadge(i.decided_mode)}` : ''}
+         ${i.self_review ? `<br><span class="badge">${escapeHtml(osT('arSelfReview'))}</span>` : ''}
+         ${i.note ? `<br><span class="muted">${escapeHtml(String(i.note).slice(0, 160))}</span>` : ''}`;
+    const mailbox = i.mailbox_attestation === 'pending'
+      ? (open && canMark ? `<button class="ghost-btn" data-ar-attest="${escapeHtml(i.id)}">${escapeHtml(osT('arBtnAttest'))}</button>
+          <button class="ghost-btn" data-ar-exception="${escapeHtml(i.id)}">${escapeHtml(osT('arBtnException'))}</button>`
+         : escapeHtml(osT('arMailboxPending')))
+      : `${escapeHtml(osT(i.mailbox_attestation === 'attested_sole_reader' ? 'arMailboxSole' : 'arMailboxException'))}
+         ${i.attestation_note ? `<br><span class="muted">${escapeHtml(String(i.attestation_note).slice(0, 160))}</span>` : ''}`;
+    return `<tr>
+      <td>${escapeHtml(s.email ?? '—')}<br><span class="muted">${escapeHtml(s.system_role ?? '')}${s.is_active === false ? ` · ${escapeHtml(osT('arInactive'))}` : ''}</span></td>
+      <td>${pos}</td><td>${lastTrace(s)}</td><td>${ruleChecks(s)}</td><td>${decision}</td><td>${mailbox}</td></tr>`;
+  }).join('');
+
+  const queueAlerts = (d.recheck_alerts ?? []).map((a) => `
+    <tr>
+      <td>${a.non_independent && d.my_can_recheck ? `<input type="checkbox" data-ar-alert="${a.id}">` : ''}
+        ${!a.acknowledged_at && d.my_mark_mode ? `<input type="checkbox" data-ar-ack="${a.id}">` : ''}</td>
+      <td>${ALERT_TYPE_LABEL[a.alert_type] ?? escapeHtml(a.alert_type)}</td>
+      <td class="mono">${escapeHtml(String(a.detail ?? '').slice(0, 160))}</td>
+      <td>${a.non_independent
+        ? `<span class="badge">${escapeHtml(osT('arQueueAlertAcked').replace('{by}', a.acknowledged_by_email ?? '—'))}</span>`
+        : escapeHtml(osT('arQueueAlertOpen'))}</td>
+      <td class="muted">${escapeHtml(formatDate(a.detected_at))}</td>
+    </tr>`).join('');
+  const queueCycles = (d.cycles ?? []).filter((c) => c.status === 'needs_independent_recheck').map((c) => `
+    <li>${escapeHtml(c.period_label)} ${d.my_can_recheck
+      ? `<button class="ghost-btn" data-ar-recheck-cycle="${escapeHtml(c.id)}">${escapeHtml(osT('arBtnRecheckCycle'))}</button>` : ''}</li>`).join('');
+
+  const timeline = (d.position_timeline ?? []).slice(0, 100).map((t) => `
+    <tr><td class="muted">${escapeHtml(formatDate(t.at))}</td>
+      <td>${escapeHtml(osT(t.kind === 'grant' ? 'arGrant' : 'arRevoke'))}</td>
+      <td>${escapeHtml(t.email ?? '—')}</td><td>${escapeHtml(t.position ?? '')}</td>
+      <td class="muted">${escapeHtml(t.by_email ?? '—')}</td></tr>`).join('');
+
+  el.innerHTML = `
+    <div class="panel">
+      <h2>${escapeHtml(osT('adminTabAccessReview'))}</h2>
+      <p class="muted">${escapeHtml(osT('arIntro'))}</p>
+      <p>${escapeHtml(osT(d.reviewer_available ? 'arReviewerAvailable' : 'arReviewerAbsent'))}</p>
+      ${unset.length ? `<p class="error">${escapeHtml(osT('arConfigUnset').replace('{keys}', unset.join('、')))}</p>` : ''}
+      <h3>${escapeHtml(osT('arCycles'))}</h3>
+      ${cycleRows ? `<table class="data-table"><thead><tr>
+        <th>${escapeHtml(osT('arColPeriod'))}</th><th>${escapeHtml(osT('arColStatus'))}</th><th>${escapeHtml(osT('arColDue'))}</th>
+        <th>${escapeHtml(osT('arColMode'))}</th><th>${escapeHtml(osT('arColProgress'))}</th></tr></thead><tbody>${cycleRows}</tbody></table>`
+        : `<p class="muted">${escapeHtml(osT('arNoCycle'))}</p>`}
+      ${cy ? `<h3>${escapeHtml(cy.period_label)} · ${escapeHtml(osT(AR_STATUS[cy.status] ?? cy.status))} · ${modeBadge(cy.reviewer_mode)}</h3>
+        <p>${escapeHtml(osT('arChecklist'))}：${Array.isArray(cy.checklist) && cy.checklist.length
+          ? cy.checklist.map((x) => escapeHtml(String(x))).join('、') : escapeHtml(osT('arChecklistUnset'))}</p>
+        <table class="data-table"><thead><tr>
+          <th>${escapeHtml(osT('arColAccount'))}</th><th>${escapeHtml(osT('arColPositions'))}</th><th>${escapeHtml(osT('arColLastTrace'))}</th>
+          <th>${escapeHtml(osT('arColRuleChecks'))}</th><th>${escapeHtml(osT('arColDecision'))}</th><th>${escapeHtml(osT('arColMailbox'))}</th>
+        </tr></thead><tbody>${itemRows}</tbody></table>` : ''}
+      <h3>${escapeHtml(osT('arQueue'))}${d.recheck_alerts_total > (d.recheck_alerts ?? []).length
+        ? ` <span class="hint">${escapeHtml(osT('arQueueTruncated').replace('{shown}', (d.recheck_alerts ?? []).length).replace('{total}', d.recheck_alerts_total))}</span>` : ''}</h3>
+      ${queueAlerts || queueCycles ? `${queueCycles ? `<ul>${queueCycles}</ul>` : ''}
+        ${queueAlerts ? `<table class="data-table"><tbody>${queueAlerts}</tbody></table>
+          ${d.my_mark_mode ? `<button class="ghost-btn" id="arAckAlerts">${escapeHtml(osT('arBtnAckAlerts'))}</button>` : ''}
+          ${d.my_can_recheck ? `<button class="ghost-btn" id="arRecheckAlerts">${escapeHtml(osT('arBtnRecheckAlerts'))}</button>` : ''}` : ''}`
+        : `<p class="muted">${escapeHtml(osT('arQueueEmpty'))}</p>`}
+      <h3>${escapeHtml(osT('arTimeline'))}</h3>
+      ${timeline ? `<table class="data-table"><tbody>${timeline}</tbody></table>` : ''}
+      <p id="arStatus" class="status"></p>
+    </div>`;
+
+  const status = (msg, bad) => {
+    const s2 = document.getElementById('arStatus');
+    s2.style.color = bad ? '#C0392B' : '';
+    s2.textContent = msg;
+  };
+  const run = async (body) => {
+    status(osT('adminCommonSubmitting'));
+    try {
+      await arCall(body);
+      status(osT('arDone'));
+      await renderAccessReviewTab(el, cy?.id);
+    } catch (err) {
+      status(osT('adminCommonFailed') + err.message, true);
+    }
+  };
+  el.querySelectorAll('[data-ar-cycle]').forEach((a) => a.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    renderAccessReviewTab(el, a.dataset.arCycle);
+  }));
+  el.querySelectorAll('[data-ar-keep]').forEach((b) => b.addEventListener('click', () => {
+    const note = window.prompt(osT('arPromptKeepNote'));
+    if (note === null) return;
+    run({ action: 'mark', itemId: b.dataset.arKeep, decision: 'keep', note });
+  }));
+  el.querySelectorAll('[data-ar-revoke]').forEach((b) => b.addEventListener('click', () => {
+    const note = window.prompt(osT('arPromptRevokeNote'));
+    if (note === null) return;
+    run({ action: 'mark', itemId: b.dataset.arRevoke, decision: 'revoke_requested', note });
+  }));
+  el.querySelectorAll('[data-ar-attest]').forEach((b) => b.addEventListener('click', () => {
+    run({ action: 'mark', itemId: b.dataset.arAttest, mailbox: 'attested_sole_reader' });
+  }));
+  el.querySelectorAll('[data-ar-exception]').forEach((b) => b.addEventListener('click', () => {
+    const note = window.prompt(osT('arPromptExceptionNote'));
+    if (note === null) return;
+    run({ action: 'mark', itemId: b.dataset.arException, mailbox: 'exception_noted', mailboxNote: note });
+  }));
+  el.querySelectorAll('[data-ar-recheck-cycle]').forEach((b) => b.addEventListener('click', () => {
+    const note = window.prompt(osT('arPromptRecheckNote'));
+    if (note === null) return;
+    run({ action: 'recheck_cycle', cycleId: b.dataset.arRecheckCycle, note });
+  }));
+  document.getElementById('arAckAlerts')?.addEventListener('click', async () => {
+    const ids = [...el.querySelectorAll('[data-ar-ack]:checked')].map((x) => Number(x.dataset.arAck));
+    if (!ids.length) return;
+    status(osT('adminCommonSubmitting'));
+    try {
+      const res = await arCall({ action: 'ack_alerts', ids });
+      if (res?.nonIndependent) alert(osT('adminAlertAckNonIndependent'));
+      await renderAccessReviewTab(el, cy?.id);
+    } catch (err) {
+      status(osT('adminCommonFailed') + err.message, true);
+    }
+  });
+  document.getElementById('arRecheckAlerts')?.addEventListener('click', () => {
+    const ids = [...el.querySelectorAll('[data-ar-alert]:checked')].map((x) => Number(x.dataset.arAlert));
+    if (!ids.length) return;
+    const note = window.prompt(osT('arPromptRecheckNote'));
+    if (note === null) return;
+    run({ action: 'recheck_alerts', ids, note });
+  });
 }
 
 async function ptCall(body) {
@@ -3852,7 +4160,7 @@ async function renderCsKbTab(el, opts) {
     <section class="panel">
       <h2>${escapeHtml(osT('adminKbFormHeading'))}
         <span class="hint">${escapeHtml(osT('adminKbStats').replace('{total}', r.total).replace('{hits}', r.totalHits))}</span></h2>
-      <p class="hint">${osT('adminKbWhy')}</p>
+      <p class="hint">${escapeHtml(osT('adminKbScopeConsumer'))}：${osT('adminKbWhy')}<br>${escapeHtml(osT('adminKbScopeInstitution'))}${escapeHtml(osT('adminKbScopeInstSuffix'))}：${osT('adminKbWhyInstitution')}</p>
       <form id="kbForm" class="stacked-form">
         <input type="hidden" id="kbId" value="" />
         <label>${escapeHtml(osT('adminKbScope'))}
@@ -4403,7 +4711,9 @@ async function renderOpsAlertsTab(el) {
     btn.addEventListener('click', async () => {
       btn.disabled = true;
       try {
-        await callFn('sfk-admin-ops-alerts', { action: 'ack', ids: [Number(btn.dataset.ack)] });
+        const res = await callFn('sfk-admin-ops-alerts', { action: 'ack', ids: [Number(btn.dataset.ack)] });
+        // TD-372：审计岗暂缺、由负责人岗代为确认 ⇒ 明说「非独立复核」，⛔ 假装独立
+        if (res?.nonIndependent) alert(osT('adminAlertAckNonIndependent'));
         await renderOpsAlertsTab(el);
         renderAppTabsOnly();
       } catch (e) {
@@ -4615,6 +4925,14 @@ const CFG_TYPES = {
     check: (v) => v === null ? null
       : (/^\d+\s+(second|minute|hour|day|week)s?$/i.test(String(v)) ? null : 'badInterval'),
   },
+  LINE: { // ⭐ **一行文字**（TD-345：转人工后对用户说的那一句，中英各一格）
+    // 🔴 空 ⇒ `null`（**未设定**，读取方⛔ 发并告警），⛔ 是空串；上限与读取方 COPY_MAX_CHARS 一致（300）
+    unit: () => '', input: 'text',
+    toInput: (v) => (v === null || v === undefined ? '' : String(v)),
+    parse: (s) => (s.trim() === '' ? null : s.trim()),
+    check: (v) => v === null ? null
+      : (/[\r\n]/.test(v) ? 'multiline' : [...v].length > 300 ? 'tooLong' : null),
+  },
   WORDS: { // ⭐ **词表**（`customer_service.health_keywords` 这种「一串词」）
     // 🔴 **⛔ 是裸 JSON 框** —— ⚠️ 📌 运营看到的是「用逗号或顿号分隔的词」，
     //   ⭐ ⛔ 是 `["头疼","失眠",…]`（`GOV-1` 达标线①：裸 JSON ＝ 让运营写代码）。
@@ -4685,6 +5003,41 @@ const CFG_TYPES = {
       return null;
     },
   },
+  // ══════════════════════════════════════════════════════════════════
+  // ⭐ `TRISTATE` · **推广商三态上限**（`TD-235`，设计窗口 10-10 17:1x 裁定）
+  // ══════════════════════════════════════════════════════════════════
+  // 三态：未设定 `{"mode":null}`／不限 `{"mode":"unlimited"}`／限 N `{"mode":"limited","count":N}`。
+  // 🔴 **按三态整体切换**：只有选「限定数量」时才有数量框；选「不限」时数量框从 DOM 里移除（⛔ 是留空），
+  //   ⇒ 界面⛔ 可能写出 `{"mode":"unlimited","count":…}`。
+  // 🔴 `check` 与库内纯解析 `fn_partner_max_sales_parse` 同一口径（count ≥ 1 的整数、未知 mode 拒绝），
+  //   并且更严：自相矛盾的值（不限／未设定却带 count）一律拒 ⇒ ⛔ 让人填出第四种形状。
+  //   ⚠️ 运行时读取方仍只经 `fn_partner_max_deals_limit()`／`fn_partner_max_sales_limit()`，本类型只负责写。
+  TRISTATE: {
+    unit: () => '', input: 'tristate',
+    toInput: (v) => {
+      if (!v || typeof v !== 'object' || Array.isArray(v)) return { state: null, count: null };
+      const keys = Object.keys(v).sort().join(',');
+      if ((v.mode === null || v.mode === undefined) && (keys === 'mode' || keys === '')) return { state: 'unset', count: null };
+      if (v.mode === 'unlimited' && keys === 'mode') return { state: 'unlimited', count: null };
+      if (v.mode === 'limited' && keys === 'count,mode' && Number.isInteger(v.count) && v.count >= 1) return { state: 'limited', count: v.count };
+      return { state: null, count: null };   // 形状不对 ⇒ 三个都不选，交给 check 报错
+    },
+    parse: (o) => {
+      if (!o || !o.state) return undefined;
+      if (o.state === 'unset') return { mode: null };
+      if (o.state === 'unlimited') return { mode: 'unlimited' };
+      const s = String(o.count ?? '').trim();
+      return { mode: 'limited', count: s === '' ? null : Number(s) };
+    },
+    check: (v) => {
+      if (!v || typeof v !== 'object' || Array.isArray(v)) return 'triState';
+      const keys = Object.keys(v).sort().join(',');
+      if (v.mode === null) return keys === 'mode' ? null : 'triState';
+      if (v.mode === 'unlimited') return keys === 'mode' ? null : 'triState';
+      if (v.mode === 'limited') return (keys === 'count,mode' && Number.isInteger(v.count) && v.count >= 1) ? null : 'triState';
+      return 'triState';
+    },
+  },
   CURMAP: {
     unit: () => '', input: 'curmap',
     toInput: (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}),
@@ -4704,12 +5057,15 @@ const CFG_TYPES = {
 
 const CFG_ERR = {
   badInterval: osT('cfgErrBadInterval'),
+  tooLong: osT('cfgErrTooLong'),
+  multiline: osT('cfgErrMultiline'),
   // ⭐ `CURMAP` 的三条 —— 📌 它们**只可能由代码缺陷触发**（界面本身给的是下拉），
   //   ⚠️ 但仍要有人话：🔴 ⛔ 则出错时运营看到的是一个 `undefined`。
   notObject: osT('cfgErrNotObject'),
   secretValueInEnvName: osT('cfgPlatformSecretValueWarn'),
   badCountry: osT('cfgErrBadCountry'),
   badCurrency: osT('cfgErrBadCurrency'),
+  triState: osT('cfgErrTriState'),   // TD-235
   notNumber: { zh: '请填数字', en: 'Must be a number' },
   negative: { zh: '不能为负', en: 'Cannot be negative' },
   tooManyDecimals: { zh: '最多 2 位小数', en: 'At most 2 decimal places' },
@@ -4750,6 +5106,8 @@ const CFG_SPEC = {
   //     ③ 固定提示写明**这是三道闸里的最后一道**。
   //     ⇒ ## 📌 **⛔ 建界面并⛔ 能防止误解 —— 它只是让运营改⛔ 了，然后来找开发。**
   //   · 50 个 `operational` 档键 —— ⭐ 按档分批，先做收入／成本／合规；📌 其余排后续。
+  // ✅ **【2026-10-10 · `TD-235`】下面这段「刻意⛔ 建界面」已结束**：两个键改由三态控件 `TRISTATE` 编辑（规格见 `P` 组），
+  //   且分档改为 `revenue`（迁移 `20261010170000`）⇒ 运营提出、财务核准。以下为当时的理由，留作历史。
   // 🔴 **`partner.max_active_deals_per_company`／`partner.max_sales_per_company` 刻意⛔ 建界面**
   //   —— ⚠️ 它们是**三态**键（未设定／⛔ 限／限 N 个），📌 读取方是数据库函数
   //   `fn_partner_max_sales_limit()`，而我第一版给了「模式下拉 ＋ 数量」两个框
@@ -4798,6 +5156,27 @@ const CFG_SPEC = {
   //   ⭐ 合规档的键本来就**刻意⛔ 进可写清单**，它们走的是 `fn_config_compliance_update()`
   //   （运营提出 ⇒ **负责人本人**核准）⇒ 📌 界面照配，只是提交走那条路。
   //   ⚠️ 既有的 `sfk_os.institution_track_policy` 正是这样：⛔ 可写、却早有界面。
+  // TD-414：季度权限复核（合规档，全部未设定；⛔ 填数 —— 期限与提醒天数由负责人岗提出，保留期待法务）
+  'gov2.access_review': {
+    group: 'D', label: osT('cfgAccessReviewLabel'),
+    notice: osT('cfgAccessReviewNotice'),
+    fields: [
+      { path: 'cadenceMonths', label: osT('cfgArCadence'), type: 'T4', unit: osT('cfgArUnitMonths'), affects: 'compliance' },
+      { path: 'firstCycleStart', label: osT('cfgArFirstStart'), type: 'T6', affects: 'compliance' },
+      { path: 'dueDays', label: osT('cfgArDueDays'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'reminderDays', label: osT('cfgArReminderDays'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'staleDays', label: osT('cfgArStaleDays'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'includeInactiveAdmins', label: osT('cfgArIncludeInactive'), type: 'T5', affects: 'compliance' },
+      { path: 'retentionMonths', label: osT('cfgArRetention'), type: 'T4', unit: osT('cfgArUnitMonths'), affects: 'compliance' },
+    ],
+  },
+  'gov2.access_review.checklist': {
+    group: 'D', label: osT('cfgArChecklistLabel'),
+    notice: osT('cfgAccessReviewNotice'),
+    fields: [
+      { path: 'items', label: osT('cfgArChecklistField'), type: 'WORDS', affects: 'compliance' },
+    ],
+  },
   'ops.alert_independent_review_types': {
     group: 'D', label: osT('cfgIndepReviewLabel'),
     notice: osT('cfgIndepReviewNotice'),
@@ -4837,6 +5216,33 @@ const CFG_SPEC = {
     group: 'S', label: osT('cfgUnattendedAlertLabel'),
     fields: [
       { path: 'days', label: osT('cfgUnattendedAlertField'), type: 'T4', unit: osT('cfgUnitDays') },
+    ],
+  },
+  // 🔴 TD-345：Chatwoot 模式下转人工（读取方 _shared/cs_handoff.ts parseHandoffConfig，路径逐字一致）
+  'cs.handoff_team_id': {
+    group: 'S', label: osT('cfgHandoffTeamLabel'), notice: osT('cfgHandoffTeamNotice'),
+    fields: [{ path: 'team_id', label: osT('cfgHandoffTeamField'), type: 'T4' }],
+  },
+  'cs.handoff_quiet_minutes': {
+    group: 'S', label: osT('cfgHandoffQuietLabel'), notice: osT('cfgHandoffQuietNotice'),
+    fields: [{ path: 'minutes', label: osT('cfgHandoffQuietField'), type: 'T4', unit: osT('cfgUnitMinutes') }],
+  },
+  'cs.handoff_unanswered_alert_hours': {
+    group: 'S', label: osT('cfgHandoffUnansweredLabel'), notice: osT('cfgHandoffUnansweredNotice'),
+    fields: [{ path: 'hours', label: osT('cfgHandoffUnansweredField'), type: 'T4', unit: osT('cfgUnitHours') }],
+  },
+  'cs.handoff_reply_transferred': {
+    group: 'S', label: osT('cfgHandoffTransferredLabel'), notice: osT('cfgHandoffTransferredNotice'),
+    fields: [
+      { path: 'zh', label: osT('cfgCopyZhField'), type: 'LINE' },
+      { path: 'en', label: osT('cfgCopyEnField'), type: 'LINE' },
+    ],
+  },
+  'cs.handoff_reply_recorded': {
+    group: 'S', label: osT('cfgHandoffRecordedLabel'), notice: osT('cfgHandoffRecordedNotice'),
+    fields: [
+      { path: 'zh', label: osT('cfgCopyZhField'), type: 'LINE' },
+      { path: 'en', label: osT('cfgCopyEnField'), type: 'LINE' },
     ],
   },
   'sfk_os.support_ticket_first_response_sla_hours': {
@@ -5081,6 +5487,20 @@ const CFG_SPEC = {
     group: 'P', label: osT('cfgDealExtensionLabel'),
     fields: [
       { path: 'days', label: osT('cfgDealExtensionField'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'revenue' },
+    ],
+  },
+  // 🔴 `TD-235`（设计窗口 10-10 17:1x）：两个三态上限 —— ⚠️ 读取方只经 `fn_partner_max_deals_limit()`／
+  //   `fn_partner_max_sales_limit()`（闸门 `check_partner_max_sales_reader`），本界面只写三种合法形状之一。
+  'partner.max_active_deals_per_company': {
+    group: 'P', label: osT('cfgMaxDealsLabel'), notice: osT('cfgMaxDealsNotice'),
+    fields: [
+      { path: '', label: osT('cfgMaxDealsLabel'), type: 'TRISTATE', unit: osT('cfgUnitShops'), affects: 'revenue' },
+    ],
+  },
+  'partner.max_sales_per_company': {
+    group: 'P', label: osT('cfgMaxSalesLabel'), notice: osT('cfgMaxSalesNotice'),
+    fields: [
+      { path: '', label: osT('cfgMaxSalesLabel'), type: 'TRISTATE', unit: osT('cfgUnitSubCodes'), affects: 'revenue' },
     ],
   },
   // ═══ ⓕ · 功能开关（TD-144，2026-09-14）═══
@@ -5965,6 +6385,12 @@ function buildDynamicFields(spec, value) {
   return spec.fields;
 }
 
+// ── `TD-235` 三态控件的数量框（只在「限定数量」时出现；切换时由下方 change 委托增删）──
+function cfgTriCountHtml(count, ro, unitText) {
+  return `<span class="cfg-tri-count"><input type="number" class="cfg-tri-n" min="1" step="1" value="${escapeHtml(count === null || count === undefined ? '' : String(count))}" ${ro || ''} />`
+    + (unitText ? ` <span class="cfg-unit">${escapeHtml(unitText)}</span>` : '') + '</span>';
+}
+
 // ── 渲染一个字段的输入控件 ──
 // 🔴 「未设定」与「0」必须一眼可分（`GOV-1` 达标线③）：
 //   · `null` ⇒ 输入框**空** ＋ 旁边一枚灰色「未设定」标签
@@ -6066,6 +6492,16 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
             </div>`;
           }).join('') + '</div>';
       }).join('')) + '</div>';
+  } else if (t.input === 'tristate') {
+    // ⭐ `TD-235` 三态：三个单选整体切换；数量框只在「限定数量」时存在（⛔ 是隐藏，是根本⛔ 渲染）
+    const cur = t.toInput(raw);
+    const nm = `${id}_mode`;
+    const opt = (st, label) => `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="${st}" ${cur.state === st ? 'checked' : ''} ${ro} /> ${escapeHtml(label)}</label>`;
+    control = `<div class="cfg-tristate" id="${id}" data-unit="${escapeHtml(pick(f.unit) || '')}">`
+      + opt('unset', osT('cfgUnset')) + opt('unlimited', osT('cfgTriUnlimited')) + opt('limited', osT('cfgTriLimited'))
+      + (cur.state === 'limited' ? cfgTriCountHtml(cur.count, ro, pick(f.unit) || '') : '')
+      + (cur.state === null ? `<span class="cfg-notice-inline">${escapeHtml(osT('cfgErrTriState'))}</span>` : '')
+      + '</div>';
   } else if (t.input === 'curmap') {
     // ══════════════════════════════════════════════════════════════
     // ⭐ 一行一个国家 —— 🔴 **行集合来自【别的键】，⛔ 来自这里**
@@ -6143,6 +6579,22 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
     </div>`;
 }
 
+// ── `TD-235` 三态切换（事件委托）：选「限定数量」⇒ 插入数量框；选其他两项 ⇒ 把数量框从 DOM 移除 ──
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+  document.addEventListener('change', (ev) => {
+    const r = ev.target;
+    if (!r || r.type !== 'radio' || !r.closest) return;
+    const wrap = r.closest('.cfg-tristate');
+    if (!wrap) return;
+    const box = wrap.querySelector('.cfg-tri-count');
+    if (r.value === 'limited') {
+      if (!box) wrap.insertAdjacentHTML('beforeend', cfgTriCountHtml(null, '', wrap.dataset.unit || ''));
+    } else if (box) {
+      box.remove();
+    }
+  });
+}
+
 // ── `T9` 排序：上移／下移（**事件委托**，⛔ 每行绑一个）──
 // ⚠️ ⛔ 用「渲染时逐行 addEventListener」：📌 每次重排都要重绑，⭐ 而漏绑一次是**静默**的
 //   —— 🔴 按钮还在，点了⛔ 没反应，而⛔ 无任何报错。
@@ -6206,6 +6658,11 @@ function cfgReadField(el) {
       o[pk] = merged;
     });
     v = t.parse(o);
+  } else if (t.input === 'tristate') {
+    // ⭐ `TD-235`：只在选了「限定数量」时才读数量框 ⇒ 「不限」／「未设定」读回的值里⛔ 可能带 count
+    const sel = node.querySelector('input[type=radio]:checked');
+    const n = node.querySelector('.cfg-tri-n');
+    v = t.parse(sel ? { state: sel.value, count: sel.value === 'limited' && n ? n.value : null } : null);
   } else if (t.input === 'curmap') {
     // ⭐ 只收**选了币种**的行 —— 🔴 空 ＝ 未设定 ⇒ 📌 那个国家**⛔ 出现在映射里**，
     //   ⚠️ 而⛔ 是写成 `""`／`null`：`booking_currency.ts` 的判据是「查⛔ 到 ⇒ 拒绝收款」，
