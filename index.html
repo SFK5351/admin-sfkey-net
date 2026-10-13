@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-DQq5pkuCbab0hYWCKjf3b+XTKghHZx/+VeZel3CZKwU='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-N7TJpWQa0YMyy9cPnUKWtxCxW7FAKi4Xf+xi6s+JX84='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -220,7 +220,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:2978f6f0f3614fa6 —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:0b59a8b75939a5ca —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -1603,8 +1603,8 @@
     cfgPartnerClickField: { zh: "每分钟上限", en: "Per minute" },
     cfgPartnerWindowLabel: { zh: "推广链接归因窗口", en: "Partner link attribution window" },
     cfgPartnerWindowField: { zh: "窗口天数", en: "Window" },
-    cfgPartnerWindowNotice: { zh: "对方点了推广链接之后多少天内注册仍算这位推广商的。留空＝链接归因不生效，系统只认手填的推广码。", en: "How many days after clicking a partner link a signup still counts for that partner. Blank = link attribution is off and only manually entered codes count." },
-    cfgPartnerTiersLabel: { zh: "推广商分级佣金表", en: "Partner commission tiers" },
+    cfgPartnerWindowNotice: { zh: "对方点了合作伙伴的推广链接之后多少天内注册，仍算这位合作伙伴的。留空＝链接归因不生效，系统只认手填的推广码。", en: "How many days after clicking a partner link a signup still counts for that partner. Blank = link attribution is off and only manually entered codes count." },
+    cfgPartnerTiersLabel: { zh: "合作伙伴分级佣金表", en: "Partner commission tiers" },
     cfgPartnerTiersNotice: { zh: "分级佣金是一张表（每档的区间与比例），不做成输入框——它的结构由决策定，改一档要走运营提出＋财务核准，在申请单里填。", en: "Tiered commission is a table (band plus rate). It is not exposed as inline inputs: its structure is set by decision, and changing a band goes through the ops-proposes / finance-approves request." },
     cfgPartnerTiersField: { zh: "当前分级表", en: "Current tiers" },
     cfgFeedbackBonusLabel: { zh: "反馈被采纳的奖励", en: "Adopted-feedback reward" },
@@ -1650,7 +1650,7 @@
     cfgDailyInspectionRunUntilNotice: { zh: "留空 ⇒ 一直跑（默认）。设了日期 ⇒ 过了那天停止巡检，缺席告警同时停止。成本约每天一封邮件加一次函数调用。", en: "Leave empty ⇒ runs indefinitely (default). Set a date ⇒ the inspection stops after that day, and so does the missed-run alert. Cost is roughly one email and one function call per day." },
     cfgUnitDays: { zh: "天", en: "days" },
     cfgBurstLabel: { zh: "AI 连续失败告警", en: "AI failure burst alert" },
-    cfgBurstNotice: { zh: "按【单个用户】计：在窗口内连续失败达到次数就告警。两个都留空＝不告警——而上线头 14 天恰好最需要它。", en: "Counted per USER: alerts when failures within the window reach the threshold. Both blank = no alert — and the first 14 days after launch are exactly when it is needed most." },
+    cfgBurstNotice: { zh: "按【单个用户】、按固定时间段计（从 UTC 零点起按「时间窗口」切段）：同一段内失败达到次数就告警一次，下一段重新计。两项任一留空＝不告警——而上线头 14 天恰好最需要它。", en: "Counted per USER in fixed time blocks (cut from 00:00 UTC by the time window): one alert when failures within a block reach the threshold; the next block starts from zero. Either field blank = no alert — and the first 14 days after launch are exactly when it is needed most." },
     cfgBurstWindowField: { zh: "时间窗口", en: "Time window" },
     cfgBurstMaxField: { zh: "窗口内失败次数", en: "Failures in window" },
     cfgBurstUnset: { zh: "留空＝不告警（不是「0 次就告警」）", en: "Blank = no alert (not \"alert at 0\")" },
@@ -1664,6 +1664,10 @@
     cfgAnnounceBudgetLabel: { zh: "每日群发预算", en: "Daily send budget" },
     cfgAnnounceBudgetField: { zh: "每日封顶", en: "Daily cap" },
     cfgAnnounceBudgetNotice: { zh: "取决于邮件服务商套餐额度——那是钱，归运营／财务。留空＝不限，会直接撞服务商额度。", en: "Depends on the mail provider plan quota — that is money, so it belongs to ops/finance. Blank = unlimited, which will hit the provider quota instead." },
+    cfgRewardSkipAlertLabel: { zh: "订阅返还 · 核实失败告警门槛", en: "Subscription reward · verification-failure alert threshold" },
+    cfgRewardSkipAlertField: { zh: "本次至少跳过几行才告警", en: "Alert when at least this many rows are skipped" },
+    cfgRewardSkipAlertNotice: { zh: "到期复核核实不了（Apple／Google 查不到、报错、凭据缺失）的返还会留在待发、不会发放，每天最多一条告警。留空＝有跳过就告警。调高会让少量用户的返还长期卡住而无人知道。", en: "Rewards that cannot be verified at the due date (store lookup failed, error, credentials missing) stay pending and are not credited; at most one alert per day. Blank = alert on any skip. Raising it can leave a few users' rewards stuck unnoticed." },
+    cfgUnitRows: { zh: "行", en: "rows" },
     cfgUnitHours: { zh: "小时", en: "hours" },
     cfgUnitMinutes: { zh: "分钟", en: "minutes" },
     cfgUnitTimes: { zh: "次", en: "times" },
@@ -1690,8 +1694,8 @@
     cfgFeatureTokenPurchaseLabel: { zh: "功能开关 · Token 购买", en: "Feature · Token purchase" },
     cfgFeatureSubPurchaseLabel: { zh: "功能开关 · 订阅购买（Stripe）", en: "Feature · Subscription purchase (Stripe)" },
     cfgFeatureSubPurchaseNotice: { zh: "⚠️ 只管 Stripe 那条路径，不含 App 内购（IAP）。IAP 购买在客户端发起、服务端只做事后校验，关掉校验只会让已付款用户拿不到权益；要停 IAP 售卖只能在商店后台下架内购项。", en: "Covers the Stripe path only, not in-app purchase (IAP). To stop IAP sales you must delist the product in the store console." },
-    cfgFeaturePartnerPortalLabel: { zh: "功能开关 · 推广商门户", en: "Feature · Partner portal" },
-    cfgFeaturePartnerPortalNotice: { zh: "⚠️ 这是上线闸门，和上面几个开关相反：只有明确选「开」才开放；留空（未设定）也按【关】处理。律师给出可签的推广商合同之前保持关闭（推广商管理办法第 3 条）。改动下一个请求即生效。", en: "This is a launch gate, the opposite of the switches above: the portal opens only when explicitly set ON; empty (not set) is treated as OFF. Keep it off until the lawyer provides a signable partner contract (Partner rules, clause 3). Takes effect on the next request." },
+    cfgFeaturePartnerPortalLabel: { zh: "功能开关 · 合作伙伴门户", en: "Feature · Partner portal" },
+    cfgFeaturePartnerPortalNotice: { zh: "⚠️ 这是上线闸门，和上面几个开关相反：只有明确选「开」才开放；留空（未设定）也按【关】处理。律师给出可签的合作伙伴合同之前保持关闭（合作伙伴管理办法第 3 条）。改动下一个请求即生效。", en: "This is a launch gate, the opposite of the switches above: the portal opens only when explicitly set ON; empty (not set) is treated as OFF. Keep it off until the lawyer provides a signable partner contract (Partner rules, clause 3). Takes effect on the next request." },
     seatOverageConfirmTitle: { zh: "新增这名员工会超出套餐含席位", en: "Adding this staff member exceeds your plan’s included seats" },
     seatOverageConfirmBody: { zh: "你的套餐含 {included} 个席位，加上这名员工后是 {after} 人，超出 {overage} 席。\n将增加每月 S${price}／席，从本期起按天折算。\n确认后立即生效。", en: "Your plan includes {included} seats. With this staff member you will have {after}, which is {overage} over.\nThis adds S${price} per seat per month, prorated daily from the current period.\nIt takes effect immediately once you confirm." },
     seatOverageConfirmOk: { zh: "确认新增并按天计费", en: "Confirm and start prorated billing" },
@@ -1776,9 +1780,9 @@
     wkOrderTtlNotSet: { zh: "付款码有效期还没有设定，请联系平台运营。", en: "The payment code lifetime has not been set. Please contact operations." },
     wkOrderNoService: { zh: "请先添加至少一个启用的服务项目。", en: "Add at least one active service first." },
     wkOrderNoStaff: { zh: "请先添加至少一位在职人员。", en: "Add at least one active staff member first." },
-    adminTabPartners: { zh: "推广商", en: "Partners" },
-    adminPtHeading: { zh: "推广商管理", en: "Partner management" },
-    adminPtIntro: { zh: "批准一家推广商会产生持续的佣金义务 ⇒ 运营提出、财务核准两步；冻结单人即可。", en: "Approving a partner creates an ongoing commission obligation, so it takes two people (ops proposes, finance approves). Suspending takes one." },
+    adminTabPartners: { zh: "合作伙伴", en: "Partners" },
+    adminPtHeading: { zh: "合作伙伴管理", en: "Partner management" },
+    adminPtIntro: { zh: "批准一家合作伙伴会产生持续的佣金义务 ⇒ 运营提出、财务核准两步；冻结单人即可。", en: "Approving a partner creates an ongoing commission obligation, so it takes two people (ops proposes, finance approves). Suspending takes one." },
     adminPtColName: { zh: "公司", en: "Company" },
     adminPtColStatus: { zh: "状态", en: "Status" },
     adminPtColEntity: { zh: "签约主体", en: "Contracting entity" },
@@ -1789,7 +1793,7 @@
     adminPtStatusActive: { zh: "生效中", en: "Active" },
     adminPtStatusSuspended: { zh: "已冻结", en: "Suspended" },
     adminPtStatusTerminated: { zh: "已终止", en: "Terminated" },
-    adminPtRegisterHeading: { zh: "登记一家推广商", en: "Register a partner" },
+    adminPtRegisterHeading: { zh: "登记一家合作伙伴", en: "Register a partner" },
     adminPtFieldLegalName: { zh: "公司法定名称", en: "Legal name" },
     adminPtFieldEntity: { zh: "与哪家子公司签约", en: "Contracting entity" },
     adminPtFieldRegNo: { zh: "注册号（可空）", en: "Registration no. (optional)" },
@@ -1811,18 +1815,51 @@
     adminPtPromptSignedAt: { zh: "合同签署日期 YYYY-MM-DD（批准必填）", en: "Contract signed date YYYY-MM-DD (required)" },
     adminPtPromptReason: { zh: "理由（会留痕）", en: "Reason (recorded)" },
     adminPtPromptNote: { zh: "核准/驳回备注", en: "Approval / rejection note" },
+    adminPtBtnMembers: { zh: "成员", en: "Members" },
+    adminPtMembersHeading: { zh: "成员：{name}", en: "Members: {name}" },
+    adminPtMembersIntro: { zh: "公司管理员须由运营岗提出、另一岗核准，核准后才成为成员。", en: "A company admin must be proposed by operations and approved by another position; they become a member only after approval." },
+    adminPtMembersEmpty: { zh: "还没有成员", en: "No members yet" },
+    adminPtMemberColEmail: { zh: "邮箱", en: "Email" },
+    adminPtMemberColRole: { zh: "角色", en: "Role" },
+    adminPtMemberRoleAdmin: { zh: "公司管理员", en: "Company admin" },
+    adminPtMemberRoleSales: { zh: "销售员", en: "Sales" },
+    adminPtMemberStatusActive: { zh: "有效", en: "Active" },
+    adminPtMemberStatusDisabled: { zh: "已停用", en: "Disabled" },
+    adminPtMemberBtnDisable: { zh: "提出停用", en: "Propose disable" },
+    adminPtMemberProposeHeading: { zh: "提出绑定公司管理员", en: "Propose company admin" },
+    adminPtMemberFieldEmail: { zh: "对方注册 SFK 用的邮箱", en: "Email they registered with SFK" },
+    adminPtMemberFieldReason: { zh: "理由（核准人会看到）", en: "Reason (shown to the approver)" },
+    adminPtMemberBtnPropose: { zh: "提出", en: "Propose" },
+    adminPtMemberProposeOnlyActive: { zh: "公司核准入驻后才能绑定成员。", en: "Members can be bound only after the company is approved." },
+    adminPtMemberRequestsHeading: { zh: "本公司的成员申请", en: "Member requests for this company" },
+    adminPtMemberColAction: { zh: "事项", en: "Action" },
+    adminPtMemberActionBind: { zh: "绑定为公司管理员", en: "Bind as company admin" },
+    adminPtMemberActionDisable: { zh: "停用公司管理员", en: "Disable company admin" },
+    adminPtMemberColProposer: { zh: "提出人", en: "Proposed by" },
+    adminPtMemberColTime: { zh: "提出时间", en: "Proposed at" },
+    adminPtMemberReqPending: { zh: "待核准", en: "Pending" },
+    adminPtMemberReqApproved: { zh: "已核准", en: "Approved" },
+    adminPtMemberReqRejected: { zh: "已驳回", en: "Rejected" },
+    adminPtMemberReqCancelled: { zh: "已作废", en: "Cancelled" },
+    adminPtMemberAccountNotFound: { zh: "找不到这个邮箱的 SFK 账号：请对方先用该邮箱注册 SFK 账号，再来提出。", en: "No SFK account uses this email. Ask them to register with it first." },
+    adminPtMemberStale: { zh: "提交后情况已变，这张申请已作废，请按现状重新提出：", en: "Things changed after it was proposed; the request was cancelled. Please propose again:" },
+    cfgPartnerConflictLabel: { zh: "合作伙伴成员 · 与机构身份可否兼任", en: "Partner members · dual role with an organization" },
+    cfgPartnerConflictNotice: { zh: "被绑定为公司管理员、或被添加为销售员的账号，若同时是任一机构的负责人或有效采购联系人：选「禁止」则拒绝；选「允许」则照常生效并发一条告警供复核。未设定（—）时按「禁止」处理。合规档：运营提出、负责人核准。", en: "If an account being made a company admin or added as a sales member is also an owner or active buyer of any organization: \"Block\" rejects it; \"Allow\" lets it through and raises an alert for review. Unset (—) is treated as Block. Compliance setting: proposed by operations, approved by the principal." },
+    cfgPartnerConflictField: { zh: "处理方式", en: "Handling" },
+    cfgPartnerConflictBlock: { zh: "禁止", en: "Block" },
+    cfgPartnerConflictAllow: { zh: "允许（并告警）", en: "Allow (with alert)" },
     adminPtKycHint: { zh: "批准需 KYC 已通过，将一并写入 passed。", en: "Approving also records KYC as passed." },
     adminPtDone: { zh: "已完成。", en: "Done." },
     adminPtCodeIssued: { zh: "已发码：", en: "Code issued: " },
-    partnerTitle: { zh: "SFK 推广商门户", en: "SFK Partner Portal" },
+    partnerTitle: { zh: "SFK 合作伙伴门户", en: "SFK Partner Portal" },
     partnerSub: { zh: "查看你的推广码、业绩与团队成员。", en: "Your referral codes, results and team." },
     partnerLoginH: { zh: "登录", en: "Sign in" },
     partnerEmail: { zh: "邮箱", en: "Email" },
     partnerPassword: { zh: "密码", en: "Password" },
     partnerLoginBtn: { zh: "登录", en: "Sign in" },
     partnerLogout: { zh: "退出", en: "Sign out" },
-    partnerNotPartner: { zh: "这个账号还不是任何推广商的成员。请联系你公司的管理员，或联系我们。", en: "This account is not a member of any partner yet. Ask your company admin, or contact us." },
-    partnerNotOpen: { zh: "推广商门户尚未开放。", en: "The partner portal is not open yet." },
+    partnerNotPartner: { zh: "这个账号还不是任何合作伙伴的成员。请联系你公司的管理员，或联系我们。", en: "This account is not a member of any partner yet. Ask your company admin, or contact us." },
+    partnerNotOpen: { zh: "合作伙伴门户尚未开放。", en: "The partner portal is not open yet." },
     partnerCompanyStatus: { zh: "公司状态", en: "Company status" },
     partnerStApplied: { zh: "待审批", en: "Awaiting approval" },
     partnerStActive: { zh: "生效中", en: "Active" },
@@ -1851,6 +1888,12 @@
     partnerStMemberDisabled: { zh: "已停用", en: "Disabled" },
     partnerIssueCode: { zh: "发码", en: "Issue code" },
     partnerDisable: { zh: "停用", en: "Disable" },
+    partnerAddSalesH: { zh: "添加销售员", en: "Add a sales member" },
+    partnerAddSalesEmail: { zh: "对方注册 SFK 用的邮箱", en: "Email they registered with SFK" },
+    partnerAddSalesBtn: { zh: "添加", en: "Add" },
+    partnerAddSalesHint: { zh: "只能添加销售员，添加后立即生效；公司管理员由 SFK 后台办理。", en: "You can add sales members only; they take effect immediately. Company admins are set up by SFK." },
+    partnerAddSalesNoAccount: { zh: "找不到这个邮箱的 SFK 账号：请对方先用该邮箱注册 SFK 账号。", en: "No SFK account uses this email. Ask them to register with it first." },
+    partnerAddSalesDone: { zh: "已添加。", en: "Added." },
     partnerEnable: { zh: "恢复", en: "Enable" },
     partnerAdminOnly: { zh: "只有公司管理员能看这一块。", en: "Only company admins can see this section." },
     partnerLoading: { zh: "加载中…", en: "Loading…" },
@@ -1928,7 +1971,7 @@
     admDisputesAlreadyCredited: { zh: "这笔已经冲减过了，不能再改。", en: "This dispute has already been credited and can no longer be changed." },
     admDisputesDone: { zh: "已处理。", en: "Done." },
     cfgAiCostGroup: { zh: "G · AI 模型与成本限额", en: "G · AI models & cost limits" },
-    cfgPartnerGroup: { zh: "P · 推广商", en: "P · Promoters" },
+    cfgPartnerGroup: { zh: "P · 合作伙伴", en: "P · Partners" },
     cfgHealthKeywordsLabel: { zh: "客服健康话题词表", en: "Health topic keywords" },
     cfgHealthKeywordsNotice: { zh: "命中这些词的对话会被判为健康话题，转由人工处理。", en: "Conversations matching these words are treated as health topics and routed to a human." },
     cfgHealthKeywordsField: { zh: "词表（逗号或顿号分隔）", en: "Keywords (comma separated)" },
@@ -1973,7 +2016,7 @@
     cfgUploadSizeLabel: { zh: "单个文件大小上限", en: "Max file size" },
     cfgUploadSizeField: { zh: "单文件上限", en: "Per file" },
     cfgDealProtectionLabel: { zh: "报备保护期", en: "Deal protection window" },
-    cfgDealProtectionNotice: { zh: "推广商报备一家机构后，这段时间内别人报同一家不算数。未设定则报备功能不生效。", en: "After a promoter registers a provider, other registrations for it do not count during this window. Unset means the feature is inactive." },
+    cfgDealProtectionNotice: { zh: "合作伙伴报备一家机构后，这段时间内别人报同一家不算数。未设定则报备功能不生效。", en: "After a partner registers a provider, other registrations for it do not count during this window. Unset means the feature is inactive." },
     cfgDealProtectionField: { zh: "保护天数", en: "Protected for (days)" },
     cfgDealExtensionLabel: { zh: "报备延长期", en: "Deal extension window" },
     cfgDealExtensionField: { zh: "可延长天数", en: "Extend by (days)" },
@@ -2018,8 +2061,8 @@
     cfgMailFromInstitution: { zh: "给机构", en: "To providers" },
     cfgMailFromBookingCustomer: { zh: "预约通知（顾客）", en: "Booking notice (customer)" },
     cfgMailFromBookingInstitution: { zh: "预约通知（机构）", en: "Booking notice (provider)" },
-    cfgMaxDealsLabel: { zh: "每家推广商同时可占的报备数", en: "Active deals per promoter" },
-    cfgMaxSalesLabel: { zh: "每家推广商的销售员子码数", en: "Sales sub-codes per promoter" },
+    cfgMaxDealsLabel: { zh: "每家合作伙伴同时可占的报备数", en: "Active deals per partner" },
+    cfgMaxSalesLabel: { zh: "每家合作伙伴的销售员子码数", en: "Sales sub-codes per partner" },
     cfgModeField: { zh: "模式", en: "Mode" },
     cfgCountField: { zh: "上限数量", en: "Limit" },
     cfgUnitKm: { zh: "公里", en: "km" },
@@ -2028,6 +2071,42 @@
     cfgUnitSkips: { zh: "天", en: "days" },
     cfgErrBadInterval: { zh: "请按「数字 ＋ 单位」填，例如 30 minutes / 2 hours / 3 days", en: "Use \"number unit\", e.g. 30 minutes / 2 hours / 3 days" },
     cfgIndepReviewLabel: { zh: "「待独立复核」的告警类型", en: "Alert types needing independent review" },
+    cfgRetentionLabel: { zh: "数据保留天数", en: "Data retention (days)" },
+    cfgRetentionNotice: { zh: "合规参数：运营提出、负责人核准。每天清理一次超过保留天数的记录（删行）。某项未设定 ⇒ 那张表不清理，并每天在运维告警里提醒。安全访问记录、后台操作记录、同意记录三项另有数据库保护：不满 6 年的记录删不掉，填得比 6 年短会清理失败；这三项的年限待法务书面确认。", en: "Compliance parameter: ops proposes, the principal approves. Records older than the retention period are deleted once a day. If an item is unset, that table is not cleaned and Ops alerts flag it daily. Security access logs, admin action logs and consent logs are also protected in the database: records younger than 6 years cannot be deleted, so a shorter value makes the clean-up fail; the period for these three awaits written legal confirmation." },
+    cfgRetClientError: { zh: "App 客户端错误记录", en: "App client error log" },
+    cfgRetNotification: { zh: "通知发送记录", en: "Notification log" },
+    cfgRetAiCall: { zh: "AI 调用明细（到期先汇总再删）", en: "AI call details (summarised, then deleted)" },
+    cfgRetSecurityAudit: { zh: "安全访问记录（待法务）", en: "Security access log (pending legal)" },
+    cfgRetAdminAction: { zh: "后台操作记录（待法务）", en: "Admin action log (pending legal)" },
+    cfgRetConsentAudit: { zh: "同意记录（待法务）", en: "Consent log (pending legal)" },
+    cfgDelFailAlertLabel: { zh: "删号连续失败告警", en: "Account deletion repeated-failure alert" },
+    cfgDelFailAlertNotice: { zh: "用户删除账号时服务端中途失败会中止（用户可重试）。同一用户连续失败达到这个次数，就在运维告警里发一条 P1。删号成功即清零。不填＝每次失败都告警。", en: "If deleting an account fails part-way, it is stopped and the user can retry. When the same user fails this many times in a row, a P1 is raised in Ops alerts. A successful deletion resets the count. Leave empty to alert on every failure." },
+    cfgDelFailAlertField: { zh: "连续失败几次就告警", en: "Alert after this many consecutive failures" },
+    cfgDelFailAlertUnit: { zh: "次", en: "times" },
+    cfgRcptLabel: { zh: "删除确认回执", en: "Deletion receipt email" },
+    cfgRcptNotice: { zh: "合规参数：运营提出、负责人核准。用户删除单份报告或账号后，系统给账号邮箱发一封确认。下面任一项（除保留月数）未设定 ⇒ 删除照常，但不发邮件，并在运维告警里提醒。", en: "Compliance parameter: ops proposes, the principal approves. After a user deletes a report or their account, a confirmation is emailed to the account address. If any item below (other than retention months) is unset, deletion still works but no email is sent and Ops alerts flag it." },
+    cfgRcptEnabled: { zh: "开启", en: "Enabled" },
+    cfgRcptDefaultLocale: { zh: "用户语言没有模板时用哪种语言", en: "Language to use when the user's language has no template" },
+    cfgRcptSendTimeout: { zh: "删除时当场发信最多等多久", en: "Longest wait when sending at deletion time" },
+    cfgRcptRetryInterval: { zh: "发不出时每隔多久再试", en: "Retry interval when sending fails" },
+    cfgRcptMaxAttempts: { zh: "最多试几次", en: "Maximum attempts" },
+    cfgRcptOutboxHours: { zh: "发不出时收件地址最多暂存多久", en: "Longest time to keep the address while undelivered" },
+    cfgRcptRetentionMonths: { zh: "回执记录保留月数（待法务）", en: "Months to keep receipt records (pending legal)" },
+    cfgRcptUnitMs: { zh: "毫秒", en: "ms" },
+    cfgRcptUnitMinutes: { zh: "分钟", en: "minutes" },
+    cfgRcptUnitMonths: { zh: "月", en: "months" },
+    cfgRcptTplLabel: { zh: "删除确认回执 · 邮件模板", en: "Deletion receipt · email templates" },
+    cfgRcptTplNotice: { zh: "正文里可以写 {executedAt}（执行时间）、{kind}（对象类型）、{count}（数量）、{shareLinksVoided}（作废的医生分享链接数）、{receiptId}（回执号），只能用下一项里放行的那几个。邮件不加密：不要写报告名称、医院、日期或用户姓名。", en: "Bodies may use {executedAt}, {kind}, {count}, {shareLinksVoided} and {receiptId} — only those allowed in the next item. Email is not encrypted: never include report names, hospitals, dates or the user's name." },
+    cfgRcptSubject: { zh: "主题", en: "Subject" },
+    cfgRcptBody: { zh: "正文", en: "Body" },
+    cfgRcptBodyStoragePending: { zh: "正文（文件清理还在处理时）", en: "Body (while file clean-up is still in progress)" },
+    cfgRcptKindRecord: { zh: "对象名称：单份报告", en: "Object name: a single report" },
+    cfgRcptKindAccount: { zh: "对象名称：账号", en: "Object name: account" },
+    cfgRcptLangZh: { zh: "中文", en: "Chinese" },
+    cfgRcptLangEn: { zh: "英文", en: "English" },
+    cfgRcptFieldsLabel: { zh: "删除确认回执 · 邮件里允许的变量", en: "Deletion receipt · variables allowed in the email" },
+    cfgRcptFieldsNotice: { zh: "只能从 executedAt、kind、count、shareLinksVoided、receiptId 里选。未设定 ⇒ 只放行 executedAt、kind、count、receiptId。", en: "Choose from executedAt, kind, count, shareLinksVoided and receiptId. If unset, only executedAt, kind, count and receiptId are allowed." },
+    cfgRcptFieldsField: { zh: "变量名（逗号或顿号分隔）", en: "Variable names (comma separated)" },
     cfgIndepReviewNotice: { zh: "只有审计岗能确认这些类型的告警；未设定时一切确认都会被拒。填的是告警类型代码。", en: "Only the audit role can acknowledge these alert types; while unset, every acknowledgement is refused. Enter alert type codes." },
     cfgIndepReviewField: { zh: "告警类型代码（逗号或顿号分隔）", en: "Alert type codes (comma separated)" },
     cfgLicensedProfileLabel: { zh: "持照医疗档的机构类型", en: "Business types treated as licensed medical" },
@@ -2047,7 +2126,7 @@
     cfgCountriesNotice: { zh: "决定哪些国家的机构可以入驻。它不只是在哪儿收钱，还牵合规档案与法律主体，须负责人核准。", en: "Decides which countries providers may onboard from. This is not only about where we collect money — it also affects compliance profiles and legal entities, so it needs principal approval." },
     cfgCountriesField: { zh: "国家代码（逗号或顿号分隔）", en: "Country codes (comma separated)" },
     adminPtAssetHeading: { zh: "官方素材库", en: "Official asset library" },
-    adminPtAssetIntro: { zh: "推广商只能使用这里已发布的素材对外宣传。关键词扫描只是阻断器，不是通行证——核准前请逐条确认三条红线。", en: "Promoters may only use published items from this library. Keyword screening blocks the obvious; it does not certify compliance — confirm each of the three red lines before approving." },
+    adminPtAssetIntro: { zh: "合作伙伴只能使用这里已发布的素材对外宣传。关键词扫描只是阻断器，不是通行证——核准前请逐条确认三条红线。", en: "Partners may only use published items from this library. Keyword screening blocks the obvious; it does not certify compliance — confirm each of the three red lines before approving." },
     adminPtAssetEmpty: { zh: "素材库还没有内容。", en: "No assets yet." },
     adminPtAssetColKind: { zh: "类型", en: "Kind" },
     adminPtAssetColTitle: { zh: "标题", en: "Title" },
@@ -2139,7 +2218,7 @@
     errRosterForbidden: { zh: "你的岗位不能做这个操作（登记＝运营岗；核准＝负责人岗）。", en: "Your position cannot do this (register = ops; approve = principal)." },
     errRosterSelfApproval: { zh: "不能核准自己登记的条目（兼岗亦然）。", en: "You cannot approve an entry you registered (even holding several positions)." },
     adminTabAccessReview: { zh: "权限复核", en: "Access review" },
-    arIntro: { zh: "按季度复核每个后台账号持有的岗位。审计岗只读并标记「仍需要／应撤销」；应撤销只产生待办，撤岗仍在岗位授予页走两人规则。", en: "Quarterly review of the positions each admin account holds. The auditor reads and marks keep / revoke; a revoke mark only raises a to-do — revoking still goes through the two-person rule on the positions page." },
+    arIntro: { zh: "按季度复核后台账号的岗位。审计岗只读并标记；「应撤销」只产生待办，撤岗仍在岗位页走两人规则。", en: "Quarterly review of the positions held by admin accounts. The auditor reads and marks; a \"revoke\" mark only raises a to-do, and revoking still follows the two-person rule on the positions page." },
     arReviewerAvailable: { zh: "审计岗在任：标记为独立复核。", en: "An auditor is in post: marks count as independent review." },
     arReviewerAbsent: { zh: "审计岗暂缺：由负责人岗代做，每条记录标注「非独立复核」，审计岗到任后进入待复核清单。", en: "No auditor in post: the principal reviews in the meantime; every record is labelled \"non-independent review\" and goes to the auditor's re-check list once an auditor is in post." },
     arConfigUnset: { zh: "复核机制未完整设定，以下项目未设定：{keys}（在「配置 → 合规参数」设定，运营提、负责人批）。", en: "The review is not fully configured; unset: {keys} (set under Config → Compliance parameters; ops proposes, principal approves)." },
@@ -2148,7 +2227,7 @@
     arColPeriod: { zh: "周期", en: "Period" },
     arColStatus: { zh: "状态", en: "Status" },
     arColDue: { zh: "期限", en: "Due" },
-    arColMode: { zh: "复核方式", en: "Reviewer" },
+    arColMode: { zh: "复核方式", en: "Review mode" },
     arColProgress: { zh: "未定／总数", en: "Pending / total" },
     arColAccount: { zh: "账号", en: "Account" },
     arColPositions: { zh: "岗位（授予人·时间）", en: "Positions (granted by · when)" },
@@ -2171,7 +2250,7 @@
     arDecisionRevoke: { zh: "应撤销", en: "Revoke" },
     arBtnKeep: { zh: "仍需要", en: "Keep" },
     arBtnRevoke: { zh: "应撤销", en: "Revoke" },
-    arBtnAttest: { zh: "只有本人能读", en: "Only the holder can read it" },
+    arBtnAttest: { zh: "只有本人能读", en: "Holder only" },
     arBtnException: { zh: "有例外", en: "Exception" },
     arMailboxPending: { zh: "未声明", en: "Not declared" },
     arMailboxSole: { zh: "只有本人能读", en: "Only the holder can read it" },
@@ -2187,17 +2266,17 @@
     arQueueTruncated: { zh: "（只显示最近 {shown} 条，共 {total} 条）", en: "(showing the latest {shown} of {total})" },
     arQueueAlertAcked: { zh: "已由负责人岗代为确认（非独立复核）：{by}", en: "Acknowledged by the principal (non-independent review): {by}" },
     arQueueAlertOpen: { zh: "未确认", en: "Not acknowledged" },
-    arBtnRecheckAlerts: { zh: "复核所选告警", en: "Re-check selected alerts" },
-    arBtnAckAlerts: { zh: "确认所选告警", en: "Acknowledge selected alerts" },
-    arBtnRecheckCycle: { zh: "完成独立复核", en: "Complete independent re-check" },
+    arBtnRecheckAlerts: { zh: "复核所选告警", en: "Re-check selected" },
+    arBtnAckAlerts: { zh: "确认所选告警", en: "Acknowledge selected" },
+    arBtnRecheckCycle: { zh: "完成独立复核", en: "Complete re-check" },
     arTimeline: { zh: "授岗／撤岗时间线", en: "Position grants and revocations" },
     arGrant: { zh: "授予", en: "Granted" },
     arRevoke: { zh: "撤销", en: "Revoked" },
-    arStatusOpen: { zh: "进行中（未开始）", en: "Open" },
+    arStatusOpen: { zh: "未开始", en: "Not started" },
     arStatusInProgress: { zh: "进行中", en: "In progress" },
     arStatusCompleted: { zh: "已完成", en: "Completed" },
     arStatusOverdue: { zh: "已逾期", en: "Overdue" },
-    arStatusNeedsRecheck: { zh: "待独立复核", en: "Awaiting independent re-check" },
+    arStatusNeedsRecheck: { zh: "待独立复核", en: "Re-check due" },
     arDone: { zh: "已记录。", en: "Recorded." },
     adminAlertAckNonIndependent: { zh: "已确认。审计岗暂缺，这次确认标注为「非独立复核」，审计岗到任后会进入待复核清单（见「权限复核」页）。", en: "Acknowledged. No auditor is in post, so this is labelled \"non-independent review\" and will go to the auditor's re-check list (see the Access review tab)." },
     cfgAccessReviewLabel: { zh: "季度权限复核", en: "Quarterly access review" },
@@ -2417,8 +2496,8 @@
     cfgTriUnlimited: { zh: "不限", en: "No limit" },
     cfgTriLimited: { zh: "限定数量", en: "Limit to" },
     cfgUnitSubCodes: { zh: "个", en: "sub-codes" },
-    cfgMaxDealsNotice: { zh: "每家推广商同时最多可有几家机构处于报备保护中。未设定时不限，并且每天告警一次；确实不想设上限，请选「不限」。改动由运营提出、财务核准后生效。", en: "How many providers one promoter can have under active deal protection at the same time. While not set there is no limit and an alert is raised every day; if you really want no limit, choose “No limit”. Changes take effect after Finance approves an operations proposal." },
-    cfgMaxSalesNotice: { zh: "每家推广商最多能发几个销售员子码。未设定时一个都发不出去，并会告警；确实不想设上限，请选「不限」。改动由运营提出、财务核准后生效。", en: "How many sales sub-codes one promoter can issue. While not set, none can be issued and an alert is raised; if you really want no limit, choose “No limit”. Changes take effect after Finance approves an operations proposal." },
+    cfgMaxDealsNotice: { zh: "每家合作伙伴同时最多可有几家机构处于报备保护中。未设定时不限，并且每天告警一次；确实不想设上限，请选「不限」。改动由运营提出、财务核准后生效。", en: "How many providers one partner can have under active deal protection at the same time. While not set there is no limit and an alert is raised every day; if you really want no limit, choose “No limit”. Changes take effect after Finance approves an operations proposal." },
+    cfgMaxSalesNotice: { zh: "每家合作伙伴最多能发几个销售员子码。未设定时一个都发不出去，并会告警；确实不想设上限，请选「不限」。改动由运营提出、财务核准后生效。", en: "How many sales sub-codes one partner can issue. While not set, none can be issued and an alert is raised; if you really want no limit, choose “No limit”. Changes take effect after Finance approves an operations proposal." },
     cfgErrTriState: { zh: "「不限」不能同时带数量；「限定数量」须填 1 以上的整数", en: "“No limit” cannot carry a number; “Limit to” needs a whole number of 1 or more" },
     cfgHandoffTeamLabel: { zh: "转人工 · 分配给哪个客服团队", en: "Human handoff · support team" },
     cfgHandoffTeamNotice: { zh: "填 Chatwoot 里客服团队的编号。转人工时会把会话设为待处理并分配给这个团队。未设定时转接按失败处理：用户收到「已记下」那一句，同时告警。", en: "The Chatwoot team ID. On handoff the conversation is opened and assigned to this team. While unset, handoff counts as failed: the user gets the \"noted\" sentence and an alert is raised." },
@@ -2437,6 +2516,36 @@
     cfgCopyEnField: { zh: "英文", en: "English" },
     cfgErrTooLong: { zh: "太长了：每句不超过 300 字", en: "Too long: up to 300 characters" },
     cfgErrMultiline: { zh: "只能填一行，不能换行", en: "One line only, no line breaks" },
+    bkdiscTitle: { zh: "确认给机构的信息", en: "Confirm what you share" },
+    bkdiscIntro: { zh: "请确认交给这家机构的信息，只用于这一次预约：", en: "Please confirm what you share with this business. It is used for this booking only:" },
+    bkdiscRequiredTitle: { zh: "必需（没有这些，机构无法接待你）", en: "Required (the business cannot serve you without these)" },
+    bkdiscOptionalTitle: { zh: "可选（默认不勾选）", en: "Optional (unchecked by default)" },
+    bkdiscHealthTitle: { zh: "健康档案（适用于看医生等，默认不勾选）", en: "Health profile (e.g. for medical visits, unchecked by default)" },
+    bkdiscName: { zh: "称呼", en: "Name" },
+    bkdiscPhone: { zh: "手机号", en: "Mobile" },
+    bkdiscDetail: { zh: "预约详情（服务、时间、金额）", en: "Booking details (service, time, amount)" },
+    bkdiscLocked: { zh: "必选，不可取消", en: "Required" },
+    bkdiscEmail: { zh: "邮箱", en: "Email" },
+    bkdiscGender: { zh: "性别", en: "Gender" },
+    bkdiscAgeRange: { zh: "年龄段", en: "Age range" },
+    bkdiscChoosePh: { zh: "请选择", en: "Please select" },
+    bkdiscGenderF: { zh: "女", en: "Female" },
+    bkdiscGenderM: { zh: "男", en: "Male" },
+    bkdiscGenderOther: { zh: "其他／不愿透露", en: "Prefer not to say" },
+    bkdiscHealthShare: { zh: "我要把健康档案分享给这家机构", en: "I want to share my health profile with this business" },
+    bkdiscHealthHint: { zh: "确认后，请在 SFK App 的「分享医生」生成链接，到店出示二维码或发给机构。链接限时、可撤销；我们看不到内容。", en: "After confirming, create a link with “Share with doctor” in the SFK app, then show the QR code at the venue or send it to the business. The link expires and can be revoked; we cannot see the contents." },
+    bkdiscFootnote: { zh: "机构收到后会作为其经营记录，按其所在地法律保管。付款后你可以撤回可选项，只影响之后；已经给出的信息无法收回。", en: "Once received, the business keeps this as its own business record under local law. After payment you can withdraw the optional items; this only affects the future, and information already shared cannot be recalled." },
+    bkdiscSubmit: { zh: "同意并继续", en: "Agree and continue" },
+    bkdiscCancel: { zh: "取消", en: "Cancel" },
+    bkdiscPhoneInvalid: { zh: "手机号只能包含数字、空格和 + - ( )", en: "A mobile number may only contain digits, spaces and + - ( )" },
+    bkdiscStale: { zh: "授权页已更新，请刷新后重新确认", en: "This page has been updated. Please refresh and confirm again" },
+    bkdiscInstName: { zh: "称呼：", en: "Name:" },
+    bkdiscInstPhone: { zh: "手机：", en: "Mobile:" },
+    bkdiscInstNone: { zh: "顾客没有提供可选信息", en: "The customer did not share optional information" },
+    bkdiscInstHealthShare: { zh: "顾客会出示健康档案分享", en: "The customer will show a health profile share" },
+    bkdiscWithdraw: { zh: "撤回可选项", en: "Withdraw options" },
+    bkdiscWithdrawConfirm: { zh: "撤回后，机构将不再看到你给过的称呼、手机号、邮箱、性别和年龄段。已经给出的信息无法收回。确定撤回吗？", en: "After withdrawing, the business will no longer see the name, mobile, email, gender or age range you shared. Information already shared cannot be recalled. Withdraw now?" },
+    bkdiscWithdrawn: { zh: "已撤回可选项", en: "Optional items withdrawn" },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -3425,6 +3534,119 @@ async function ptCall(body) {
   return await callFn('sfk-admin-partner-manage', body);
 }
 
+// TD-480：某家公司的「成员」区 —— 成员列表、提出绑定公司管理员、本公司申请（核准人看得到提出人与理由）
+async function renderPtMembers(box, co, say) {
+  box.innerHTML = `<div class="panel"><p class="loading">${escapeHtml(osT('adminCommonLoading'))}</p></div>`;
+  let data;
+  try {
+    data = await ptCall({ action: 'member_list', companyId: co.id });
+  } catch (e) {
+    box.innerHTML = `<div class="panel"><p class="error">${escapeHtml(osT('adminCommonLoadFailed'))}${escapeHtml(e.message)}</p></div>`;
+    return;
+  }
+  const ROLE = { company_admin: osT('adminPtMemberRoleAdmin'), sales: osT('adminPtMemberRoleSales') };
+  const MSTATUS = { active: osT('adminPtMemberStatusActive'), disabled: osT('adminPtMemberStatusDisabled') };
+  const ACTION = { bind_admin: osT('adminPtMemberActionBind'), disable_admin: osT('adminPtMemberActionDisable') };
+  const RSTATUS = {
+    pending: osT('adminPtMemberReqPending'), approved: osT('adminPtMemberReqApproved'),
+    rejected: osT('adminPtMemberReqRejected'), cancelled: osT('adminPtMemberReqCancelled'),
+  };
+  const memberRows = (data.members ?? []).map((m) => `
+    <tr>
+      <td>${escapeHtml(m.email ?? '—')}</td>
+      <td>${escapeHtml(ROLE[m.role] ?? m.role)}</td>
+      <td>${escapeHtml(MSTATUS[m.status] ?? m.status)}</td>
+      <td>${m.role === 'company_admin' && m.status === 'active' && m.email
+        ? `<button class="ghost-btn" data-ptm-disable="${escapeHtml(m.email)}">${escapeHtml(osT('adminPtMemberBtnDisable'))}</button>` : '—'}</td>
+    </tr>`).join('');
+  const reqRows = (data.requests ?? []).map((r) => `
+    <tr>
+      <td>${escapeHtml(ACTION[r.action] ?? r.action)}</td>
+      <td>${escapeHtml(r.target_email ?? '—')}</td>
+      <td>${escapeHtml(r.requested_by_email ?? r.requested_by)}</td>
+      <td class="mono">${escapeHtml(String(r.requested_at ?? '').slice(0, 16).replace('T', ' '))}</td>
+      <td>${escapeHtml(r.reason ?? '')}</td>
+      <td>${escapeHtml(RSTATUS[r.status] ?? r.status)}${r.approver_note ? `<br><span class="muted">${escapeHtml(r.approver_note)}</span>` : ''}</td>
+      <td>${r.status === 'pending'
+        ? `<button class="ghost-btn" data-ptm-approve="${r.request_id}">${escapeHtml(osT('adminPtBtnApprove'))}</button>
+           <button class="ghost-btn" data-ptm-reject="${r.request_id}">${escapeHtml(osT('adminPtBtnReject'))}</button>` : '—'}</td>
+    </tr>`).join('');
+  box.innerHTML = `
+    <div class="panel">
+      <h2>${escapeHtml(osT('adminPtMembersHeading').replace('{name}', co.legal_name))}</h2>
+      <p class="hint">${escapeHtml(osT('adminPtMembersIntro'))}</p>
+      ${memberRows ? `<table class="data-table">
+        <thead><tr>
+          <th>${escapeHtml(osT('adminPtMemberColEmail'))}</th><th>${escapeHtml(osT('adminPtMemberColRole'))}</th>
+          <th>${escapeHtml(osT('adminPtColStatus'))}</th><th>${escapeHtml(osT('adminPtColActions'))}</th>
+        </tr></thead><tbody>${memberRows}</tbody></table>`
+        : `<p class="muted">${escapeHtml(osT('adminPtMembersEmpty'))}</p>`}
+      <h3>${escapeHtml(osT('adminPtMemberProposeHeading'))}</h3>
+      ${co.status === 'active' ? `
+        <label>${escapeHtml(osT('adminPtMemberFieldEmail'))}<input id="ptmEmail" type="email"></label>
+        <label>${escapeHtml(osT('adminPtMemberFieldReason'))}<input id="ptmReason" type="text"></label>
+        <button id="ptmProposeBtn">${escapeHtml(osT('adminPtMemberBtnPropose'))}</button>`
+        : `<p class="muted">${escapeHtml(osT('adminPtMemberProposeOnlyActive'))}</p>`}
+      <h3>${escapeHtml(osT('adminPtMemberRequestsHeading'))}</h3>
+      ${reqRows ? `<table class="data-table">
+        <thead><tr>
+          <th>${escapeHtml(osT('adminPtMemberColAction'))}</th><th>${escapeHtml(osT('adminPtMemberColEmail'))}</th>
+          <th>${escapeHtml(osT('adminPtMemberColProposer'))}</th><th>${escapeHtml(osT('adminPtMemberColTime'))}</th>
+          <th>${escapeHtml(osT('adminPtColReason'))}</th><th>${escapeHtml(osT('adminPtColStatus'))}</th>
+          <th>${escapeHtml(osT('adminPtColActions'))}</th>
+        </tr></thead><tbody>${reqRows}</tbody></table>`
+        : `<p class="muted">${escapeHtml(osT('adminPtPendingEmpty'))}</p>`}
+    </div>`;
+
+  // ⚠️ 两种「失败」⛔ 走异常、是返回 {ok:false}（账号未注册、陈旧快照作废）⇒ 必须当错误显示，⛔ 显示「完成」
+  const runM = async (body) => {
+    try {
+      const r = await ptCall(body);
+      const res = r?.result ?? {};
+      if (res.ok === false) {
+        if (res.error === 'PARTNER_MEMBER_ACCOUNT_NOT_FOUND') say(osT('adminPtMemberAccountNotFound'), true);
+        else if (res.error === 'PARTNER_MEMBER_STALE_SNAPSHOT') say(osT('adminPtMemberStale') + (res.detail ?? ''), true);
+        else say(String(res.error ?? 'FAILED'), true);
+        renderPtMembers(box, co, say);
+        return;
+      }
+      say(osT('adminPtDone'), false);
+      renderPtMembers(box, co, say);
+    } catch (e) {
+      say(String(e.message || e), true);
+    }
+  };
+  const proposeBtn = box.querySelector('#ptmProposeBtn');
+  if (proposeBtn) {
+    proposeBtn.onclick = () => runM({
+      action: 'member_propose', companyId: co.id, memberAction: 'bind_admin',
+      email: box.querySelector('#ptmEmail').value.trim(),
+      reason: box.querySelector('#ptmReason').value.trim(),
+    });
+  }
+  box.querySelectorAll('[data-ptm-disable]').forEach((b) => {
+    b.onclick = () => {
+      const reason = prompt(osT('adminPtPromptReason'));
+      if (!reason) return;
+      runM({ action: 'member_propose', companyId: co.id, memberAction: 'disable_admin', email: b.dataset.ptmDisable, reason });
+    };
+  });
+  box.querySelectorAll('[data-ptm-approve]').forEach((b) => {
+    b.onclick = () => {
+      const note = prompt(osT('adminPtPromptNote'));
+      if (note === null) return;
+      runM({ action: 'member_approve', requestId: b.dataset.ptmApprove, note: note || null });
+    };
+  });
+  box.querySelectorAll('[data-ptm-reject]').forEach((b) => {
+    b.onclick = () => {
+      const note = prompt(osT('adminPtPromptNote'));
+      if (!note) return;
+      runM({ action: 'member_reject', requestId: b.dataset.ptmReject, note });
+    };
+  });
+}
+
 async function renderPartnersTab(el) {
   el.innerHTML = `<p class="loading">${escapeHtml(osT('adminCommonLoading'))}</p>`;
   let list, pending, assets;
@@ -3454,6 +3676,7 @@ async function renderPartnersTab(el) {
              <button class="ghost-btn" data-pt-code="${c.id}">${escapeHtml(osT('adminPtBtnIssueCode'))}</button>` : ''}
         ${c.status !== 'terminated'
           ? `<button class="ghost-btn" data-pt-terminate="${c.id}">${escapeHtml(osT('adminPtBtnProposeTerminate'))}</button>` : ''}
+        <button class="ghost-btn" data-pt-members="${c.id}">${escapeHtml(osT('adminPtBtnMembers'))}</button>
       </td>
     </tr>`).join('');
 
@@ -3509,6 +3732,7 @@ async function renderPartnersTab(el) {
         </tr></thead><tbody>${rows}</tbody></table>`
         : `<p class="muted">${escapeHtml(osT('adminCommonEmpty'))}</p>`}
     </div>
+    <div id="ptMembersPanel"></div>
 
     <div class="panel">
       <h2>${escapeHtml(osT('adminPtPendingHeading'))}</h2>
@@ -3614,6 +3838,15 @@ async function renderPartnersTab(el) {
       run({ action: 'suspend', companyId: b.dataset.ptSuspend, reason });
     };
   });
+  // ══ TD-480：成员区（运营提出绑定公司管理员、另一岗核准；判断全在 RPC）══
+  const companies = list.companies ?? [];
+  el.querySelectorAll('[data-pt-members]').forEach((b) => {
+    b.onclick = () => {
+      const co = companies.find((c) => c.id === b.dataset.ptMembers);
+      if (co) renderPtMembers(el.querySelector('#ptMembersPanel'), co, say);
+    };
+  });
+
   el.querySelectorAll('[data-pt-code]').forEach((b) => {
     b.onclick = () => run({ action: 'issue_code', companyId: b.dataset.ptCode });
   });
@@ -4946,6 +5179,12 @@ const CFG_TYPES = {
     },
     check: (v) => v === null ? null : (!Array.isArray(v) ? 'notArray' : null),
   },
+  PARA: { // ⭐ 多行文字（TD-417：删除回执的邮件正文）—— 空 ⇒ `null`（未设定，读取方⛔ 发并告警）；保留换行
+    unit: () => '', input: 'textarea',
+    toInput: (v) => (v === null || v === undefined ? '' : String(v)),
+    parse: (s) => (s.trim() === '' ? null : s.replace(/\r\n/g, '\n').trim()),
+    check: () => null,
+  },
   STR: { // ⭐ 自由文本（TD-129 #10：证据的文件名或链接）—— 空 ⇒ `null`（未设定）；真正的「齐⛔ 齐」由数据库就绪闸判
     unit: () => '', input: 'text',
     toInput: (v) => (v === null || v === undefined ? '' : String(v)),
@@ -5175,6 +5414,56 @@ const CFG_SPEC = {
     notice: osT('cfgAccessReviewNotice'),
     fields: [
       { path: 'items', label: osT('cfgArChecklistField'), type: 'WORDS', affects: 'compliance' },
+    ],
+  },
+  // TD-452：数据保留天数（合规档，运营提、负责人批）。未设定的表⛔ 清理并每日告警；三张审计表 6 年锚待法务
+  'data_retention.policy': {
+    group: 'D', label: osT('cfgRetentionLabel'),
+    notice: osT('cfgRetentionNotice'),
+    fields: [
+      { path: 'tables.client_error_log.days', label: osT('cfgRetClientError'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'tables.user_notification_log.days', label: osT('cfgRetNotification'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'tables.ai_call_log.days', label: osT('cfgRetAiCall'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'tables.security_audit_logs.days', label: osT('cfgRetSecurityAudit'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'tables.admin_action_log.days', label: osT('cfgRetAdminAction'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'tables.consent_audit_log.days', label: osT('cfgRetConsentAudit'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+    ],
+  },
+  // TD-417：删除确认回执（合规档，运营提、负责人批）。任一发信项未设定 ⇒ 删除照常、⛔ 发信、P1 告警
+  'privacy.deletion_receipt': {
+    group: 'D', label: osT('cfgRcptLabel'),
+    notice: osT('cfgRcptNotice'),
+    fields: [
+      { path: 'enabled', label: osT('cfgRcptEnabled'), type: 'T5', affects: 'compliance' },
+      { path: 'defaultLocale', label: osT('cfgRcptDefaultLocale'), type: 'TEXT', options: ['zh', 'en'], affects: 'compliance' },
+      { path: 'sendTimeoutMs', label: osT('cfgRcptSendTimeout'), type: 'T4', unit: osT('cfgRcptUnitMs'), affects: 'compliance' },
+      { path: 'retryIntervalMinutes', label: osT('cfgRcptRetryInterval'), type: 'T4', unit: osT('cfgRcptUnitMinutes'), affects: 'compliance' },
+      { path: 'maxAttempts', label: osT('cfgRcptMaxAttempts'), type: 'T4', affects: 'compliance' },
+      { path: 'outboxRetentionHours', label: osT('cfgRcptOutboxHours'), type: 'T4', unit: osT('cfgUnitHours'), affects: 'compliance' },
+      { path: 'receiptRetentionMonths', label: osT('cfgRcptRetentionMonths'), type: 'T4', unit: osT('cfgRcptUnitMonths'), affects: 'compliance' },
+    ],
+  },
+  'privacy.deletion_receipt.templates': {
+    group: 'D', label: osT('cfgRcptTplLabel'),
+    notice: osT('cfgRcptTplNotice'),
+    fields: [
+      { path: 'zh.subject', label: osT('cfgRcptSubject') + ' · ' + osT('cfgRcptLangZh'), type: 'LINE', affects: 'compliance' },
+      { path: 'zh.body', label: osT('cfgRcptBody') + ' · ' + osT('cfgRcptLangZh'), type: 'PARA', affects: 'compliance' },
+      { path: 'zh.bodyStoragePending', label: osT('cfgRcptBodyStoragePending') + ' · ' + osT('cfgRcptLangZh'), type: 'PARA', affects: 'compliance' },
+      { path: 'zh.kindRecord', label: osT('cfgRcptKindRecord') + ' · ' + osT('cfgRcptLangZh'), type: 'LINE', affects: 'compliance' },
+      { path: 'zh.kindAccount', label: osT('cfgRcptKindAccount') + ' · ' + osT('cfgRcptLangZh'), type: 'LINE', affects: 'compliance' },
+      { path: 'en.subject', label: osT('cfgRcptSubject') + ' · ' + osT('cfgRcptLangEn'), type: 'LINE', affects: 'compliance' },
+      { path: 'en.body', label: osT('cfgRcptBody') + ' · ' + osT('cfgRcptLangEn'), type: 'PARA', affects: 'compliance' },
+      { path: 'en.bodyStoragePending', label: osT('cfgRcptBodyStoragePending') + ' · ' + osT('cfgRcptLangEn'), type: 'PARA', affects: 'compliance' },
+      { path: 'en.kindRecord', label: osT('cfgRcptKindRecord') + ' · ' + osT('cfgRcptLangEn'), type: 'LINE', affects: 'compliance' },
+      { path: 'en.kindAccount', label: osT('cfgRcptKindAccount') + ' · ' + osT('cfgRcptLangEn'), type: 'LINE', affects: 'compliance' },
+    ],
+  },
+  'privacy.deletion_receipt.fields': {
+    group: 'D', label: osT('cfgRcptFieldsLabel'),
+    notice: osT('cfgRcptFieldsNotice'),
+    fields: [
+      { path: 'allowed', label: osT('cfgRcptFieldsField'), type: 'WORDS', affects: 'compliance' },
     ],
   },
   'ops.alert_independent_review_types': {
@@ -5464,6 +5753,13 @@ const CFG_SPEC = {
       { path: 'count', label: osT('cfgUploadBatchField'), type: 'T4', unit: osT('cfgUnitFiles'), affects: 'liability' },
     ],
   },
+  // 第 47 号裁定 60：同一用户删号连续被中止多少次发 P1（运营档）。未设定＝每次失败都告警；⛔ 用 0 表示未设定
+  'privacy.deletion_failure_alert': {
+    group: 'G', label: osT('cfgDelFailAlertLabel'), notice: osT('cfgDelFailAlertNotice'),
+    fields: [
+      { path: 'consecutiveFailures', label: osT('cfgDelFailAlertField'), type: 'T4', unit: osT('cfgDelFailAlertUnit'), affects: 'ops' },
+    ],
+  },
   'upload_guardrail.daily_max_files': {
     group: 'G', label: osT('cfgUploadDailyLabel'),
     fields: [
@@ -5501,6 +5797,16 @@ const CFG_SPEC = {
     group: 'P', label: osT('cfgMaxSalesLabel'), notice: osT('cfgMaxSalesNotice'),
     fields: [
       { path: '', label: osT('cfgMaxSalesLabel'), type: 'TRISTATE', unit: osT('cfgUnitSubCodes'), affects: 'revenue' },
+    ],
+  },
+  // TD-480 M2：合作伙伴成员利益冲突开关（合规档，走合规两步：运营提、负责人批）。
+  //   「—」＝未设定 ⇒ 运行时按「禁止」（唯一读取方 fn_partner_member_conflict_mode()）。
+  'partner.member_block_if_institution_member': {
+    group: 'P', label: osT('cfgPartnerConflictLabel'), notice: osT('cfgPartnerConflictNotice'),
+    fields: [
+      { path: 'mode', label: osT('cfgPartnerConflictField'), type: 'TEXT', affects: 'compliance',
+        options: ['block', 'allow'],
+        optionLabels: { block: () => osT('cfgPartnerConflictBlock'), allow: () => osT('cfgPartnerConflictAllow') } },
     ],
   },
   // ═══ ⓕ · 功能开关（TD-144，2026-09-14）═══
@@ -5695,6 +6001,13 @@ const CFG_SPEC = {
     notice: osT('cfgAnnounceBudgetNotice'),
     fields: [{ path: 'value', label: osT('cfgAnnounceBudgetField'), type: 'T4',
       unit: osT('cfgUnitSends'), affects: 'ops' }],
+  },
+  // 🔴 TD-486（第 62 号 三）：返还到期复核失败被跳过 ⇒ 每日一条告警；门槛未设定 ⇒ 有跳过就告警。读取方 sfk-subscription-reward-sweep。
+  'ops.subscription_reward_skip_alert': {
+    group: 'O', label: osT('cfgRewardSkipAlertLabel'),
+    notice: osT('cfgRewardSkipAlertNotice'),
+    fields: [{ path: 'minSkipped', label: osT('cfgRewardSkipAlertField'), type: 'T4',
+      unit: osT('cfgUnitRows'), affects: 'ops' }],
   },
   // ═══ A · C 端会员与返还 ═══
   'membership_pricing.trial': {
@@ -6537,6 +6850,8 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
           st === 'active' ? osT('cfgBookingCurMktActive') : osT('cfgBookingCurMktPending'))}</span>
       </div>`;
     }).join('') + '</div>';
+  } else if (t.input === 'textarea') {
+    control = `<textarea id="${id}" rows="6" ${ro}>${escapeHtml(t.toInput(raw))}</textarea>`;
   } else {
     control = `<input type="${t.input}" id="${id}" step="${t.step || ''}" value="${escapeHtml(t.toInput(raw))}" ${ro} />`;
   }
