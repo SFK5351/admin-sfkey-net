@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-N7TJpWQa0YMyy9cPnUKWtxCxW7FAKi4Xf+xi6s+JX84='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-qEyUT4DaQg4y7YLqMryDGSvIa1uecVPVA22IGCaJeWk='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -220,7 +220,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:0b59a8b75939a5ca —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:3440cda58017a815 —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -2069,6 +2069,10 @@
     cfgUnitShops: { zh: "家", en: "providers" },
     cfgUnitErrors: { zh: "条", en: "errors" },
     cfgUnitSkips: { zh: "天", en: "days" },
+    cfgStaffTitleMaxLabel: { zh: "机构自设称谓的最大字数", en: "Maximum length of an organization's staff title" },
+    cfgStaffTitleMaxField: { zh: "最大字数", en: "Maximum characters" },
+    cfgStaffTitleMaxNotice: { zh: "机构在机构后台为自己的服务人员设置称谓（如教练、医生）时，字数不得超过这里设定的数。留空表示未设定：机构无法设置自己的称谓，只显示按机构类型的默认称谓。参考值 20，仅作提示，不是默认值，具体数字由运营设定。", en: "Organizations cannot set a staff title longer than this number of characters. Blank means not set: organizations cannot set their own title and the default for their organization type is shown. A reference value is 20; this is only a hint, not a default, and the actual number is set by operations." },
+    cfgUnitChars: { zh: "字", en: "chars" },
     cfgErrBadInterval: { zh: "请按「数字 ＋ 单位」填，例如 30 minutes / 2 hours / 3 days", en: "Use \"number unit\", e.g. 30 minutes / 2 hours / 3 days" },
     cfgIndepReviewLabel: { zh: "「待独立复核」的告警类型", en: "Alert types needing independent review" },
     cfgRetentionLabel: { zh: "数据保留天数", en: "Data retention (days)" },
@@ -5062,6 +5066,13 @@ const CFG_TYPES = {
     check: (v) => v === null ? null
       : (!Number.isInteger(v) ? 'notInteger' : v < 0 ? 'negative' : null),
   },
+  T4P: { // 〔TD-717 配置卡〕正整数（≥1）：与 T4 同形，只是 0 也被拒——0 不能兼任「未设定」（未设定＝留空＝null）。⛔ 改 T4 本身（其它键行为不变）
+    unit: (f) => pick(f.unit), input: 'number', step: '1',
+    toInput: (v) => (v === null || v === undefined ? '' : String(v)),
+    parse: (s) => (s.trim() === '' ? null : Number(s)),
+    check: (v) => v === null ? null
+      : (!Number.isInteger(v) ? 'notInteger' : v < 1 ? 'ltOne' : null),
+  },
   T5: { // 开关
     unit: () => '', input: 'checkbox',
     toInput: (v) => v === true,
@@ -5489,6 +5500,14 @@ const CFG_SPEC = {
   //     `stripe_publishable_key`／`fin6.ai_call_log_expected_functions`／`health_archive.pdf_languages`
   //     —— ⚠️ 这些是**基础设施与工程登记**，⛔ 是运营参数：🔴 给它们一个输入框，等于把
   //     「改一个 URL 就能让全站调用打到别处」这种能力交出去 ⇒ ⭐ 它们该**冻结**，⛔ 是配界面。
+  // 🔴 TD-717 配置卡：机构自设称谓的最大字数。读取方 _shared/staff_title.ts（loadStaffTitleMaxLength → parseMaxLength，字段路径 max_length）；
+  //   留空＝未设定＝null（⛔ 用 0 兼任；T4P 拒绝 0）⇒ 机构后台「保存称谓」被拒并提示未配置。operational 档单人改（⛔ 双人复核）。⛔ 在客户端可读白名单加此键。
+  'sfk_os.staff_title_max_length': {
+    group: 'C', label: osT('cfgStaffTitleMaxLabel'), notice: osT('cfgStaffTitleMaxNotice'),
+    fields: [
+      { path: 'max_length', label: osT('cfgStaffTitleMaxField'), type: 'T4P', unit: osT('cfgUnitChars'), affects: 'institution' },
+    ],
+  },
   'cs.digest_window_days': {
     group: 'S', label: osT('cfgDigestWindowLabel'),
     fields: [
