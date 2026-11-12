@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-qEyUT4DaQg4y7YLqMryDGSvIa1uecVPVA22IGCaJeWk='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/7dbnpd/CpQ8iOK9WkangkABSViKP4k48TRn2Oi7nc0='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -137,6 +137,10 @@
   .cfg-cur-cc { font-weight: 600; min-width: 2.5em; }
   .cfg-cur-sel { min-width: 6em; }
   .cfg-tristate { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+  .cfg-domainlist { display: flex; flex-direction: column; gap: 6px; max-width: 520px; }   /* TD-548 H3：域名清单 */
+  .cfg-domainlist textarea { width: 100%; font-family: ui-monospace, monospace; }
+  .cfg-dl-removed { color: #B3261E; font-size: 13px; word-break: break-all; }
+  .cfg-dl-added { color: #1A6B3C; font-size: 13px; word-break: break-all; }
   .cfg-tri-n { width: 6em; }
   .cfg-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
   .cfg-reason { flex: 1 1 240px; padding: 5px 7px; }
@@ -220,7 +224,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:3440cda58017a815 —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:66fe5136a93c836c —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -2550,6 +2554,21 @@
     bkdiscWithdraw: { zh: "撤回可选项", en: "Withdraw options" },
     bkdiscWithdrawConfirm: { zh: "撤回后，机构将不再看到你给过的称呼、手机号、邮箱、性别和年龄段。已经给出的信息无法收回。确定撤回吗？", en: "After withdrawing, the business will no longer see the name, mobile, email, gender or age range you shared. Information already shared cannot be recalled. Withdraw now?" },
     bkdiscWithdrawn: { zh: "已撤回可选项", en: "Optional items withdrawn" },
+    cfgDomainsCount: { zh: "{n} 个域名", en: "{n} domains" },
+    cfgDomainsCurrent: { zh: "当前生效：{n} 个域名", en: "Currently in effect: {n} domains" },
+    cfgDomainsDiffHead: { zh: "当前 {before} → 提交后 {after}；新增 {added} 个、移除 {removed} 个", en: "Now {before} → after {after}; {added} added, {removed} removed" },
+    cfgDomainsImport: { zh: "导入文件（txt／conf，一行一个域名；只读本机文件）", en: "Import a file (txt / conf, one domain per line; reads the local file only)" },
+    cfgDomainsRemovedWarn: { zh: "⚠ 有域名被移除：这些域名的邮箱此后可以领取注册类奖励，请逐个核对", en: "⚠ Domains are being removed: emails on them will be able to claim sign-up rewards — please check each one" },
+    cfgDomainsSet: { zh: "已设定（一行一个域名；留空＝已设定为空）", en: "Set (one domain per line; empty = set to empty)" },
+    cfgDomainsUnset: { zh: "未设定（不拦任何人）", en: "Not set (block nobody)" },
+    cfgErrBadDomain: { zh: "名单里有不像域名的行（不能含空白、@、/，中间要有一个点）", en: "The list has a line that is not a domain (no spaces, @ or /; it needs a dot in the middle)" },
+    cfgErrBadDomainStrict: { zh: "域名须是小写字母、数字或连字符，中间要有点，不能含空格、@、通配符 *；已设定的名单不能为空", en: "A domain must use lowercase letters, digits or hyphens with a dot in the middle, and no spaces, @ or wildcard *; a set list cannot be empty" },
+    cfgAdminDomField: { zh: "允许的邮箱域名", en: "Allowed email domains" },
+    cfgAdminDomLabel: { zh: "允许的后台账号邮箱域名", en: "Allowed email domains for admin accounts" },
+    cfgAdminDomNotice: { zh: "同一个收件箱的别名地址视为同一个人：@ 前面去掉点号后相同的邮箱（例如 nancy@alpha.example 与 nancy@beta.example）不能各开一个后台账号。邮箱里含加号一律不允许。名单只管新开账号，已有账号不受影响。", en: "Alias addresses of one mailbox count as the same person: emails whose part before the @ is the same once dots are removed (for example nancy@alpha.example and nancy@beta.example) cannot each hold an admin account. A plus sign in the address is always refused. The list only governs new accounts; existing accounts are not affected." },
+    cfgAdminDomRemovedWarn: { zh: "⚠ 有域名被移除：已有这些域名邮箱的后台账号不受影响，但此后不能再用这些域名新开后台账号", en: "⚠ Domains are being removed: existing admin accounts on them are not affected, but new admin accounts can no longer be opened on them" },
+    cfgAdminDomSet: { zh: "已设定（一行一个域名，例如 sfkey.net、sfkey.com）", en: "Set (one domain per line, for example sfkey.net and sfkey.com)" },
+    cfgAdminDomUnset: { zh: "未设定（只允许公司默认域名）", en: "Not set (only the company default domain is allowed)" },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -5190,6 +5209,15 @@ const CFG_TYPES = {
     },
     check: (v) => v === null ? null : (!Array.isArray(v) ? 'notArray' : null),
   },
+  T10: { // ⭐ TD-548 H3：域名清单（一次性邮箱名单，成百上千条）—— 三态：未设定(null)／已设定([…])／已设定为空([])；⛔ 裸 JSON 框
+    // 界面是「未设定／已设定」两个单选＋一个多行框（一行一个域名）＋导入文件＋差集预览；读回交给 parse，校验与库函数 fn_reward_email_domain_blocked 同一口径。
+    unit: () => '', input: 'domainlist',
+    toInput: (v) => (Array.isArray(v) ? v : null),
+    parse: (o) => (!o || (o.state !== 'unset' && o.state !== 'set') ? undefined : o.state === 'unset' ? null : cfgNormDomains(o.text)),
+    check: (v, spec) => v === null ? null
+      : (!Array.isArray(v) ? 'triState' : v.some((d) => !CFG_DOMAIN_RE.test(d)) ? 'badDomain'
+        : (spec && spec.domainStrict && (v.length === 0 || v.some((d) => !CFG_DOMAIN_STRICT_RE.test(d)))) ? 'badDomainStrict' : null),
+  },
   PARA: { // ⭐ 多行文字（TD-417：删除回执的邮件正文）—— 空 ⇒ `null`（未设定，读取方⛔ 发并告警）；保留换行
     unit: () => '', input: 'textarea',
     toInput: (v) => (v === null || v === undefined ? '' : String(v)),
@@ -5316,6 +5344,8 @@ const CFG_ERR = {
   badCountry: osT('cfgErrBadCountry'),
   badCurrency: osT('cfgErrBadCurrency'),
   triState: osT('cfgErrTriState'),   // TD-235
+  badDomain: osT('cfgErrBadDomain'),   // TD-548 H3：域名清单里有不像域名的行
+  badDomainStrict: osT('cfgErrBadDomainStrict'),   // TD-1167：严格域名形状（小写、无通配符、非空名单）
   notNumber: { zh: '请填数字', en: 'Must be a number' },
   negative: { zh: '不能为负', en: 'Cannot be negative' },
   tooManyDecimals: { zh: '最多 2 位小数', en: 'At most 2 decimal places' },
@@ -6601,6 +6631,19 @@ const CFG_SPEC = {
       { path: 'recoveryGraceMonths', label: { zh: '恢复宽限月数', en: 'Recovery grace (months)' }, type: 'T4', unit: { zh: '个月', en: 'months' }, affects: 'liability' },
     ],
   },
+  // 后台账号允许的邮箱域名（TD-1167；合规档，合规岗提出、负责人岗核准）。保存路径＝fn_config_compliance_update；⛔ 进普通可写清单。
+  // GOV-1 自检：① 具名域名列表输入（一行一个，⛔ 裸 JSON）② 合规岗自己改得动 ③ 「未设定」单选≠空名单（空名单被拒；未设定＝只允许 @sfkey.net）
+  //   ④ 两步审批 ⑤ 运行时读取方＝fn_admin_email_allowed_domains()（唯一判据 fn_admin_email_policy_check 经它读），读的就是 value.domains 这一处。
+  // 冻结项不在这张卡：邮箱含 + 一律拒绝（一个人能开两个后台账号就能自提自批，是安全底线，不由某个岗位的专业判断决定）。
+  'admin.allowed_email_domains': {
+    group: 'D', label: osT('cfgAdminDomLabel'),
+    notice: osT('cfgComplianceNotice'),
+    fields: [
+      { path: 'domains', label: osT('cfgAdminDomField'), type: 'T10', affects: 'ops', domainStrict: true,
+        fieldNotice: osT('cfgAdminDomNotice'),
+        domainTexts: { unset: osT('cfgAdminDomUnset'), set: osT('cfgAdminDomSet'), removedWarn: osT('cfgAdminDomRemovedWarn') } },
+    ],
+  },
 };
 
 // ── `D1` §三：**未接入 ／ 已冻结** ⇒ 🔴 界面只读，⛔ 给编辑框 ──
@@ -6834,6 +6877,18 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
       + (cur.state === 'limited' ? cfgTriCountHtml(cur.count, ro, pick(f.unit) || '') : '')
       + (cur.state === null ? `<span class="cfg-notice-inline">${escapeHtml(osT('cfgErrTriState'))}</span>` : '')
       + '</div>';
+  } else if (t.input === 'domainlist') {
+    // ⭐ TD-548 H3：两个单选（未设定／已设定）＋ 多行框（一行一个）＋ 导入文件（只读本地文件内容，⛔ 联网）＋ 与当前生效名单的差集预览
+    cfgDomainListWire();
+    const cur = t.toInput(raw);
+    const nm = `${id}_dl`;
+    const dt = f.domainTexts || {};   // TD-1167：卡片可自带单选文案与「移除域名」警示（默认是 TD-548 奖励邮箱名单的措辞）
+    const opt = (st, on) => `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="${st}" ${on ? 'checked' : ''} ${ro} /> ${escapeHtml(pick(dt[st]) || osT(st === 'unset' ? 'cfgDomainsUnset' : 'cfgDomainsSet'))}</label>`;
+    control = `<div class="cfg-domainlist" id="${id}" data-warn="${escapeHtml(pick(dt.removedWarn) || '')}" data-base="${escapeHtml(JSON.stringify(cur))}">`
+      + opt('unset', cur === null) + opt('set', cur !== null)
+      + `<textarea class="cfg-dl-text" rows="8" ${ro}>${escapeHtml((cur || []).join('\n'))}</textarea>`
+      + (ro ? '' : `<div><label class="muted">${escapeHtml(osT('cfgDomainsImport'))} <input type="file" class="cfg-dl-file" accept=".txt,.conf,text/plain" /></label></div>`)
+      + `<div class="cfg-dl-diff muted">${escapeHtml(osT('cfgDomainsCurrent').replace('{n}', cur === null ? osT('cfgUnset') : String(cur.length)))}</div></div>`;
   } else if (t.input === 'curmap') {
     // ══════════════════════════════════════════════════════════════
     // ⭐ 一行一个国家 —— 🔴 **行集合来自【别的键】，⛔ 来自这里**
@@ -6896,7 +6951,7 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
   const policyText = (typeof pMin === 'number' || typeof pMax === 'number')
     ? `${osT('cfgPolicyRange')}${fmtRange(pMin)} – ${fmtRange(pMax)}` : '';
   return `
-    <div class="cfg-field" data-key="${escapeHtml(keyName)}" data-path="${escapeHtml(f.path)}" data-type="${f.type}" data-id="${id}"${f.options ? ` data-options="${escapeHtml(JSON.stringify(f.options))}"` : ''}${f.configuredPath ? ` data-configured-path="${escapeHtml(f.configuredPath)}"` : ''}${f.disabledPath ? ` data-disabled-path="${escapeHtml(f.disabledPath)}"` : ''}${t.input === 'platrows' ? ` data-base="${escapeHtml(JSON.stringify(t.toInput(raw)))}"` : ''}${typeof pMin === 'number' ? ` data-policy-min="${pMin}"` : ''}${typeof pMax === 'number' ? ` data-policy-max="${pMax}"` : ''}>
+    <div class="cfg-field" data-key="${escapeHtml(keyName)}" data-path="${escapeHtml(f.path)}" data-type="${f.type}" data-id="${id}"${f.options ? ` data-options="${escapeHtml(JSON.stringify(f.options))}"` : ''}${f.maxLen ? ` data-max-len="${Number(f.maxLen)}"` : ''}${f.domainStrict ? ' data-domain-strict="1"' : ''}${t.input === 'datetime-local' && typeof raw === 'string' ? ` data-orig="${escapeHtml(raw)}"` : ''}${f.configuredPath ? ` data-configured-path="${escapeHtml(f.configuredPath)}"` : ''}${f.disabledPath ? ` data-disabled-path="${escapeHtml(f.disabledPath)}"` : ''}${f.omitWhenEmpty ? ' data-omit-empty="1"' : ''}${t.input === 'platrows' ? ` data-base="${escapeHtml(JSON.stringify(t.toInput(raw)))}"` : ''}${typeof pMin === 'number' ? ` data-policy-min="${pMin}"` : ''}${typeof pMax === 'number' ? ` data-policy-max="${pMax}"` : ''}>
       <div class="cfg-field-label">${escapeHtml(pick(f.label) || f.path || keyName)}</div>
       <div class="cfg-field-input">
         ${t.prefix ? `<span class="cfg-unit">${escapeHtml(unit)}</span>` : ''}
@@ -6956,6 +7011,32 @@ document.addEventListener('click', (ev) => {
 });
 }
 
+// TD-548 H3：域名清单控件的事件委托（渲染是动态的，所以挂在 document 上一次）
+function cfgDomainListRefresh(box) {
+  const base = JSON.parse(box.dataset.base || 'null');
+  const sel = box.querySelector('input[type=radio]:checked');
+  const out = box.querySelector('.cfg-dl-diff');
+  if (!sel || !out) return;
+  const next = sel.value === 'set' ? cfgNormDomains(box.querySelector('.cfg-dl-text').value) : null;
+  out.innerHTML = cfgDomainDiffHtml(cfgDomainDiff(base, next), box.dataset.warn || '');
+}
+let cfgDomainWired = false;
+function cfgDomainListWire() {   // 渲染域名清单控件时才挂（只挂一次）；⛔ 在脚本顶层碰 document（若干离线测试用的假 document 没有 addEventListener）
+  if (cfgDomainWired || typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;   // 离线测试的假 document 可能没有
+  cfgDomainWired = true;
+  document.addEventListener('input', (e) => { const b = e.target.closest && e.target.closest('.cfg-domainlist'); if (b) cfgDomainListRefresh(b); });
+  document.addEventListener('change', (e) => {
+    const b = e.target.closest && e.target.closest('.cfg-domainlist');
+    if (!b) return;
+    if (e.target.classList.contains('cfg-dl-file') && e.target.files && e.target.files[0]) {
+      const rd = new FileReader();
+      rd.onload = () => { b.querySelector('.cfg-dl-text').value = cfgNormDomains(String(rd.result || '')).join('\n');
+        const r = b.querySelector('input[type=radio][value=set]'); if (r) r.checked = true; cfgDomainListRefresh(b); };
+      rd.readAsText(e.target.files[0]);
+    } else cfgDomainListRefresh(b);
+  });
+}
+
 /** ⭐ 从界面读回一个字段的值；返回 `{ v, err }`。⚠️ 空 ⇒ `null`（**未设定**），⛔ 是 `0`。 */
 function cfgReadField(el) {
   const f = { type: el.dataset.type, path: el.dataset.path };
@@ -6969,6 +7050,10 @@ function cfgReadField(el) {
     v = t.parse([...node.querySelectorAll('.cfg-ord-row')]
       .filter((r) => r.querySelector('input[type=checkbox]').checked)
       .map((r) => r.dataset.code));
+  }
+  else if (t.input === 'domainlist') {
+    const sel = node.querySelector('input[type=radio]:checked');
+    v = t.parse(sel ? { state: sel.value, text: node.querySelector('.cfg-dl-text').value } : null);   // ⛔ 选 ⇒ undefined ⇒ check 报 triState
   }
   else if (t.input === 'checklist') {
     v = t.parse([...node.querySelectorAll('input[type=checkbox]')].filter((c) => c.checked).map((c) => c.value));
@@ -7010,7 +7095,7 @@ function cfgReadField(el) {
   } else v = t.parse(node.value);
   // 🔴 2026-09-22 修（TD-129 #10 顺带查出）：原写 `options: undefined` ⇒ 下拉类（TEXT）字段校验永远报「只能从清单里选」，
   //   ⚠️ 即选了清单里的值也存⛔ 了（告警分级「默认级别」那一格同样中招）。⇒ 选项随字段渲染进 data-options，这里读回来校验。
-  const spec = { ...f, options: el.dataset.options ? JSON.parse(el.dataset.options) : undefined };
+  const spec = { ...f, options: el.dataset.options ? JSON.parse(el.dataset.options) : undefined, maxLen: el.dataset.maxLen ? Number(el.dataset.maxLen) : undefined, domainStrict: el.dataset.domainStrict === '1' };
   const errCode = t.check(v, spec);
   return { v, err: errCode ? pick(CFG_ERR[errCode]) : null };
 }
@@ -7256,7 +7341,37 @@ function cfgIsBigChange(oldV, newV) {
   return Math.abs(newV - oldV) / Math.abs(oldV) > CFG_HIGHLIGHT_RATIO;  // ① 超 50%
 }
 
+// ---- H3 domain helpers ----
+// 与库函数 fn_reward_email_domain_blocked 同一口径：不含空白、@、/，中间有一个点；非 ASCII 域名原样小写（名单里可同时放原形与 xn-- 形）。
+const CFG_DOMAIN_RE = /^[^\s@/]+\.[^\s@/]+$/;
+// TD-1167：后台账号邮箱域名名单的严格形状，与库内形状守卫（fn_validate_td1167_email_domains_shape）逐字同一把尺；空名单不允许（未设定用「未设定」单选，不用空数组）
+const CFG_DOMAIN_STRICT_RE = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
+function cfgNormDomains(text) {
+  const seen = new Set(); const out = [];
+  String(text || '').split(/[\s,;，；、]+/).forEach((x) => {
+    const d = x.trim().toLowerCase().replace(/\.+$/, '');
+    if (d && !seen.has(d)) { seen.add(d); out.push(d); }
+  });
+  return out;
+}
+function cfgDomainDiff(oldArr, newArr) {
+  const a = new Set(Array.isArray(oldArr) ? oldArr : []); const b = new Set(Array.isArray(newArr) ? newArr : []);
+  return { added: [...b].filter((x) => !a.has(x)).sort(), removed: [...a].filter((x) => !b.has(x)).sort(),
+           before: Array.isArray(oldArr) ? oldArr.length : null, after: Array.isArray(newArr) ? newArr.length : null };
+}
+const CFG_DOMAIN_SHOW = 50;   // 预览只列前若干个，总数另给（显示数量不影响任何判定）
+function cfgDomainDiffHtml(d, warnText) {
+  const head = osT('cfgDomainsDiffHead').replace('{added}', () => String(d.added.length)).replace('{removed}', () => String(d.removed.length))
+    .replace('{before}', () => d.before === null ? osT('cfgUnset') : String(d.before)).replace('{after}', () => d.after === null ? osT('cfgUnset') : String(d.after));
+  const list = (arr, cls) => (arr.length ? `<div class="${cls}">${escapeHtml(arr.slice(0, CFG_DOMAIN_SHOW).join('、'))}${arr.length > CFG_DOMAIN_SHOW ? ' …' : ''}</div>` : '');
+  return `<div>${escapeHtml(head)}</div>`
+    + (d.removed.length ? `<div class="cfg-hot-tag">${escapeHtml(warnText || osT('cfgDomainsRemovedWarn'))}</div>` : '')
+    + list(d.removed, 'cfg-dl-removed') + list(d.added, 'cfg-dl-added');
+}
+// ---- end H3 domain helpers ----
+
 function cfgFmt(v, type) {
+  if (type === 'T10' && Array.isArray(v)) return escapeHtml(osT('cfgDomainsCount').replace('{n}', String(v.length)));
   if (v === null || v === undefined) return `<span class="cfg-unset">${escapeHtml(osT('cfgUnset'))}</span>`;
   if (typeof v === 'boolean') return v ? '✔' : '✘';
   if (Array.isArray(v)) return escapeHtml(v.join('、'));
@@ -7281,7 +7396,9 @@ function cfgDiffRows(key, oldV, newV) {
         && ((typeof pMin === 'number' && b < pMin) || (typeof pMax === 'number' && b > pMax));
       rows.push({
         label: pick(f.label) || f.path, type: f.type, a, b,
-        affects: f.affects, hot: cfgIsBigChange(a, b) || outOfPolicy,
+        domainDiff: f.type === 'T10' ? cfgDomainDiff(a, b) : null,
+        domainWarn: f.type === 'T10' && f.domainTexts ? (pick(f.domainTexts.removedWarn) || '') : '',
+        affects: f.affects, hot: cfgIsBigChange(a, b) || outOfPolicy || (f.type === 'T10' && cfgDomainDiff(a, b).removed.length > 0),
         outOfPolicy, policyMin: pMin, policyMax: pMax,
       });
     });
@@ -7322,7 +7439,7 @@ function cfgReqCard(r, emails, mode) {
             <td>${escapeHtml(d.label)}</td>
             <td class="mono">${d.raw ? escapeHtml(d.a) : cfgFmt(d.a, d.type)}</td>
             <td>→</td>
-            <td class="mono"><strong>${d.raw ? escapeHtml(d.b) : cfgFmt(d.b, d.type)}</strong>${d.hot ? ` <span class="cfg-hot-tag">${escapeHtml(osT(d.outOfPolicy ? 'cfgOutOfPolicy' : 'cfgBigChange'))}</span>` : ''}${d.outOfPolicy ? `<br><small class="cfg-policy-warn">${escapeHtml(osT('cfgPolicyRange'))}${escapeHtml(String(Math.round((d.policyMin ?? 0) * 10000) / 100))}% – ${escapeHtml(String(Math.round((d.policyMax ?? 0) * 10000) / 100))}%</small>` : ''}</td>
+            <td class="mono"><strong>${d.raw ? escapeHtml(d.b) : cfgFmt(d.b, d.type)}</strong>${d.domainDiff ? cfgDomainDiffHtml(d.domainDiff, d.domainWarn) : ''}${d.rowsDiff ? cfgRowsDiffHtml(d.rowsDiff) : ''}${d.hot ? ` <span class="cfg-hot-tag">${escapeHtml(osT(d.outOfPolicy ? 'cfgOutOfPolicy' : (d.riskUp || 'cfgBigChange')))}</span>` : ''}${d.outOfPolicy ? `<br><small class="cfg-policy-warn">${escapeHtml(osT('cfgPolicyRange'))}${escapeHtml(String(Math.round((d.policyMin ?? 0) * 10000) / 100))}% – ${escapeHtml(String(Math.round((d.policyMax ?? 0) * 10000) / 100))}%</small>` : ''}</td>
             <td class="muted">${d.affects ? escapeHtml(pick(CFG_AFFECTS[d.affects])) : ''}</td>
           </tr>`).join('')}
         </tbody>
