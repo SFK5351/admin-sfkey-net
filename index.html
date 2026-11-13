@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/7dbnpd/CpQ8iOK9WkangkABSViKP4k48TRn2Oi7nc0='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-iSzBJttAuigwG0m/qj9nnRqEkEUIYSEmRXqKZd8DekA='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFKey Health Admin Console</title>
 <style>
@@ -141,6 +141,8 @@
   .cfg-domainlist textarea { width: 100%; font-family: ui-monospace, monospace; }
   .cfg-dl-removed { color: #B3261E; font-size: 13px; word-break: break-all; }
   .cfg-dl-added { color: #1A6B3C; font-size: 13px; word-break: break-all; }
+  .cfg-bool3 { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }   /* TD-531 S1c：是／否／未设定 三态（⛔ 复选框） */
+  .cfg-gate { border-left: 3px solid #C9A84C; padding: 4px 8px; margin: 6px 0; display: flex; flex-direction: column; gap: 4px; }
   .cfg-tri-n { width: 6em; }
   .cfg-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
   .cfg-reason { flex: 1 1 240px; padding: 5px 7px; }
@@ -224,7 +226,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:66fe5136a93c836c —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:f812ad199264b2ee —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -2569,6 +2571,67 @@
     cfgAdminDomRemovedWarn: { zh: "⚠ 有域名被移除：已有这些域名邮箱的后台账号不受影响，但此后不能再用这些域名新开后台账号", en: "⚠ Domains are being removed: existing admin accounts on them are not affected, but new admin accounts can no longer be opened on them" },
     cfgAdminDomSet: { zh: "已设定（一行一个域名，例如 sfkey.net、sfkey.com）", en: "Set (one domain per line, for example sfkey.net and sfkey.com)" },
     cfgAdminDomUnset: { zh: "未设定（只允许公司默认域名）", en: "Not set (only the company default domain is allowed)" },
+    cfgErrMinGtMax: { zh: "最低值不能大于最高值", en: "The minimum cannot be greater than the maximum" },
+    cfgPromoCheck1: { zh: "邮箱验证与设备去重已生效（TD-548）", en: "Email verification and device de-duplication are in effect (TD-548)" },
+    cfgPromoCheck2: { zh: "两个推广异常告警阈值已配置：同一要约每小时领取笔数、同一账号跨机构 24 小时领取笔数（TD-550）", en: "Both promo anomaly thresholds are configured: claims per offer per hour, and claims per account across institutions per 24 hours (TD-550)" },
+    cfgPromoCheck3: { zh: "面值、张数、领取窗口区间已核准", en: "Face value, quantity and claim window ranges are approved" },
+    cfgPromoCheck4: { zh: "至少一条核销路径可用：新加坡在线付款已开通，或到店付核销已上线", en: "At least one redemption path works: online payment is live in Singapore, or in-store redemption is live" },
+    cfgPromoChecklistBlock: { zh: "清单未全部勾选，不能提交「开」", en: "Tick every item before submitting \"On\"" },
+    cfgPromoChecklistTitle: { zh: "打开前清单", en: "Pre-opening checklist" },
+    cfgPromoClaimUnset: { zh: "未设定 —— 顾客领取会被拒绝", en: "Not set — customer claims will be rejected" },
+    cfgPromoFaceLabel: { zh: "推广要约 · 面值区间", en: "Promo offers · Face value range" },
+    cfgPromoFaceMax: { zh: "最高面值（S$）", en: "Maximum face value (S$)" },
+    cfgPromoFaceMin: { zh: "最低面值（S$）", en: "Minimum face value (S$)" },
+    cfgPromoPaidLabel: { zh: "推广要约 · 领取是否限付费会员", en: "Promo offers · Claiming limited to paid members" },
+    cfgPromoPaidNotRequired: { zh: "不限", en: "No limit" },
+    cfgPromoPaidRequired: { zh: "限付费会员", en: "Paid members only" },
+    cfgPromoPerUserLabel: { zh: "推广要约 · 每人限领上限", en: "Promo offers · Per-customer claim cap" },
+    cfgPromoPerUserMax: { zh: "机构可设的每人限领最多为", en: "Highest per-customer limit an institution may set" },
+    cfgPromoStockLabel: { zh: "推广要约 · 张数区间", en: "Promo offers · Quantity range" },
+    cfgPromoStockMax: { zh: "每个要约最多张数", en: "Maximum quantity per offer" },
+    cfgPromoStockMin: { zh: "每个要约最少张数", en: "Minimum quantity per offer" },
+    cfgPromoSubmitUnset: { zh: "未设定 —— 机构提交会被拒绝", en: "Not set — institution submissions will be rejected" },
+    cfgPromoSwitchLabel: { zh: "推广要约 · 领取总开关", en: "Promo offers · Claiming master switch" },
+    cfgPromoSwitchOff: { zh: "关", en: "Off" },
+    cfgPromoSwitchOn: { zh: "开", en: "On" },
+    cfgPromoSwitchUnset: { zh: "未设定（视为关）", en: "Not set (treated as off)" },
+    cfgPromoTierOff: { zh: "不开放", en: "Closed" },
+    cfgPromoTierOn: { zh: "开放", en: "Open" },
+    cfgPromoTiersLabel: { zh: "推广要约 · 按档位开放", en: "Promo offers · Open by plan tier" },
+    cfgPromoWindowLabel: { zh: "推广要约 · 领取窗口天数", en: "Promo offers · Claim window (days)" },
+    cfgPromoWindowMax: { zh: "最长天数", en: "Longest (days)" },
+    cfgPromoWindowMin: { zh: "最短天数", en: "Shortest (days)" },
+    cfgRetCronDispatch: { zh: "定时任务派发台账 · 保留天数", en: "Scheduled-job dispatch ledger · retention (days)" },
+    cfgRetCronDispatchMin: { zh: "定时任务派发台账 · 最短保留（天）", en: "Scheduled-job dispatch ledger · minimum retention (days)" },
+    cfgRetEdgeJobRuns: { zh: "定时任务运行记录 · 保留天数", en: "Scheduled-job run log · retention (days)" },
+    cfgRetEdgeJobRunsMin: { zh: "定时任务运行记录 · 最短保留（天）", en: "Scheduled-job run log · minimum retention (days)" },
+    cfgRetentionNoticeRunLogs: { zh: "定时任务运行记录与派发台账各有「保留天数」和「最短保留」：两者都设定，且保留天数不小于最短保留，才会清理；最短保留不要小于每日巡检回查的窗口（近 7 天）。", en: "The scheduled-job run log and dispatch ledger each have a retention period and a minimum retention. Cleanup only runs when both are set and the retention period is not shorter than the minimum; do not set the minimum below the daily inspection's look-back window (7 days)." },
+    promoReviewApprove: { zh: "通过", en: "Approve" },
+    promoReviewColActions: { zh: "操作", en: "Actions" },
+    promoReviewColFace: { zh: "面值", en: "Face value" },
+    promoReviewColInstitution: { zh: "机构", en: "Institution" },
+    promoReviewColStock: { zh: "张数／已领", en: "Quantity / Claimed" },
+    promoReviewColSubmitted: { zh: "提交时间", en: "Submitted" },
+    promoReviewColTier: { zh: "档位", en: "Plan tier" },
+    promoReviewColTrack: { zh: "分轨", en: "Track" },
+    promoReviewColWindow: { zh: "领取窗口", en: "Claim window" },
+    promoReviewEfficacyHint: { zh: "审核时核对：机构对外页文案不得含疗效表述", en: "Check before approving: the institution's public copy must not make treatment-effect claims" },
+    promoReviewEmpty: { zh: "无记录。", en: "No records." },
+    promoReviewEnd: { zh: "下架", en: "Unlist" },
+    promoReviewHistory: { zh: "状态流水", en: "Status history" },
+    promoReviewMore: { zh: "加载更多", en: "Load more" },
+    promoReviewReasonPh: { zh: "原因", en: "Reason" },
+    promoReviewReasonRequired: { zh: "请填写原因", en: "A reason is required" },
+    promoReviewReject: { zh: "驳回", en: "Reject" },
+    promoReviewSnapshot: { zh: "提交时生效的区间", en: "Ranges in effect at submission" },
+    promoReviewTitle: { zh: "推广要约审核", en: "Promo offer review" },
+    promoReviewTrackAWarning: { zh: "该机构为 A 轨，不能上架", en: "This institution is on Track A and cannot be listed" },
+    promoReviewTabPending: { zh: "待审", en: "Pending" },
+    promoReviewTabListed: { zh: "已上架", en: "Listed" },
+    promoReviewTabRejected: { zh: "已驳回", en: "Rejected" },
+    promoReviewTabEnded: { zh: "已结束", en: "Ended" },
+    promoReviewStatusWithdrawn: { zh: "机构已撤回", en: "Cancelled by institution" },
+    promoReviewDone: { zh: "已完成", en: "Done" },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -2811,6 +2874,7 @@ async function handleSession(session) {
   // 🔴 TD-129 B1 ④：非全权但持机构权限点（子公司四岗、客服提出暂停等）⇒ 也显示机构页；看到哪些机构由 RLS 按公司过滤
   state.instScoped = false;
   state.auditView = false;
+  state.promoReview = false;
   {
     const { data: scope, error: scopeErr } = await supabase.rpc('fn_admin_my_scope');
     if (scopeErr) console.error('TD-129 我的范围读取失败，按无机构权限显示：', scopeErr.message);
@@ -2818,6 +2882,8 @@ async function handleSession(session) {
     if (!state.backofficeFull) state.instScoped = perms.some((p) => p.startsWith('inst.'));
     // TD-414：权限复核页只对持 audit.view 的人显示（审计岗、负责人岗）；服务端照样判
     state.auditView = perms.includes('audit.view');
+    // DV-admin-4（TD-1151）：推广审核页只对持 promo.offer.review 的人显示（运营岗）；服务端照样判（与 audit.view 同一做法：本线⛔ 有 fn_admin_my_entries，生产上没有这个函数）
+    state.promoReview = perms.includes('promo.offer.review');
   }
   renderApp();
   if (!state.backofficeFull) return;
@@ -2834,6 +2900,9 @@ async function handleSession(session) {
 // ⭐ 全权 ⇒ 按等级显示全部；非全权 ⇒ 配置页，另加持机构权限点时的机构页（TD-128 最小版 ＋ TD-129 B1 ④）
 function tabVisible(t) {
   if (t.id === 'accessreview') return state.auditView === true;
+  // 🔴 DV-admin-4（TD-1151）：推广审核页签只认服务端给的权限点 promo.offer.review（fn_admin_my_scope，本线已在用）；
+  //   ⛔ 前端另写判定。读失败 ⇒ 权限点空 ⇒ 不显示（少显示，⛔ 多显示）。其余页签沿用本线原判定，⛔ 改。
+  if (t.id === 'promoreview') return state.promoReview === true;
   if (state.backofficeFull) return hasRole(t.minRole);
   if (t.id === 'config') return hasRole(t.minRole);
   return t.id === 'institutions' && state.instScoped === true;
@@ -3103,6 +3172,8 @@ const TABS = [
   // OPS-11③：客户端错误。表在、客户端十几处在写，后台⛔ 无界面 ⇒
   //   用户报「打不开」时运营查不了，只能找开发连数据库。
   { id: 'clienterrors', label: osT('adminTabClientErrors'), minRole: 'support' },
+  // TD-531 S1c：推广要约审核。可见与否由服务端入口清单决定（运营岗 promo.offer.review）；判权在 fn_promo_offer_review（按机构交易主体三参判）
+  { id: 'promoreview', label: osT('promoReviewTitle'), minRole: 'support' },   // 角色只是粗筛：能不能看见由岗位（入口清单）定
   // F5 步骤3：客服知识库。🔴 **设计稿把「新增入口」定为一等功能** ——
   //   决策 2 的省钱靠【持续补条目】（每次 AI 被迫出手，都暴露知识库缺一条），
   //   ⇒ ⚠️ **没有顺手能补的入口，第零层就等于没有。**
@@ -3230,12 +3301,154 @@ function renderTab(tab) {
   else if (tab === 'atvenuedisputes') renderAtVenueDisputesTab(el);
   else if (tab === 'partners') renderPartnersTab(el);
   else if (tab === 'roster') renderRosterTab(el);
+  else if (tab === 'promoreview') renderPromoReviewTab(el);
   else if (tab === 'accessreview') renderAccessReviewTab(el);
   else if (tab === 'clienterrors') renderClientErrorsTab(el);
   else if (tab === 'cskb') renderCsKbTab(el);
   else if (tab === 'csdigest') renderCsDigestTab(el);
   else if (tab === 'csfeedback') renderCsFeedbackTab(el);
 }
+
+// ==================== TD-531 S1c · 推广要约审核 ====================
+// 依据：技术设计稿 v0.2 §6.1；第 148 号 Q7（一人审核＋全程留痕）；第 159 号 #1。
+// 本页⛔ 判任何权限、⛔ 判能⛔ 能上架：「我能看哪家」「能⛔ 能通过」「为什么⛔ 能」全部由服务端给
+//   （sfk-admin-promo-offer-review → fn_admin_entity_scope／checkInstitutionTrack／fn_promo_offer_review）。按钮只是显隐，⛔ 是安全边界。
+// 本页⛔ 有任何金额输入框：要约只有数字字段、没有自由文案（第 148 号 Q2）；合规是人工，页面只显示业态与分轨并给两句固定提示。
+// ==================== TD-531 S1c 纯函数（admin/tests/td531_promo_review_ui.test.mjs 现场抽取）
+const PROMO_REVIEW_TABS = [
+  { id: 'pending_review', label: 'promoReviewTabPending' }, { id: 'listed', label: 'promoReviewTabListed' },
+  { id: 'rejected', label: 'promoReviewTabRejected' }, { id: 'ended', label: 'promoReviewTabEnded' },
+];
+const PROMO_REVIEW_ERROR_LABEL = {
+  REASON_REQUIRED: 'promoReviewReasonRequired', PROMO_REASON_REQUIRED: 'promoReviewReasonRequired',
+  INSTITUTION_TRACK_NOT_ALLOWED: 'promoReviewTrackAWarning',
+};
+// 一行给哪些按钮：只看服务端给的状态（待审 ⇒ 通过／退回；已上架 ⇒ 下架；其余 ⇒ 无）
+function promoReviewRowActions(row) {
+  if (row?.status === 'pending_review') return ['approve', 'reject'];
+  if (row?.status === 'listed') return ['end'];
+  return [];
+}
+// 退回／下架要原因（只含空白＝没填）；通过⛔ 要
+function promoReviewMissingReason(action, reason) {
+  return (action === 'reject' || action === 'end') && String(reason ?? '').trim() === '';
+}
+// 错误原文（「CODE」或「CODE: 说明」）⇒ 文案键；⛔ 认识 ⇒ null（调用方原样显示码）
+function promoReviewErrorKey(message) {
+  const code = String(message ?? '').split(':')[0].trim();
+  return Object.prototype.hasOwnProperty.call(PROMO_REVIEW_ERROR_LABEL, code) ? PROMO_REVIEW_ERROR_LABEL[code] : null;
+}
+// 面值：分 ⇒ S$x.xx；读⛔ 到 ⇒「-」（⛔ 显示成 0）
+function promoReviewMoney(cents) {
+  return (typeof cents === 'number' && Number.isFinite(cents)) ? `S$${(cents / 100).toFixed(2)}` : '-';
+}
+// 档位：档名＋（未设定／不开放）；档名读⛔ 到 ⇒「-」
+function promoReviewTierText(row) {
+  const tier = row?.tier ? String(row.tier) : '-';
+  if (row?.tierEnabled === null || row?.tierEnabled === undefined) return `${tier} · ${osT('cfgUnset')}`;
+  return row.tierEnabled === true ? `${tier} · ${osT('cfgPromoTierOn')}` : `${tier} · ${osT('cfgPromoTierOff')}`;
+}
+// 状态：机构撤回的单独一句（⛔ 混成「已结束」）
+function promoReviewStatusKey(status) {
+  return { pending_review: 'promoReviewTabPending', listed: 'promoReviewTabListed', rejected: 'promoReviewTabRejected',
+    ended: 'promoReviewTabEnded', withdrawn: 'promoReviewStatusWithdrawn' }[status] || null;
+}
+// ==================== TD-531 S1c 纯函数结束
+
+function promoReviewRowHtml(r) {
+  const acts = promoReviewRowActions(r);
+  const inst = r.institution || {};
+  const st = promoReviewStatusKey(r.status);
+  return `<tr data-promo-row="${escapeHtml(r.offerId || '')}">
+    <td>${escapeHtml(inst.name || '-')}<br><span class="muted">${escapeHtml(inst.businessType || '-')} · ${escapeHtml(inst.accountKind || '-')} · ${escapeHtml(inst.market || '-')}</span>
+      <br><span class="muted">${escapeHtml(st ? osT(st) : String(r.status ?? '-'))}</span></td>
+    <td>${escapeHtml(promoReviewTierText(r))}</td>
+    <td>${escapeHtml(String(r.track ?? '-'))}${r.trackAllowsPromo === true ? '' : `<br><span class="status error">${escapeHtml(osT('promoReviewTrackAWarning'))}</span>`}</td>
+    <td>${escapeHtml(promoReviewMoney(r.amountOffCents))}</td>
+    <td>${escapeHtml(String(r.totalStock ?? '-'))} / ${escapeHtml(String(r.claimedCount ?? '-'))}<br><span class="muted">≤ ${escapeHtml(String(r.perUserLimit ?? '-'))}</span></td>
+    <td>${r.claimStartsAt ? formatDate(r.claimStartsAt) : '-'} – ${r.claimEndsAt ? formatDate(r.claimEndsAt) : '-'}</td>
+    <td class="muted">${r.submittedAt ? formatDate(r.submittedAt) : '-'}
+      ${r.rejectReason ? `<br>${escapeHtml(r.rejectReason)}` : ''}${r.endReason ? `<br>${escapeHtml(r.endReason)}` : ''}</td>
+    <td>${acts.includes('reject') || acts.includes('end') ? `<input type="text" class="promo-reason" placeholder="${escapeHtml(osT('promoReviewReasonPh'))}" style="min-width:180px" />` : ''}
+      ${acts.includes('approve') ? `<button data-promo-act="approve">${escapeHtml(osT('promoReviewApprove'))}</button>` : ''}
+      ${acts.includes('reject') ? `<button class="ghost-btn" data-promo-act="reject">${escapeHtml(osT('promoReviewReject'))}</button>` : ''}
+      ${acts.includes('end') ? `<button class="ghost-btn" data-promo-act="end">${escapeHtml(osT('promoReviewEnd'))}</button>` : ''}
+      <button class="ghost-btn" data-promo-history="1">${escapeHtml(osT('promoReviewHistory'))}</button>
+      <span class="status promo-status"></span>
+      <details><summary>${escapeHtml(osT('promoReviewSnapshot'))}</summary><pre class="mono">${escapeHtml(JSON.stringify(r.configSnapshot ?? null, null, 2))}</pre></details>
+      <div class="promo-history muted"></div></td></tr>`;
+}
+function promoReviewListHtml(items) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return `<p class="muted">${escapeHtml(osT('promoReviewEmpty'))}</p>`;
+  return `<table class="data-table"><thead><tr>
+      <th>${escapeHtml(osT('promoReviewColInstitution'))}</th><th>${escapeHtml(osT('promoReviewColTier'))}</th>
+      <th>${escapeHtml(osT('promoReviewColTrack'))}</th><th>${escapeHtml(osT('promoReviewColFace'))}</th>
+      <th>${escapeHtml(osT('promoReviewColStock'))}</th><th>${escapeHtml(osT('promoReviewColWindow'))}</th>
+      <th>${escapeHtml(osT('promoReviewColSubmitted'))}</th><th>${escapeHtml(osT('promoReviewColActions'))}</th></tr></thead><tbody>
+    ${list.map(promoReviewRowHtml).join('')}</tbody></table>`;
+}
+
+async function promoReviewCall(body) { return callFn('sfk-admin-promo-offer-review', body); }
+function promoReviewSay(el, err) {
+  el.classList.add('error');
+  const key = promoReviewErrorKey(err?.message);
+  el.textContent = key ? osT(key) : osT('adminCommonFailed') + (err?.message ?? '');
+}
+
+async function renderPromoReviewTab(el, status, page, notice) {
+  const cur = PROMO_REVIEW_TABS.some((x) => x.id === status) ? status : 'pending_review';
+  const pg = Number.isInteger(page) && page >= 0 ? page : 0;
+  el.innerHTML = `<p class="loading">${escapeHtml(osT('adminCommonLoading'))}</p>`;
+  let data;
+  try {
+    data = await promoReviewCall({ action: 'list', status: cur, page: pg });
+  } catch (e) {
+    el.innerHTML = `<p class="error">${escapeHtml(osT('adminCommonLoadFailed'))}${escapeHtml(e.message)}</p>`;
+    return;
+  }
+  el.innerHTML = `<section class="panel">
+    <h2>${escapeHtml(osT('promoReviewTitle'))}</h2>
+    <p class="cfg-notice">${escapeHtml(osT('promoReviewTrackAWarning'))}</p>
+    <p class="cfg-notice">${escapeHtml(osT('promoReviewEfficacyHint'))}</p>
+    <div class="cfg-card-actions">${PROMO_REVIEW_TABS.map((x) =>
+      `<button class="${x.id === cur ? '' : 'ghost-btn'}" data-promo-tab="${x.id}">${escapeHtml(osT(x.label))}</button>`).join('')}</div>
+    <p class="status promo-notice">${notice ? escapeHtml(osT(notice)) : ''}</p>
+    ${promoReviewListHtml(data?.items)}
+    ${data?.hasMore === true ? `<button class="ghost-btn" data-promo-more="1">${escapeHtml(osT('promoReviewMore'))}</button>` : ''}
+  </section>`;
+  el.querySelectorAll('[data-promo-tab]').forEach((b) => b.addEventListener('click', () => renderPromoReviewTab(el, b.dataset.promoTab, 0)));
+  el.querySelector('[data-promo-more]')?.addEventListener('click', () => renderPromoReviewTab(el, cur, pg + 1));
+  el.querySelectorAll('[data-promo-row]').forEach((tr) => {
+    const id = tr.dataset.promoRow;
+    const statusEl = tr.querySelector('.promo-status');
+    tr.querySelectorAll('[data-promo-act]').forEach((btn) => btn.addEventListener('click', async () => {
+      const act = btn.dataset.promoAct;
+      const reason = tr.querySelector('.promo-reason')?.value ?? '';
+      statusEl.classList.remove('error');
+      if (promoReviewMissingReason(act, reason)) { statusEl.classList.add('error'); statusEl.textContent = osT('promoReviewReasonRequired'); return; }
+      statusEl.textContent = osT('adminCommonSubmitting');
+      try {
+        await promoReviewCall({ action: act, offerId: id, reason: reason.trim() || null });
+        renderPromoReviewTab(el, cur, pg, 'promoReviewDone');   // 重取：状态以服务端为准
+      } catch (err) {
+        promoReviewSay(statusEl, err);
+      }
+    }));
+    tr.querySelector('[data-promo-history]')?.addEventListener('click', async () => {
+      const box = tr.querySelector('.promo-history');
+      try {
+        const h = await promoReviewCall({ action: 'history', offerId: id });
+        box.innerHTML = (Array.isArray(h?.history) ? h.history : []).map((x) =>
+          `<div>${x.created_at ? formatDate(x.created_at) : '-'} · ${escapeHtml(String(x.from_status ?? '-'))} → ${escapeHtml(String(x.to_status ?? '-'))}`
+          + ` · ${escapeHtml(String(x.actor_role ?? '-'))}${x.reason ? ` · ${escapeHtml(x.reason)}` : ''}</div>`).join('');
+      } catch (err) {
+        promoReviewSay(statusEl, err);
+      }
+    });
+  });
+}
+// ==================== TD-531 S1c 结束 ====================
 
 // ==================== 推广商（`PART-3` ③）====================
 // 🔴 这一屏要回答三件事：
@@ -5331,6 +5544,19 @@ const CFG_TYPES = {
       return null;
     },
   },
+  // ══════════════════════════════════════════════════════════════════
+  // ⭐ `BOOL3` · **是／否／未设定 三态**（TD-531 S1c，技术设计稿 v0.2 §6.2）
+  // ══════════════════════════════════════════════════════════════════
+  // 存的形状：`true`／`false`／`null`（null 是唯一的「未设定」，`GOV-1` 达标线③）。
+  // 🔴 **⛔ 用复选框**：复选框只有两态，读回时「⛔ 勾」会被写成 `false`，⇒ 「未设定」永远写⛔ 出、也显示⛔ 出来。
+  //   三个选项的文字由字段规格的 `stateLabels` 给（同一控件在不同键上叫法不同：开放／不开放、限付费会员／不限、开／关）。
+  // 库里是三种以外的值（如 `"true"` 字符串）⇒ 三个都不选并提示，交给 check 拒 ⇒ ⛔ 悄悄改写成别的。
+  BOOL3: {
+    unit: () => '', input: 'bool3',
+    toInput: (v) => (v === true ? 'true' : v === false ? 'false' : (v === null || v === undefined) ? 'unset' : null),
+    parse: (s) => (s === 'true' ? true : s === 'false' ? false : s === 'unset' ? null : undefined),
+    check: (v) => ((v === true || v === false || v === null) ? null : 'triState'),
+  },
 };
 
 const CFG_ERR = {
@@ -5346,6 +5572,7 @@ const CFG_ERR = {
   triState: osT('cfgErrTriState'),   // TD-235
   badDomain: osT('cfgErrBadDomain'),   // TD-548 H3：域名清单里有不像域名的行
   badDomainStrict: osT('cfgErrBadDomainStrict'),   // TD-1167：严格域名形状（小写、无通配符、非空名单）
+  minGtMax: osT('cfgErrMinGtMax'),   // TD-531 S1c：区间卡「最低 > 最高」
   notNumber: { zh: '请填数字', en: 'Must be a number' },
   negative: { zh: '不能为负', en: 'Cannot be negative' },
   tooManyDecimals: { zh: '最多 2 位小数', en: 'At most 2 decimal places' },
@@ -5457,10 +5684,81 @@ const CFG_SPEC = {
       { path: 'items', label: osT('cfgArChecklistField'), type: 'WORDS', affects: 'compliance' },
     ],
   },
+  // ═══ TD-531 S1c「帮我推广」配置卡（技术设计稿 v0.2 §4.4、§6.2；第 154／155 号）═══
+  // 🔴 判据只在读取方：四个区间由 fn_promo_offer_submit 读（任一端 null、最低 ≤ 0、最低 > 最高 ＝ 未设定 ⇒ 机构提交一律拒）；
+  //   档位开关与付费门槛由 sfk-promo-offers 读（只有 true／false 是设定值）。界面写的路径＝读取方读的路径（GOV-1 达标线⑤）。
+  //   卡上的红字「未设定」（unsetWhen）只是把同一口径**显示**出来，⛔ 拦提交；「最低 > 最高」前端软拦（crossCheck），库函数硬拦。
+  //   分档由 revenue_class 决定：面值、张数、档位、付费门槛＝revenue（运营提出 → 财务核准）；每人限领、窗口＝operational（运营直接保存，留痕）。
+  'promo_offer.face_value_range_sgd': {
+    group: 'C', label: osT('cfgPromoFaceLabel'),
+    unsetNotice: osT('cfgPromoSubmitUnset'), unsetWhen: (v) => cfgPromoRangeUnset(v, 'minSgd', 'maxSgd'),
+    crossCheck: (v) => cfgPromoMinGtMax(v, 'minSgd', 'maxSgd'),
+    fields: [
+      { path: 'minSgd', label: osT('cfgPromoFaceMin'), type: 'T1', affects: 'institution' },
+      { path: 'maxSgd', label: osT('cfgPromoFaceMax'), type: 'T1', affects: 'institution' },
+    ],
+  },
+  'promo_offer.stock_range': {
+    group: 'C', label: osT('cfgPromoStockLabel'),
+    unsetNotice: osT('cfgPromoSubmitUnset'), unsetWhen: (v) => cfgPromoRangeUnset(v, 'min', 'max'),
+    crossCheck: (v) => cfgPromoMinGtMax(v, 'min', 'max'),
+    fields: [
+      { path: 'min', label: osT('cfgPromoStockMin'), type: 'T4', affects: 'institution' },
+      { path: 'max', label: osT('cfgPromoStockMax'), type: 'T4', affects: 'institution' },
+    ],
+  },
+  'promo_offer.per_user_limit_max': {
+    group: 'C', label: osT('cfgPromoPerUserLabel'),
+    unsetNotice: osT('cfgPromoSubmitUnset'), unsetWhen: (v) => !(typeof v?.max === 'number' && v.max >= 1),
+    fields: [
+      { path: 'max', label: osT('cfgPromoPerUserMax'), type: 'T4', affects: 'institution' },
+    ],
+  },
+  'promo_offer.claim_window_days_range': {
+    group: 'C', label: osT('cfgPromoWindowLabel'),
+    unsetNotice: osT('cfgPromoSubmitUnset'), unsetWhen: (v) => cfgPromoRangeUnset(v, 'minDays', 'maxDays'),
+    crossCheck: (v) => cfgPromoMinGtMax(v, 'minDays', 'maxDays'),
+    fields: [
+      { path: 'minDays', label: osT('cfgPromoWindowMin'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'institution' },
+      { path: 'maxDays', label: osT('cfgPromoWindowMax'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'institution' },
+    ],
+  },
+  // 档位：每档一个三态（未设定／开放／不开放）。行集合＝三档 ∪ 库里已有的键（见 buildDynamicFields 'promoTiers'）
+  'promo_offer.enabled_tiers': {
+    group: 'C', label: osT('cfgPromoTiersLabel'),
+    fields: [], dynamic: 'promoTiers',
+  },
+  // 第 154 号：种子已设定 false ⇒ 显示「不限」；null 才显示红字（运行时 null ⇒ 领取一律拒）
+  'promo_offer.claim_requires_paid_member': {
+    group: 'C', label: osT('cfgPromoPaidLabel'),
+    unsetNotice: osT('cfgPromoClaimUnset'), unsetWhen: (v) => !(v?.required === true || v?.required === false),
+    fields: [
+      { path: 'required', label: osT('cfgPromoPaidLabel'), type: 'BOOL3', affects: 'c_end',
+        stateLabels: { unset: osT('cfgUnset'), true: osT('cfgPromoPaidRequired'), false: osT('cfgPromoPaidNotRequired') } },
+    ],
+  },
+  // TD-531 S1c：网页与 App 领取总开关（compliance 档 ⇒ 合规岗提出、负责人岗核准，fn_config_compliance_update；⛔ 进普通可写白名单）。
+  //   🔴 本界面只是把三态与打开前清单（第 155 号 D10 ②）摆出来；清单是前端提示，⛔ 是判据（清单各项分属不同系统，自动判会给假绿）；
+  //   真判据仍是负责人岗核准。运行时只认显式 true（sfk-promo-offers 与 fn_promo_offer_claim 各判一次）。⛔ 由开发设值。
+  'promo_offer.public_claim_enabled': {
+    group: 'D', label: osT('cfgPromoSwitchLabel'),
+    notice: osT('cfgComplianceNotice'),
+    openChecklist: {
+      title: osT('cfgPromoChecklistTitle'), block: osT('cfgPromoChecklistBlock'),
+      items: [osT('cfgPromoCheck1'), osT('cfgPromoCheck2'), osT('cfgPromoCheck3'), osT('cfgPromoCheck4')],
+      when: (v) => v?.enabled === true,
+    },
+    fields: [
+      { path: 'enabled', label: osT('cfgPromoSwitchLabel'), type: 'BOOL3', affects: 'c_end',
+        stateLabels: { unset: osT('cfgPromoSwitchUnset'), true: osT('cfgPromoSwitchOn'), false: osT('cfgPromoSwitchOff') } },
+    ],
+  },
+
+
   // TD-452：数据保留天数（合规档，运营提、负责人批）。未设定的表⛔ 清理并每日告警；三张审计表 6 年锚待法务
   'data_retention.policy': {
     group: 'D', label: osT('cfgRetentionLabel'),
-    notice: osT('cfgRetentionNotice'),
+    notice: osT('cfgRetentionNotice') + ' ' + osT('cfgRetentionNoticeRunLogs'),   // 第 185 号：说明句接在既有说明之后
     fields: [
       { path: 'tables.client_error_log.days', label: osT('cfgRetClientError'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
       { path: 'tables.user_notification_log.days', label: osT('cfgRetNotification'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
@@ -5468,6 +5766,11 @@ const CFG_SPEC = {
       { path: 'tables.security_audit_logs.days', label: osT('cfgRetSecurityAudit'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
       { path: 'tables.admin_action_log.days', label: osT('cfgRetAdminAction'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
       { path: 'tables.consent_audit_log.days', label: osT('cfgRetConsentAudit'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      // TD-512（第 168 号 §一；文案第 185 号定稿）：运行记录与派发台账各有「保留天数」与「最短保留」。两者都设定且天数不小于最短保留才清理；任何一项未设定或低于下限 ⇒ 不清理并每日告警。
+      { path: 'tables.edge_job_runs.days', label: osT('cfgRetEdgeJobRuns'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'tables.edge_job_runs.min_days', label: osT('cfgRetEdgeJobRunsMin'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'tables.cron_dispatch_log.days', label: osT('cfgRetCronDispatch'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
+      { path: 'tables.cron_dispatch_log.min_days', label: osT('cfgRetCronDispatchMin'), type: 'T4', unit: osT('cfgUnitDays'), affects: 'compliance' },
     ],
   },
   // TD-417：删除确认回执（合规档，运营提、负责人批）。任一发信项未设定 ⇒ 删除照常、⛔ 发信、P1 告警
@@ -6751,6 +7054,15 @@ function buildDynamicFields(spec, value) {
         fixedText: osT('cfgNoChargePolicy'), fieldNotice: osT('cfgNoChargeWhy') },
     ]);
   }
+  if (spec.dynamic === 'promoTiers') {
+    // TD-531 S1c：设计稿 §6.2「Basic／Pro／Enterprise 三个开关」⇒ 三档必列（缺键 ＝ 未设定，必须看得见）；
+    //   库里另有的档位一并列出（⛔ 悄悄藏掉）。读取方 sfk-promo-offers 按 resolveFeatureTier() 的档名取同名键。
+    const tiers = [...new Set(['basic', 'pro', 'enterprise', ...Object.keys(value ?? {})])];
+    return tiers.map((tier) => ({
+      path: tier, label: { zh: tier, en: tier }, type: 'BOOL3', affects: 'institution',
+      stateLabels: { unset: osT('cfgUnset'), true: osT('cfgPromoTierOn'), false: osT('cfgPromoTierOff') },
+    }));
+  }
   if (spec.dynamic === 'modelRates') {
     return Object.keys(value ?? {}).flatMap((m) => [
       { path: `${m}.inputPerMillionUsd`, label: { zh: `${m} · 输入`, en: `${m} · input` }, type: 'T8', affects: 'institution' },
@@ -6889,6 +7201,15 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
       + `<textarea class="cfg-dl-text" rows="8" ${ro}>${escapeHtml((cur || []).join('\n'))}</textarea>`
       + (ro ? '' : `<div><label class="muted">${escapeHtml(osT('cfgDomainsImport'))} <input type="file" class="cfg-dl-file" accept=".txt,.conf,text/plain" /></label></div>`)
       + `<div class="cfg-dl-diff muted">${escapeHtml(osT('cfgDomainsCurrent').replace('{n}', cur === null ? osT('cfgUnset') : String(cur.length)))}</div></div>`;
+  } else if (t.input === 'bool3') {
+    // ⭐ TD-531 S1c 三态：三个单选；⛔ 复选框（见 CFG_TYPES.BOOL3）。文字取 f.stateLabels（unset／true／false）
+    const cur = t.toInput(raw0);
+    const nm = `${id}_b3`;
+    const lab = (st) => pick((f.stateLabels || {})[st]) || st;
+    const opt = (st) => `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="${st}" ${cur === st ? 'checked' : ''} ${ro} /> ${escapeHtml(lab(st))}</label>`;
+    control = `<div class="cfg-bool3" id="${id}">` + opt('unset') + opt('true') + opt('false')
+      + (cur === null ? `<span class="cfg-notice-inline">${escapeHtml(osT('cfgErrTriState'))}</span>` : '')
+      + '</div>';
   } else if (t.input === 'curmap') {
     // ══════════════════════════════════════════════════════════════
     // ⭐ 一行一个国家 —— 🔴 **行集合来自【别的键】，⛔ 来自这里**
@@ -7082,6 +7403,10 @@ function cfgReadField(el) {
     const sel = node.querySelector('input[type=radio]:checked');
     const n = node.querySelector('.cfg-tri-n');
     v = t.parse(sel ? { state: sel.value, count: sel.value === 'limited' && n ? n.value : null } : null);
+  } else if (t.input === 'bool3') {
+    // ⭐ TD-531 S1c：⛔ 选任何一项 ⇒ undefined ⇒ check 报 triState（⛔ 当成 null 悄悄写进库）
+    const sel = node.querySelector('input[type=radio]:checked');
+    v = t.parse(sel ? sel.value : null);
   } else if (t.input === 'curmap') {
     // ⭐ 只收**选了币种**的行 —— 🔴 空 ＝ 未设定 ⇒ 📌 那个国家**⛔ 出现在映射里**，
     //   ⚠️ 而⛔ 是写成 `""`／`null`：`booking_currency.ts` 的判据是「查⛔ 到 ⇒ 拒绝收款」，
@@ -7102,6 +7427,45 @@ function cfgReadField(el) {
 
 // ==================== `E1` 收入参数界面 ====================
 // 🔴 TD-306：saveOutcome ＝ renderConfigTab 里的 TD-60 `cfgSaveOutcome`（同一判据，⛔ 抄一份）
+function cfgPromoRangeUnset(v, lo, hi) {
+  const a = v?.[lo], b = v?.[hi];
+  return !(typeof a === 'number' && typeof b === 'number' && a > 0 && a <= b);
+}
+// 「最低 > 最高」前端软拦：两端都是数字且最低 > 最高 ⇒ 错误码；其余（含只填了一端）⇒ null
+function cfgPromoMinGtMax(v, lo, hi) {
+  const a = v?.[lo], b = v?.[hi];
+  return (typeof a === 'number' && typeof b === 'number' && a > b) ? 'minGtMax' : null;
+}
+// 打开前清单（只是前端提示，⛔ 是判据）：只有「正要提交的值」命中 gate.when 时才要求全部勾上
+function cfgGateHtml(gate, ro) {
+  return `<div class="cfg-gate"><strong>${escapeHtml(pick(gate.title))}</strong>`
+    + gate.items.map((it, i) => `<label><input type="checkbox" class="cfg-gate-item" data-i="${i}" ${ro ? 'disabled' : ''} /> ${escapeHtml(pick(it))}</label>`).join('')
+    + `<span class="status error cfg-gate-block" hidden>${escapeHtml(pick(gate.block))}</span></div>`;
+}
+function cfgGateOk(card, gate, draft) {
+  if (!gate.when(draft)) return true;
+  const boxes = [...card.querySelectorAll('.cfg-gate .cfg-gate-item')];
+  return boxes.length === gate.items.length && boxes.every((b) => b.checked);
+}
+// 卡上此刻填的值（从库值出发逐字段覆盖；读不出的字段保持库值）
+function cfgCardDraft(card, base) {
+  let v = JSON.parse(JSON.stringify(base ?? {}));
+  card.querySelectorAll('.cfg-field').forEach((el) => {
+    if (el.dataset.fixed) return;
+    const r = cfgReadField(el);
+    if (!r.err && r.v !== undefined) v = cfgSet(v, el.dataset.path, r.v);
+  });
+  return v;
+}
+function cfgGateRefresh(card, gate, base) {
+  const okNow = cfgGateOk(card, gate, cfgCardDraft(card, base));
+  card.querySelectorAll('.cfg-card-actions .cfg-submit').forEach((b) => { b.disabled = !okNow; });
+  const hint = card.querySelector('.cfg-gate-block');
+  if (hint) hint.hidden = okNow;
+  return okNow;
+}
+
+
 async function renderRevenueConfigSection(host, configs, myPerms, saveOutcome) {
   const byKey = Object.fromEntries(configs.map((c) => [c.key, c]));
   const canPropose = myPerms.permissions.includes('config.revenue.propose');
@@ -7145,7 +7509,9 @@ async function renderRevenueConfigSection(host, configs, myPerms, saveOutcome) {
                 <code class="muted">${escapeHtml(k)}</code>
               </div>
               ${spec.notice ? `<p class="cfg-notice">${escapeHtml(pickNotice(spec.notice, { value: cfg.value, all: byKey }))}</p>` : ''}
+              ${spec.unsetNotice && spec.unsetWhen && spec.unsetWhen(cfg.value) ? `<p class="cfg-unset">${escapeHtml(pick(spec.unsetNotice))}</p>` : ''}
               <div class="cfg-fields">${fields.map((f) => cfgFieldInput(k, f, cfg.value, !canPropose, byKey)).join('')}</div>
+              ${spec.openChecklist ? cfgGateHtml(spec.openChecklist, !(canAct || soleHere)) : ''}
               ${allRo ? `<p class="hint">${escapeHtml(osT('cfgAllReadonlyHint'))}</p>` : (canAct || soleHere) ? `
                 ${soleHere ? `<p class="cfg-notice">${escapeHtml(osT('cfgSoleApplyHint'))}</p>` : ''}
                 <div class="cfg-card-actions">
@@ -7184,6 +7550,15 @@ async function renderRevenueConfigSection(host, configs, myPerms, saveOutcome) {
         </table>
       </section>` : ''}
   `;
+
+  // TD-531 S1c：带打开前清单的卡 —— 选「开」而清单未勾全 ⇒ 提交按钮不可点（前端提示；判据仍是负责人岗核准）
+  host.querySelectorAll('[data-card]').forEach((card) => {
+    const spec = CFG_SPEC[card.dataset.card];
+    if (!spec || !spec.openChecklist) return;
+    const refresh = () => cfgGateRefresh(card, spec.openChecklist, byKey[card.dataset.card].value);
+    card.addEventListener('change', refresh);
+    refresh();
+  });
 
   if (!canPropose && !canSole && !canEditNonRev) return;
   host.querySelectorAll('[data-submit],[data-sole-apply],[data-direct]').forEach((btn) => {
@@ -7248,6 +7623,13 @@ async function renderRevenueConfigSection(host, configs, myPerms, saveOutcome) {
         }
       });
       if (bad) { statusEl.classList.add('error'); statusEl.textContent = osT('cfgFixErrors'); return; }
+      // TD-531 S1c：区间「最低 > 最高」前端软拦（库函数另把它当未设定硬拦）；打开前清单未勾全 ⇒ ⛔ 提交「开」
+      const cardSpec = CFG_SPEC[key];
+      const crossErr = cardSpec && cardSpec.crossCheck ? cardSpec.crossCheck(newValue, byKey) : null;
+      if (crossErr) { statusEl.classList.add('error'); statusEl.textContent = typeof crossErr === 'object' ? crossErr.msg : pick(CFG_ERR[crossErr]); return; }
+      if (cardSpec && cardSpec.openChecklist && !cfgGateOk(card, cardSpec.openChecklist, newValue)) {
+        statusEl.classList.add('error'); statusEl.textContent = pick(cardSpec.openChecklist.block); return;
+      }
       if (!changed) { statusEl.classList.add('error'); statusEl.textContent = osT('cfgNoChange'); return; }
 
       // 🔴 **超出政策区间：强提示，⛔ 硬拦**（创始人 2026-09-11）
