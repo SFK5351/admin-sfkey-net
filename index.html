@@ -7,7 +7,7 @@
      script-src 只放行同源（本地打包的 supabase-js）＋ 下面那段内联脚本的 sha256；⛔ 许任何远程脚本、⛔ 许 unsafe-inline／unsafe-eval。
      ⚠️ 改了内联脚本（含 os_l10n_sync 重新生成文案块）后必须跑 `python3 scripts/build_admin_panel.py csp` 重算哈希，⛔ 则浏览器拒绝执行、整页空白；
         `build_admin_panel.py check` 与闸门 check_admin_no_remote_script.py 会当场拦下。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-mqUIc4tDXZaznBT/2kJDcf3tpdAWUf3lWRs0dpxWOfA='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-+WZVacGgY+DdT6gN4Zjvow/z66tD5/dcad8Lk9Mybg4='; connect-src https://ptmfqxfmymhzqgpkxixm.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <title>SFK Wellness Admin Console</title>
 <style>
@@ -66,6 +66,16 @@
     margin-top: 4px; background: #C9A84C; color: #1A3D2B; font-weight: 600;
     border: none; border-radius: 10px; padding: 12px; font-size: 14px; cursor: pointer;
   }
+
+  /* TD-1518：密码框右侧眼睛图标（与门户 TD-1223／App 登录页同一形态） */
+  .pw-eye-wrap { position: relative; display: block; }
+  .pw-eye-wrap > input { width: 100%; box-sizing: border-box; padding-right: 44px; }
+  /* TD-1534：单色 SVG（Material visibility／visibility_off outlined，与 App 登录页同款），中性灰、悬停加深；20px，框内右侧垂直居中 */
+  .pw-eye, .login-card .pw-eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); margin: 0; background: none; border: 0; padding: 0; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; line-height: 0; color: #8B9AA8; font-weight: normal; border-radius: 6px; }
+  .pw-eye:hover, .login-card .pw-eye:hover { color: #5E6C78; background: none; }
+  .pw-eye:focus-visible { outline: 2px solid #1A3D2B; outline-offset: 1px; }
+  .pw-eye svg { display: block; width: 20px; height: 20px; pointer-events: none; }
+  .login-card .link-btn { background: none; color: #1A3D2B; font-weight: normal; padding: 4px 0; text-decoration: underline; align-self: flex-start; }
 
   /* 主界面 */
   .shell { max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; }
@@ -143,6 +153,13 @@
   .cfg-rt-row input[type=text], .cfg-rt-row input[type=number] { width: 100%; box-sizing: border-box; }
   /* 〔TD-904〕通用「可增删行具名表格」ROWS：行内各格宽度等分（select／text 同形） */
   .cfg-rows { display: flex; flex-direction: column; gap: 6px; font-size: 12px; max-width: 760px; }
+  .cfg-hub { display: flex; flex-direction: column; gap: 10px; font-size: 12px; max-width: 760px; }
+  .cfg-hub-slot { border: 1px solid #ddd; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .cfg-hub-slot.off .cfg-hub-body { display: none; }
+  .cfg-hub-slot-h { font-weight: 600; }
+  .cfg-hub-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .cfg-hub-row > .cfg-hub-lbl { min-width: 96px; color: #666; }
+  .cfg-hub input[type=text], .cfg-hub input[type=number], .cfg-hub textarea { padding: 4px 6px; }
   .cfg-rows-head, .cfg-rows-row { display: flex; align-items: center; gap: 8px; }
   .cfg-rows-head { color: #666; }
   .cfg-rows-head span, .cfg-rows-row > * { flex: 1; min-width: 0; }
@@ -187,6 +204,8 @@
   .cfg-reason { flex: 1 1 240px; padding: 5px 7px; }
   .cfg-raw { margin-top: 8px; font-size: 12px; color: #888; }
   .cfg-raw pre { background: #fafafa; padding: 8px; overflow-x: auto; }
+  .cfg-fmt-json { margin: 0; white-space: pre-wrap; word-break: break-all; font-size: 12px; max-height: 320px; overflow: auto; }   /* TD-1550 */
+  .cfg-fmt-named > div { margin: 2px 0; }   /* TD-1550 */
   /* ── `E2` 审批页 ── */
   .cfg-diff td, .cfg-diff th { white-space: normal; }
   /* 🔴 `D1` §二①「让第二双眼睛看见小数点」—— 变动 >50% 或 0/未设定⇒有值 */
@@ -265,7 +284,7 @@
 <script src="vendor/supabase-js-2.117.2.umd.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok"></script>
 <script type="module">
   // <<<OS_L10N_GENERATED — 由 tool/os_l10n_sync.py 生成，⛔ 不要手改>>>
-  // 🔴 块指纹 sha256:eb3fd39d4672f692 —— 手改本块会被下次同步默默还原，改 os_l10n.json
+  // 🔴 块指纹 sha256:011f048b1e610cfe —— 手改本块会被下次同步默默还原，改 os_l10n.json
   // 真源：lib/l10n/os_l10n.json ——改那里再跑 `python3 tool/os_l10n_sync.py`。
   // ⚠️ 合规文案（免责声明那类）⛔ 不在这里，它们走 compliance_strings.json。
   const OS_L10N = {
@@ -3035,6 +3054,7 @@
     pwSetConfirm: { zh: "确认新密码", en: "Confirm new password" },
     pwSetSubmit: { zh: "确认重置", en: "Confirm Reset" },
     resetLinkExpired: { zh: "重置链接已失效，请重新申请一封密码重置邮件。", en: "This reset link has expired — please request a new password reset email." },
+    authLinkInvalid: { zh: "这个邮件链接已失效或已经用过。请直接登录；忘记密码可点「忘记密码」，还没有账号请点「注册新账号」。", en: "This email link has expired or has already been used. Sign in below, or use \"Forgot password?\". New here? Choose \"Create an account\"." },
     resetErrSamePassword: { zh: "新密码不能和当前密码相同，请换一个不一样的密码。", en: "Your new password can't be the same as your current one — please choose a different password." },
     resetErrGeneric: { zh: "遇到问题，请检查网络后重试；如果反复出现，请联系客服。", en: "Something went wrong. Please check your connection and try again — if it keeps happening, contact support." },
     resetDoneLogin: { zh: "密码已更新，请使用新密码登录。", en: "Password updated. Please log in with your new password." },
@@ -5594,12 +5614,11 @@
     cfgErrTierNotLoaded: { zh: "会员档位还没读取成功，不能保存（避免把已设定的折扣率当成未设定而覆盖）。请等待加载或刷新页面。", en: "Membership tiers have not loaded yet, so this cannot be saved (to avoid overwriting existing rates as 'not set'). Wait for them to load or refresh the page." },
     cfgMallElTierLabel: { zh: "商城折扣 · 可使用的会员档位", en: "Mall discount · membership tiers allowed to use it" },
     cfgMallElTierField: { zh: "哪些会员档位可以使用商城点数折扣", en: "Which membership tiers may use the mall points discount" },
-    cfgMallElTierNotice: { zh: "决定哪些会员档位可以在商城使用点数折扣。注意：这一项和其他配置不同——选“不限档位”（存为空值）表示所有档位都可以使用，包括体验版；这是创始人 11 月 10 日的裁定，不是漏填。选“仅所列档位”并勾选档位，则只有所勾档位可以使用；一个都不勾表示没有任何档位可以使用。总开关关闭时，这里怎么设都不会生效。", en: "Decides which membership tiers may use the points discount in the mall. Note: unlike other settings, choosing 'No tier restriction' (stored as empty) means every tier may use it, trial included; this is the founder's 10 Nov decision, not an omission. Choosing 'Only the listed tiers' and ticking tiers means only those tiers may use it; ticking none means no tier can use it. While the master switch is off, nothing here takes effect." },
-    cfgMallElTierUnsetNote: { zh: "当前显示“未设定”时＝不限档位：所有档位都可使用（含体验版），这是有意的例外", en: "When shown as 'not set' it means no tier restriction: every tier may use it (trial included), a deliberate exception" },
+    cfgMallElTierNotice: { zh: "决定哪些会员档位可以在商城使用点数折扣。三选一：“未设定”＝任何档位都不能用（总开关打开时每天告警一次）；“不限档位”＝所有档位都可以用，含体验版（创始人 11 月 10 日裁定的语义，须明确选）；“仅所列档位”＝只有勾选的档位可以用，至少勾一个。总开关关闭时，这里怎么设都不会生效。", en: "Decides which membership tiers may use the points discount in the mall. Pick one: 'Not set' means no tier can use it (a daily alert while the master switch is on); 'No tier restriction' means every tier may use it, trial included (the founder's 10 Nov decision, which must be chosen explicitly); 'Only the listed tiers' means only the ticked tiers may use it, with at least one ticked. While the master switch is off, nothing here takes effect." },
+    cfgMallElTierUnsetNote: { zh: "“未设定”＝任何档位都不能使用商城点数折扣（不等于不限档位）。要让所有人可用，请明确选“不限档位”。", en: "'Not set' means no tier can use the mall points discount (it does not mean no restriction). To let everyone use it, choose 'No tier restriction' explicitly." },
     cfgMallElTierModeAll: { zh: "不限档位（所有人可用，含体验版）", en: "No tier restriction (everyone, trial included)" },
     cfgMallElTierModeListed: { zh: "仅所列档位", en: "Only the listed tiers" },
     cfgMallElTierConfirmAll: { zh: "你将把可使用档位设为“不限档位”：所有会员档位（含体验版）都可使用商城点数折扣。这会让更多订单少付钱。确认提交？", en: "You are setting 'No tier restriction': every membership tier, trial included, may use the mall points discount. More orders will pay less. Submit?" },
-    cfgMallElTierConfirmNone: { zh: "你没有勾选任何档位：提交后没有任何档位可以使用商城点数折扣。确认提交？", en: "You ticked no tier: after this, no tier can use the mall points discount. Submit?" },
     cfgMallEnLabel: { zh: "商城点数折扣·总开关", en: "Mall points discount · master switch" },
     cfgMallEnField: { zh: "总开关", en: "Master switch" },
     cfgMallEnNotice: { zh: "决定商城是否让会员用点数折扣。可用的点数有两种：商城专属点数（顾客侧叫「商城奖励点数」）与平台奖励点数；「商城专属点数 · 结账时先用」为开时先用商城专属点数、不够再用平台奖励点数。只有选「开」才开启；「未设定」和「关」都是关闭。开启前请先核对：注册防刷收口（TD-548）已完成、其余八项设置都已填好、生产里确有可花的点数。运营提出，财务核准后生效。", en: "Decides whether the mall lets members use points as a discount. Two kinds of points can be used: mall-scoped points (shown to customers as 'Shop reward points') and Platform reward points; when 'Mall-scoped points · use first at checkout' is On, mall-scoped points are used first, then Platform reward points. Only 'On' turns it on; both 'Not set' and 'Off' mean off. Before turning it on, check: sign-up abuse protection (TD-548) is done, the other eight settings are filled in, and production really has points to spend. Proposed by operations and approved by finance before it takes effect." },
@@ -5927,6 +5946,132 @@
     cfgHaclSleep: { zh: "第 3 张：睡眠", en: "Card 3: Sleep" },
     cfgHaclSupplements: { zh: "第 4 张：营养补充", en: "Card 4: Supplements" },
     cfgErrNotShopLink: { zh: "链接不合格：须为 https，主机限 sfkey.net／sfkey.com（含子域）或 *.myshopify.com，不超过 300 字符，不能带端口或账号。", en: "Invalid link: must be https on sfkey.net / sfkey.com (incl. subdomains) or *.myshopify.com, up to 300 characters, with no port or username." },
+    cfgRewardAnomFastClaimLabel: { zh: "奖励异常告警 · 注册后速领满额", en: "Reward anomaly alerts · fast claim right after sign-up" },
+    cfgRewardAnomFastClaimWithinField: { zh: "注册后多少分钟内", en: "Within this many minutes after sign-up" },
+    cfgRewardAnomFastClaimMaxField: { zh: "这段时间内累计领取超过多少点就告警", en: "Alert when the total claimed in that time exceeds" },
+    cfgRewardAnomFastClaimNotice: { zh: "看新注册的账号是否一上来就把能领的奖励领满：账号注册后「几分钟内」，累计进入的商城奖励点数（商城可用池）超过上限就告警（每个账号每天最多一条；员工邀请的账号不计）。两项都要设；留空＝未设定，这个维度不评估，系统每天提醒一次；上限填 0＝出现一笔就告警。只告警，不拦截。调高上限或缩短分钟数＝更难告警，需要财务核准。", en: "Watches whether a newly registered account claims every reward it can almost immediately: an alert is raised when the Shop reward points (the mall-spendable pool) credited within the first few minutes after sign-up exceed the cap (at most one alert per account per day; staff-invited accounts are excluded). Set both fields; blank = not set, this check is not evaluated and a reminder is raised once a day; a cap of 0 = alert on the first credited reward. Alert only, nothing is blocked. Raising the cap or shortening the minutes makes alerts harder to trigger and needs finance approval." },
+    cfgHubLayoutLabel: { zh: "Hub 首页版面（机构／商城板块）", en: "Hub home layout (institutions / mall sections)" },
+    cfgHubLayoutNotice: { zh: "决定 Hub 首页显示哪些板块、各显示几条、怎么排。两个板块都不勾 ＝ 未设定：App 的 Hub 首页回落为直接打开商城，系统会提示。保存后立即影响所有访客。", en: "Controls which sections the Hub home shows, how many items and in what order. Neither section ticked = not set: the App Hub home falls back to opening the shop directly and the system raises a notice. Takes effect for all visitors on save." },
+    cfgHubSectionsField: { zh: "首页板块", en: "Home sections" },
+    cfgHubUrlField: { zh: "详情链接模板", en: "Item link template" },
+    cfgHubSlotInst: { zh: "机构板块", en: "Institutions section" },
+    cfgHubSlotMall: { zh: "商城板块", en: "Mall section" },
+    cfgHubTitle: { zh: "标题", en: "Title" },
+    cfgHubSeeAll: { zh: "「查看全部」文案", en: "\"See all\" label" },
+    cfgHubZh: { zh: "中文", en: "Chinese" },
+    cfgHubEn: { zh: "English", en: "English" },
+    cfgHubItemCount: { zh: "显示条数", en: "Items shown" },
+    cfgHubCountOptional: { zh: "可留空", en: "optional" },
+    cfgHubRule: { zh: "排序规则", en: "Ordering" },
+    cfgHubRuleNewest: { zh: "最新入驻", en: "Newest first" },
+    cfgHubRuleRotate: { zh: "每日轮换", en: "Rotate daily" },
+    cfgHubNone: { zh: "— 未选 —", en: "— not chosen —" },
+    cfgHubOrder: { zh: "板块顺序", en: "Section order" },
+    cfgHubOrderInstFirst: { zh: "机构在上，商城在下", en: "Institutions first, then mall" },
+    cfgHubOrderMallFirst: { zh: "商城在上，机构在下", en: "Mall first, then institutions" },
+    cfgHubOrderHint: { zh: "两个板块都显示时必须选", en: "Required when both sections are shown" },
+    cfgHubAllOffNote: { zh: "两个板块都不勾 ＝ 未设定；勾了的板块必须填标题和「查看全部」的中英文。", en: "Neither section ticked = not set; a ticked section needs its title and \"See all\" label in both languages." },
+    cfgHubRecruitLabel: { zh: "Hub 招募卡（合规档）", en: "Hub recruitment card (compliance tier)" },
+    cfgHubRecruitNotice: { zh: "某地区还没有机构时，Hub 首页机构板块里显示的招募卡。未设定时该地区的机构板块不显示招募，系统会提示；填写后须由负责人岗核准才生效。系统不预置任何文案。", en: "Shown in the Hub home institutions section when a region has no institutions yet. While not set, that section shows no recruitment card and the system raises a notice; once filled in it needs approval from the responsible position. Nothing is pre-filled." },
+    cfgHubRecruitField: { zh: "招募卡", en: "Recruitment card" },
+    cfgHubRecruitSet: { zh: "已设定", en: "Set" },
+    cfgHubRecTitle: { zh: "标题", en: "Title" },
+    cfgHubRecBody: { zh: "正文（可留空）", en: "Body (optional)" },
+    cfgHubRecCta: { zh: "按钮文案", en: "Button label" },
+    cfgHubRecUrl: { zh: "按钮链接", en: "Button link" },
+    cfgHubRecSrcName: { zh: "来源参数名", en: "Source parameter name" },
+    cfgHubRecSrcValue: { zh: "来源参数值", en: "Source parameter value" },
+    cfgErrHubSections: { zh: "已勾选的板块须填标题和「查看全部」的中英文；机构板块还要填显示条数（正整数）和排序规则；商城条数留空或填正整数", en: "A ticked section needs its title and \"See all\" label in both languages; the institutions section also needs a positive whole number of items and an ordering; mall items may be blank or a positive whole number" },
+    cfgErrHubOrder: { zh: "两个板块都显示时，请先选板块顺序", en: "Choose the section order when both sections are shown" },
+    cfgErrHubUrl: { zh: "详情链接须以 https:// 开头，并且恰好含一个 {id}", en: "The link must start with https:// and contain exactly one {id}" },
+    cfgErrHubRecruit: { zh: "招募卡：标题、按钮文案的中英文都要填；正文要么两种语言都填、要么都留空；链接须以 https:// 开头；来源参数名为小写字母开头的小写字母／数字／下划线，参数值为小写字母／数字／下划线", en: "Recruitment card: title and button label are needed in both languages; body is either both languages or empty; the link starts with https://; source name starts with a lowercase letter (lowercase letters, digits, underscore) and the value uses lowercase letters, digits, underscore" },
+    cfgPpExpLabel: { zh: "平台奖励点数 · 退款时原池已过期怎么回补", en: "Platform reward points · refund when the original pool has expired" },
+    cfgPpExpNotice: { zh: "会员用平台奖励点数享受折扣的订单退款时，原来那一池点数若已过期或已被清扫，按这里的口径处理。现金退款不受影响；原池仍有效的部分永远回原池。留空＝未设定：过期部分不回补，记一笔作废并发 P1 告警。运营提出、财务核准。", en: "When an order discounted with platform reward points is refunded and the original pool has expired or been swept, this setting decides what happens. Cash refunds are not affected; any part whose original pool is still valid always goes back to it. Left empty = not set: the expired part is not restored, it is recorded as lapsed and a P1 alert is raised. Proposed by operations, approved by finance." },
+    cfgPpExpField: { zh: "原池已过期的那部分", en: "The part whose original pool has expired" },
+    cfgPpExpRegrant: { zh: "重新发放（新入一行，按标准有效期）", en: "Re-grant (new entry with the standard validity)" },
+    cfgPpExpLapse: { zh: "作废（不回补）", en: "Lapse (not restored)" },
+    cfgPpExpConfirm: { zh: "这会改变退款时会员拿回多少点数。确认按所选口径提交？", en: "This changes how many points a member gets back on a refund. Submit with the selected policy?" },
+    adminForgotLink: { zh: "忘记密码？", en: "Forgot password?" },
+    adminForgotTitle: { zh: "重设后台密码", en: "Reset your admin password" },
+    adminForgotIntro: { zh: "输入你的后台登录邮箱。如果它是有效的后台账号，我们会发一封重设密码的邮件。重设后登录仍需两步验证。", en: "Enter your admin sign-in email. If it belongs to an active admin account, we will send a password reset email. Two-step verification is still required after the reset." },
+    adminForgotSubmit: { zh: "发送重设邮件", en: "Send reset email" },
+    adminForgotSending: { zh: "正在提交…", en: "Submitting…" },
+    adminForgotSent: { zh: "已提交。如果这个邮箱是有效的后台账号，几分钟内会收到重设邮件；没收到请检查垃圾邮件，或联系超级管理员。", en: "Submitted. If this email belongs to an active admin account, a reset email will arrive within a few minutes. If it does not, check your spam folder or contact a super admin." },
+    adminForgotBack: { zh: "返回登录", en: "Back to sign-in" },
+    cfgMallElTierModeUnset: { zh: "未设定（任何档位都不能用）", en: "Not set (no tier can use it)" },
+    cfgErrTierListEmpty: { zh: "选了“仅所列档位”就至少要勾一个档位；如果不想让任何档位使用，请选“未设定”。", en: "With 'Only the listed tiers' you must tick at least one tier; if no tier should use it, choose 'Not set'." },
+    cfgMallConfigInvalid: { zh: "这次修改没有生效：{detail}", en: "This change did not take effect: {detail}" },
+    mrvTab: { zh: "审核演示账号", en: "Review accounts" },
+    mrvTitle: { zh: "审核演示账号：标记、发放、撤销", en: "Review demo accounts: mark, grant, release" },
+    mrvIntro: { zh: "只有演示账号可以标记。标记后可发放商城点数额度，供应用商店审核员演示点数结账；用完要撤销并清零。", en: "Only demo accounts can be marked. A marked account can receive a mall points allowance so store reviewers can try checkout with points; release and clear it when done." },
+    mrvEmailLabel: { zh: "账号邮箱", en: "Account email" },
+    mrvFind: { zh: "查找", en: "Find" },
+    mrvAccountKind: { zh: "账号类型：", en: "Account type: " },
+    mrvOnlyDemo: { zh: "只有演示账号可标记", en: "Only demo accounts can be marked" },
+    mrvReasonLabel: { zh: "理由（必填）", en: "Reason (required)" },
+    mrvReasonPh: { zh: "撤销理由（必填）", en: "Reason for release (required)" },
+    mrvMark: { zh: "标记为审核账号", en: "Mark as review account" },
+    mrvMarkDone: { zh: "已标记", en: "Marked" },
+    mrvMarkAlready: { zh: "已在标记中", en: "Already marked" },
+    mrvRemarkLimitNotSet: { zh: "再次标记次数上限未设定，请先在卡 A 设定", en: "The re-mark limit is not set; set it in card A first" },
+    mrvRemarkLimitReached: { zh: "该账号已达再次标记次数上限", en: "This account has reached its re-mark limit" },
+    mrvGrant: { zh: "发放额度", en: "Grant allowance" },
+    mrvGrantDone: { zh: "已发放", en: "Granted" },
+    mrvGrantAlready: { zh: "已发放过", en: "Already granted" },
+    mrvGrantNotConfigured: { zh: "发放所需的设置有未设定项：审核演示账号额度（T 组「审核演示账号 · 额度」）、发行主体（T 组「商城专属点数 · 发行主体」）、有效月数（B 组「商城专属点数 · 有效月数」）", en: "A setting needed to grant is not set: review account allowance (group T), issuing entity (group T, mall-scoped points) or validity months (group B, mall-scoped points)" },
+    mrvNotMarked: { zh: "该账号不在标记中", en: "This account is not marked" },
+    mrvRelease: { zh: "撤销并清零", en: "Release and clear" },
+    mrvReleaseConfirm: { zh: "撤销后该账号不能再用点数结账，剩余额度清零；已付款订单不在这里回冲。确认撤销？", en: "After release this account can no longer pay with points and its remaining allowance is cleared; paid orders are not reversed here. Release?" },
+    mrvReleaseDone: { zh: "已撤销，清零 {n} 点", en: "Released; {n} points cleared" },
+    mrvReleaseOpenOrders: { zh: "还有 {n} 张进行中的草稿单，等系统释放后再试", en: "{n} draft orders are still open; try again after they are released" },
+    mrvReleasePaidUnreversed: { zh: "还有 {n} 笔已付款订单的点数未回冲：先走退款回冲，再撤销", en: "{n} paid orders still have points not reversed: refund and reverse them first, then release" },
+    mrvUnknownStatus: { zh: "未识别的结果：{s}", en: "Unrecognised result: {s}" },
+    mrvErrInvalidTarget: { zh: "账号标识不对", en: "The account identifier is not valid" },
+    mrvErrInvalidEmail: { zh: "邮箱格式不对", en: "The email address is not valid" },
+    mrvErrNotFound: { zh: "没有找到这个账号", en: "No account found" },
+    mrvErrNotDemo: { zh: "只有演示账号可标记", en: "Only demo accounts can be marked" },
+    mrvErrReasonRequired: { zh: "请填写理由（2–500 字）", en: "Please give a reason (2–500 characters)" },
+    mrvErrUnknown: { zh: "请求不被支持", en: "Request not supported" },
+    mrvListTitle: { zh: "标记记录", en: "Marks" },
+    mrvNone: { zh: "还没有标记记录", en: "No marks yet" },
+    mrvMaxDays: { zh: "清理期限：{n} 个工作日", en: "Clean-up deadline: {n} working days" },
+    mrvMaxDaysUnset: { zh: "清理期限未设定（卡 A）", en: "Clean-up deadline not set (card A)" },
+    mrvPointsUnset: { zh: "审核演示账号额度未设定（卡 A），发放会被拒", en: "Review account allowance not set (card A); granting will be refused" },
+    mrvOverdue: { zh: "已超期", en: "Overdue" },
+    mrvActive: { zh: "标记中", en: "Marked" },
+    mrvReleasedAt: { zh: "已撤销于 ", en: "Released on " },
+    mrvCleared: { zh: "清零 ", en: "Cleared " },
+    mrvColEmail: { zh: "邮箱", en: "Email" },
+    mrvColMarkedAt: { zh: "标记时间", en: "Marked at" },
+    mrvColGranted: { zh: "已发额度", en: "Granted" },
+    mrvColAvailable: { zh: "可用额度", en: "Available" },
+    mrvColOpenOrders: { zh: "进行中草稿单", en: "Open drafts" },
+    mrvColState: { zh: "状态", en: "State" },
+    cfgPointsSgdHint: { zh: "≈ S${sgd}", en: "≈ S${sgd}" },
+    cfgUnitWorkdays: { zh: "个工作日", en: "working days" },
+    cfgMrvPointsLabel: { zh: "审核演示账号 · 额度（点数）", en: "Review accounts · allowance (points)" },
+    cfgMrvPointsNotice: { zh: "给被标记的审核演示账号发放的商城点数额度，供应用商店审核员演示点数结账。运营提出、财务核准。1 点＝S$0.01。", en: "Mall points allowance granted to a marked review demo account so store reviewers can try checkout with points. Proposed by operations, approved by finance. 1 point = S$0.01." },
+    cfgMrvPointsField: { zh: "每个审核演示账号发放的点数", en: "Points granted per review demo account" },
+    cfgMrvUnsetNote: { zh: "未设定时单独显示“未设定”，不会当成 0；未设定时不发放并每天提醒一次。", en: "When not set it shows as not set, never as 0; nothing is granted and a reminder is sent daily." },
+    cfgMrvRemarkLabel: { zh: "审核演示账号 · 撤销后允许再次标记的次数", en: "Review accounts · re-marks allowed after release" },
+    cfgMrvRemarkNotice: { zh: "同一账号撤销标记后还能再标记几次；每多一次就多发一次额度，所以运营提出、财务核准。0＝撤销后不许再标；1＝可再标一次。", en: "How many more times the same account may be marked again after a release; each re-mark grants the allowance again, so operations propose and finance approves. 0 = no re-marking; 1 = one more time." },
+    cfgMrvRemarkField: { zh: "撤销后允许再次标记的次数", en: "Re-marks allowed after release" },
+    cfgMrvRemarkUnsetNote: { zh: "未设定＝一律拒绝再标并每天提醒；它和填 0 不一样。", en: "Not set = every re-mark is refused with a daily reminder; this is different from 0." },
+    cfgMrvMaxDaysLabel: { zh: "审核演示账号 · 清理期限", en: "Review accounts · clean-up deadline" },
+    cfgMrvMaxDaysNotice: { zh: "标记后最长存续工作日数（含审核期＋清理期），按工作日算（周一至周五，只排除周末）。超过仍未撤销的审核标记，每天告警一次；只告警，不会自动撤销，也不影响额度。", en: "The longest a mark may stay active, in working days (review period plus clean-up; Monday to Friday, weekends excluded). A mark still active past this raises a daily alert; it only alerts, it does not release the mark or change the allowance." },
+    cfgMrvMaxDaysField: { zh: "标记后最长存续工作日数", en: "Longest active period after marking (working days)" },
+    mrvOverdueUnset: { zh: "清理期限未设定", en: "Clean-up deadline not set" },
+    mrvOverdueInactive: { zh: "已撤销／非活跃", en: "Released or inactive" },
+    mrvOverdueCheckFailed: { zh: "超期判定失败", en: "Overdue check failed" },
+    mrvAccountDeleted: { zh: "（账号已删除）", en: "(account deleted)" },
+    mrvRemarkMax: { zh: "撤销后允许再次标记的次数：{n}", en: "Re-marks allowed after release: {n}" },
+    mrvRemarkMaxUnset: { zh: "撤销后允许再次标记的次数未设定（卡 A）：再标一律被拒", en: "Re-mark limit not set (card A): every re-mark is refused" },
+    mrvMarkCountFailed: { zh: "统计失败", en: "Count failed" },
+    mrvColMarkCount: { zh: "已标记次数", en: "Times marked" },
+    mrvErrPermission: { zh: "当前岗位没有这项权限，请联系负责人开通", en: "Your position does not have this permission. Please ask the principal to grant it." },
+    mrvGrantNotDemo: { zh: "该账号已不是演示账号，不能发放", en: "This account is no longer a demo account, so nothing can be granted" },
+    mrvGrantConfirm: { zh: "将向 {email} 发放 {n} 点（≈ S${sgd}）。确认发放？", en: "Grant {n} points (≈ S${sgd}) to {email}?" },
+    mrvFoundEmail: { zh: "账号：", en: "Account: " },
   };
   // <<<END_OS_L10N_GENERATED>>>
 
@@ -6161,6 +6306,8 @@ async function callFn(name, body) {
         // TD-594 WO-4：客服会话回复／关闭时状态自读取后已变（409）
         CONVERSATION_STATE_CHANGED: 'csAdminStaleState' };
       if (LIC_ERR[ctx?.error]) msg = osT(LIC_ERR[ctx.error]);
+      // 〔TD-1538〕商城配置写入守卫（核准、真正落库时才拦）：把库里点名坏值的那句给核准人看，⛔ 只显示错误码
+      if (ctx?.error === 'MALL_CONFIG_INVALID' && typeof ctx.detail === 'string' && ctx.detail.trim()) msg = osT('cfgMallConfigInvalid').replace('{detail}', () => ctx.detail.trim());
     } catch {
       // 响应体不是 JSON 就用默认 message，不阻断流程
     }
@@ -6300,6 +6447,8 @@ const TAB_ENTRY = {
   aicreditprices: 'sfk-admin-ai-credit-prices',
   // TD-523：代办恢复（可见与否由服务端入口清单决定）
   tokenrecovery: 'sfk-admin-token-recovery',
+  // TD-1540 B：审核演示账号（可见与否由服务端入口清单决定）
+  mallreview: 'sfk-admin-mall-review-account',
   // TD-527：暂停机构预授权（可见与否由服务端入口清单决定）
   pausedpreauth: 'sfk-admin-paused-preauth',
   // TD-531 S1c：推广要约审核（可见与否由服务端入口清单决定；运营岗持 promo.offer.review）
@@ -6465,9 +6614,11 @@ function renderLogin(errorMsg) {
           <button type="submit">${escapeHtml(osT('adminLoginSubmit'))}</button>
         </form>
         <p id="loginStatus" class="status"></p>
+        <button type="button" id="loginForgot" class="link-btn">${escapeHtml(osT('adminForgotLink'))}</button>
       </div>
     </div>
   `;
+  document.getElementById('loginForgot').addEventListener('click', () => renderForgotPassword());
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -6482,6 +6633,48 @@ function renderLogin(errorMsg) {
     await handleSession(data.session);
   });
 }
+
+// ══════ TD-1518 ①：忘记密码 ══════
+// ⭐ 重设链接回跳本页（redirectTo＝本页地址，⛔ 带任何参数）⇒ 地址栏带 type=recovery ⇒ init() 走 AUTH_LINK 分支
+//   ⇒ renderSetPassword()（先核在职后台账号）⇒ handleSession() ⇒ 两步验证门槛与平时登录完全同一条路。
+//   🔴 ⛔ 因为重设就跳过两步验证：本函数只负责「发信」，之后的路⛔ 另开分支。
+// 🔴 防探测：⛔ 管邮箱存⛔ 存在、接口成功还是报错，页面一律显示同一句 adminForgotSent；
+//   报错只进控制台，且⛔ 带邮箱本身。
+// 纯函数（供测试）：重设链接回跳地址＝本页的 origin＋pathname
+function adminResetRedirectUrl(loc) { return loc.origin + loc.pathname; }
+function renderForgotPassword() {
+  app.innerHTML = `
+    <div class="login-wrap">
+      <div class="login-card">
+        <h1>${escapeHtml(osT('adminForgotTitle'))}</h1>
+        <p class="status">${escapeHtml(osT('adminForgotIntro'))}</p>
+        <form id="forgotForm">
+          <label>${escapeHtml(osT('adminLoginEmail'))}<input type="email" id="forgotEmail" required autocomplete="username" /></label>
+          <button type="submit" id="forgotSubmit">${escapeHtml(osT('adminForgotSubmit'))}</button>
+        </form>
+        <p id="forgotStatus" class="status"></p>
+        <button type="button" id="forgotBack" class="link-btn">${escapeHtml(osT('adminForgotBack'))}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('forgotBack').addEventListener('click', () => renderLogin());
+  document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('forgotEmail').value.trim();
+    const statusEl = document.getElementById('forgotStatus');
+    const btn = document.getElementById('forgotSubmit');
+    btn.disabled = true;
+    statusEl.textContent = osT('adminForgotSending');
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: adminResetRedirectUrl(location) });
+      if (error) console.error('TD-1518 重设邮件请求返回错误（页面仍显示统一文案）：', error.status || '', error.message);
+    } catch (err) {
+      console.error('TD-1518 重设邮件请求异常（页面仍显示统一文案）：', err && err.message);
+    }
+    statusEl.textContent = osT('adminForgotSent');
+  });
+}
+// ══════ TD-1518 ① end ══════
 
 // ══════ TD-293 ③：邀请／找回进来的会话 ⇒ 先设密码，再按现有判权走 ══════
 // 🔴 设密码前先确认是在职后台账号（⛔ 给任何能拿到会话的人一个改密码的入口）。
@@ -6584,6 +6777,8 @@ const TABS = [
   { id: 'aicreditprices', label: osT('adminTabAiCreditPrices'), minRole: 'operator' },
   // TD-523：代办恢复。可见与否由服务端入口清单决定（客服岗提出；财务岗、负责人岗核准）；判权在 fn_token_recovery_on_behalf_* 与 fn_approval_decide
   { id: 'tokenrecovery', label: osT('obRecTab'), minRole: 'support' },
+  // TD-1540 B：审核演示账号标记／撤销（权限点 mall.review_account.view／manage，默认不授予任何岗位；可见与否由服务端入口清单决定，角色只是粗筛）
+  { id: 'mallreview', label: osT('mrvTab'), minRole: 'operator' },
   // TD-527：暂停机构预授权的逐笔处理。可见与否由服务端入口清单决定（负责人岗提出；负责人岗、财务岗核准）；判权在 fn_paused_preauth_* 与 fn_approval_decide
   { id: 'pausedpreauth', label: osT('ppaTab'), minRole: 'support' },   // 角色只是粗筛，定成最低一档：能不能看见由岗位（入口清单）定
   // TD-531 S1c：推广要约审核。可见与否由服务端入口清单决定（运营岗 promo.offer.review）；判权在 fn_promo_offer_review（按机构交易主体三参判）
@@ -6762,6 +6957,7 @@ function renderTab(tab) {
   else if (tab === 'tokenrules') renderTokenRulesTab(el);
   else if (tab === 'aicreditprices') renderAiCreditPricesTab(el);
   else if (tab === 'tokenrecovery') renderTokenRecoveryTab(el);
+  else if (tab === 'mallreview') renderMallReviewTab(el);   // TD-1540 B
   else if (tab === 'pausedpreauth') renderPausedPreauthTab(el);
   else if (tab === 'promoreview') renderPromoReviewTab(el);
   else if (tab === 'positionreview') renderPositionReviewTab(el);
@@ -11914,11 +12110,13 @@ const CFG_TYPES = {
       return null;
     },
   },
-  TIERSET: { // 〔TD-607-7 键卡 7/8〕可使用档位：null＝不限档位（创始人 v0.5.2 裁定 A：对「未设定＝不抵扣」的有意例外）；数组＝仅所列档位，[]＝无人可用；档位清单取自 membership_tier_config（⛔ 界面写死）
+  TIERSET: { // 〔TD-607-7 键卡 7/8；TD-1535 改三态〕整值 {mode: null|'all'|'list', tiers: null|[…]}：未设定＝任何档位都不能用；all＝不限档位（含体验版，裁定 A 的语义，须明确选）；list＝仅所列（至少一个）。档位清单取自 membership_tier_config（⛔ 界面写死）
     unit: () => '', input: 'tierset',
-    toInput: (v) => (Array.isArray(v) ? v : null),
-    parse: (o) => (o && o.mode === 'listed' ? o.list : null),
-    check: (v) => (v === null ? null : !Array.isArray(v) || v.some((x) => typeof x !== 'string' || x === '') || new Set(v).size !== v.length ? 'notArray' : null),
+    toInput: (v) => (v && typeof v === 'object' && !Array.isArray(v) ? { mode: v.mode === 'all' || v.mode === 'list' ? v.mode : null, tiers: Array.isArray(v.tiers) ? v.tiers : [] } : { mode: null, tiers: [] }),
+    parse: (o) => (!o ? undefined : o.mode === 'all' ? { mode: 'all', tiers: null } : o.mode === 'listed' ? { mode: 'list', tiers: o.list } : { mode: null, tiers: null }),
+    check: (v) => (!v || typeof v !== 'object' ? 'notArray'
+      : v.mode === 'list' ? (!Array.isArray(v.tiers) || v.tiers.length === 0 ? 'tierListEmpty' : v.tiers.some((x) => typeof x !== 'string' || x === '') || new Set(v.tiers).size !== v.tiers.length ? 'notArray' : null)
+      : (v.mode === 'all' || v.mode === null) && v.tiers === null ? null : 'notArray'),
   },
   T4PS: { // 〔TD-1111 R0-c3 补丁 36〕正整数且不超过 JS 安全整数（2^53−1）：行数键由库内读取方转 bigint，超出 bigint 会让校验函数溢出（c1b 守卫兜底）；界面在更小的『无损』边界前就拒，⛔ 不是政策上限（高低由运营设）
     unit: (f) => pick(f.unit), input: 'number', step: '1',
@@ -12329,6 +12527,24 @@ const CFG_TYPES = {
     parse: (o) => (!o || (o.state !== 'unset' && o.state !== 'set') ? undefined : o.state === 'unset' ? null : o.rows),
     check: (v, spec) => (v === undefined ? 'triState' : cfgRowsCheckValue(v, spec && spec.rows)),
   },
+  HUBSECTIONS: { // 〔TD-1262〕Hub 首页版面：两个固定板块槽（机构／商城）；两块都不勾 ⇒ null（未设定，⛔ 用空数组兼任）。形状与库内 fn_hub_feed_layout_shape_check 对拍：check_td1262_cards_match_readers.py；上下限（条数上限、域名白名单）⛔ 在此写死，由服务端触发器报错并原样显示
+    unit: () => '', input: 'hubsections',
+    toInput: (v) => (Array.isArray(v) ? v : null),
+    parse: (o) => (o === undefined ? undefined : o),
+    check: (v) => (v === undefined ? 'hubSections' : cfgHubSectionsCheck(v)),
+  },
+  HUBURL: { // 〔TD-1262〕详情链接模板：留空 ⇒ null；须 https:// 开头且恰含一个 {id}；域名是否允许由服务端核
+    input: 'text', unit: () => '',
+    toInput: (v) => (typeof v === 'string' ? v : ''),
+    parse: (x) => (x.trim() === '' ? null : x.trim()),
+    check: (v) => (v === null ? null : (typeof v !== 'string' || /\s/.test(v) || !/^https:\/\/[^\s"<>{}]+/.test(v) || !/^[^{}]*\{id\}[^{}]*$/.test(v) ? 'hubUrl' : null)),
+  },
+  HUBRECRUIT: { // 〔TD-1262〕Hub 招募卡：未设定（null）／已设定（标题、按钮文案、链接、来源参数；正文可空）。合规档，运营提出→负责人核准
+    unit: () => '', input: 'hubrecruit',
+    toInput: (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : null),
+    parse: (o) => o,
+    check: (v) => (v === undefined ? 'triState' : cfgHubRecruitCheck(v)),
+  },
   CURMAP: {
     unit: () => '', input: 'curmap',
     toInput: (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}),
@@ -12379,6 +12595,7 @@ const CFG_ERR = {
   tooManyDecimals: osT('cfgInl004'),
   ratioRange: osT('cfgInl005'),
   tierNotLoaded: osT('cfgErrTierNotLoaded'),
+  tierListEmpty: osT('cfgErrTierListEmpty'),   // TD-1535
   notInteger: osT('cfgInl006'),
   badDate: osT('cfgInl007'),
   notArray: osT('cfgInl008'),
@@ -12393,6 +12610,7 @@ const CFG_ERR = {
   badOrigin: osT('cfgErrBadOrigin'),   // 〔TD-1301〕   // 〔TD-1079〕
   percentRange: osT('cfgErrPercentRange'),   // 〔TD-1079 片A〕
   badEmail: osT('cfgErrBadEmail'),   // 〔TD-1102〕
+  hubSections: osT('cfgErrHubSections'), hubOrder: osT('cfgErrHubOrder'), hubUrl: osT('cfgErrHubUrl'), hubRecruit: osT('cfgErrHubRecruit'),   // 〔TD-1262〕
   badKeyName: osT('cfgErrBadKeyName'), badLayoutName: osT('cfgErrBadLayoutName'), badPair: osT('cfgErrBadPair'), badColor: osT('cfgErrBadColor'), contrastRange: osT('cfgErrContrastRange'), pairKeyUnknown: osT('cfgErrPairKeyUnknown'),   // 〔TD-1084 补丁 25〕
   buildMin: osT('cfgErrBuildMin'),
   notHttps: osT('cfgErrNotHttps'),
@@ -12842,6 +13060,18 @@ const CFG_SPEC = {
         optionLabels: { alert_only: () => osT('cfgPrfTacAlertOnly') }, affects: 'revenue' },
     ],
   },
+  // 🔴 TD-1516（GOV-1 达标线①～⑤；revenue 档：运营提出→财务核准）：平台奖励点数退款「原池已过期」口径。
+  //   运行时读取方＝库内 fn_platform_points_refund_expired_mode()（迁移 20261102231000，唯一读取方；由 fn_booking_redemption_refund_platform 调，
+  //   Edge _shared/booking_refund_core.ts 经 rpc 进入）；字段路径 mode 与它读的 v -> 'mode' 逐字相同；允许值 regrant／lapse 与读取方白名单一致。
+  //   留空＝未设定（{"mode": null}）⇒ 读取方返回 null：过期部分不回补、记 refund_lapsed＋P1 告警，⛔ 静默默认。
+  'sfk_os.platform_points_refund_expired_policy': {
+    submitConfirm: () => osT('cfgPpExpConfirm'),
+    group: 'C', label: osT('cfgPpExpLabel'), notice: osT('cfgPpExpNotice'),
+    fields: [
+      { path: 'mode', label: osT('cfgPpExpField'), type: 'TEXT', options: ['regrant', 'lapse'],
+        optionLabels: { regrant: () => osT('cfgPpExpRegrant'), lapse: () => osT('cfgPpExpLapse') }, affects: 'revenue' },
+    ],
+  },
   // 🔴 TD-789 R5：平台统一时区（Token 到期日界；GOV-1 达标线①～⑤；revenue 档：运营提出→财务核准）。
   //   运行时读取方＝库内 fn_platform_timezone()（迁移 20261101943000，唯一读取方；Token 到期两个函数 fn_token_grant_expires_at／fn_token_recovery_deadline_at 与 Edge getPlatformTimezone 都经它读）；
   //   界面写的字段路径 tz 与它读的逐字相同（check_td789_platform_tz_matches_reader.py 钉住）。留空＝未设定（读取方抛错＋告警，⛔ 回落新加坡）；已设定的不能改回未设定（库内写入口拒）；⛔ 进客户端可读白名单。
@@ -12904,6 +13134,20 @@ const CFG_SPEC = {
   'contact.addresses.support': {
     group: 'D', label: osT('cfgContactSupportLabel'), notice: osT('cfgContactSupportNotice'),
     fields: [{ path: 'address', label: osT('cfgContactSupportField'), type: 'TMAIL', affects: 'compliance' }],
+  },
+  // TD-1262 Hub 首页版面（运营档，单人即改）：读取方 fn_app_hub_feed（读 app.hub_feed_layout 的 sections / item_url_template）；未设定 ＝ {"sections":null,"item_url_template":null}。
+  //   形状／域名／条数限制由库内触发器 trg_validate_td1262_keys_shape 把关，⛔ 在界面写死；对拍闸门 check_td1262_cards_match_readers.py
+  'app.hub_feed_layout': {
+    group: 'O', label: osT('cfgHubLayoutLabel'), notice: osT('cfgHubLayoutNotice'),
+    fields: [
+      { path: 'sections', label: osT('cfgHubSectionsField'), type: 'HUBSECTIONS', affects: 'ops' },
+      { path: 'item_url_template', label: osT('cfgHubUrlField'), type: 'HUBURL', affects: 'ops' },
+    ],
+  },
+  // TD-1262 Hub 招募卡（合规档：运营提出 → 负责人岗核准，键⛔ 进 fn_config_writable_keys，走 fn_config_compliance_update）；未设定 ＝ {"recruit":null}，⛔ 预置任何文案
+  'app.hub_recruit': {
+    group: 'D', label: osT('cfgHubRecruitLabel'), notice: osT('cfgHubRecruitNotice'),
+    fields: [{ path: 'recruit', label: osT('cfgHubRecruitField'), type: 'HUBRECRUIT', affects: 'compliance' }],
   },
   'customer_service.health_handoff.confirm_required': {
     group: 'D', label: osT('cfgHgHandoffLabel'), notice: osT('cfgHgHandoffNotice'),
@@ -14035,8 +14279,9 @@ const CFG_SPEC = {
   // 🔴 TD-607-7（键卡 7/8）：可使用奖励点数折扣的会员档位。读取方 fn_mall_config()（字段 tiers）；库守卫：数组或 null。🔴 null＝不限档位（所有人可用，含体验版）——对「未设定＝不抵扣」的有意例外（创始人 v0.5.2 裁定 A），卡上显式提示；设为 null 或 [] 前强提示（submitConfirm）。revenue 档（谁能用决定谁少付钱，GOV-1）⇒ 运营提出、财务核准。达标线⑤读取方交付前⛔ 签双签。
   'token_mall.eligible_tiers': {
     group: 'T', label: osT('cfgMallElTierLabel'), notice: osT('cfgMallElTierNotice'),
-    fields: [{ path: 'tiers', label: osT('cfgMallElTierField'), type: 'TIERSET', affects: 'c_end', fieldNotice: osT('cfgMallElTierUnsetNote') }],
-    submitConfirm: (nv) => { const v = nv && nv.tiers; return v === null ? osT('cfgMallElTierConfirmAll') : (Array.isArray(v) && v.length === 0 ? osT('cfgMallElTierConfirmNone') : null); },
+    // 〔TD-1535〕整值一个字段（path ''）：三态单选＋档位勾选；选「不限档位」提交前强提示
+    fields: [{ path: '', label: osT('cfgMallElTierField'), type: 'TIERSET', affects: 'c_end', fieldNotice: osT('cfgMallElTierUnsetNote') }],
+    submitConfirm: (nv) => (nv && nv.mode === 'all' ? osT('cfgMallElTierConfirmAll') : null),
   },
   // 🔴 TD-607-7（键卡 8/8）：商城奖励点数折扣总闸（GOV-1 总闸卡）。读取方 fn_mall_config()（字段 enabled，非布尔一律读成 null）；库守卫：布尔或 null。null＝未设定＝关闭（⛔ 种子值，⛔ 用 false 兼任）；revenue 档 ⇒ 运营提出、财务核准两步。设为「开」前强提示（前置清单）。
   //   达标线⑤（运行时确有读取方）：fn_mall_config 已在库，-3/-4/-5 的调用方未交付前本卡⛔ 签双签。
@@ -14057,6 +14302,20 @@ const CFG_SPEC = {
     group: 'S', label: osT('cfgXlLabel'), notice: osT('cfgXlNotice'),
     submitConfirm: () => osT('cfgXlConfirm'),
     fields: [{ path: '', label: osT('cfgXlLabel'), type: 'XLINES', affects: 'c_end' }],
+  },
+  // 🔴 TD-1540 A（卡 A，契约 SFK_TD1527b_后台接口契约与具名卡要求_线3给线4 v0.3.1）：审核演示账号三个具名框。读取方＝库内 fn_mall_review_*（线3，迁移 20261124170000／190100）。
+  //   未设定态单独显示，⛔ 用 0 兼任（points／max_days 用 T4P：0 被拒；remark_max 用 T4：0 是有意义的设定＝不许再标）；⛔ 写默认／推荐值。
+  'token_mall.review_account_points': {
+    group: 'T', label: osT('cfgMrvPointsLabel'), notice: osT('cfgMrvPointsNotice'),
+    fields: [{ path: 'amount', label: osT('cfgMrvPointsField'), type: 'T4P', unit: osT('cfgUnitPoints'), affects: 'c_end', pointsSgdHint: true, fieldNotice: osT('cfgMrvUnsetNote') }],
+  },
+  'token_mall.review_account_remark_max': {
+    group: 'T', label: osT('cfgMrvRemarkLabel'), notice: osT('cfgMrvRemarkNotice'),
+    fields: [{ path: 'times', label: osT('cfgMrvRemarkField'), type: 'T4', unit: osT('cfgUnitTimes'), affects: 'c_end', fieldNotice: osT('cfgMrvRemarkUnsetNote') }],
+  },
+  'token_mall.review_account_max_days': {
+    group: 'T', label: osT('cfgMrvMaxDaysLabel'), notice: osT('cfgMrvMaxDaysNotice'),
+    fields: [{ path: 'days', label: osT('cfgMrvMaxDaysField'), type: 'T4P', unit: osT('cfgUnitWorkdays'), affects: 'ops', fieldNotice: osT('cfgMrvUnsetNote') }],
   },
   'token_mall.enabled': {
     group: 'T', label: osT('cfgMallEnLabel'), notice: osT('cfgMallEnNotice'),
@@ -14283,6 +14542,15 @@ const CFG_SPEC = {
     fields: [
       { path: 'max_count', label: osT('cfgRewardAnomPromoCustCountField'), type: 'T4', unit: osT('cfgUnitTimes'), affects: 'ops', risk: 'up', refKey: 'promo_customer' },
       { path: 'window_minutes', label: osT('cfgRewardAnomPromoWindowField'), type: 'T4', unit: osT('cfgUnitMinutes'), affects: 'ops', risk: 'down' },
+    ],
+  },
+  // 🔴 C2 · 注册后速领满额（TD-550 维度 H）。读取方 fn_reward_fast_claim_sentinel()，字段路径与它读的逐字相同（check_c2fastclaim_config_ui_matches_reader.py）。
+  //   留空＝未设定，0 是有意义的设定；调高上限＝更难告警、缩短分钟数＝更难告警（核准页高亮）。只告警不拦。
+  'ops.reward_anomaly_fast_claim_threshold': {
+    group: 'O', label: osT('cfgRewardAnomFastClaimLabel'), notice: osT('cfgRewardAnomFastClaimNotice'),
+    fields: [
+      { path: 'within_minutes', label: osT('cfgRewardAnomFastClaimWithinField'), type: 'T4P', unit: osT('cfgUnitMinutes'), affects: 'ops', risk: 'down' },
+      { path: 'max_tokens', label: osT('cfgRewardAnomFastClaimMaxField'), type: 'T4', unit: osT('cfgUnitTokens'), affects: 'ops', risk: 'up' },
     ],
   },
   // ═══ A · C 端会员与返还 ═══
@@ -15377,6 +15645,125 @@ function cfgRowsRowHtml(rs, key, d, ro) {
   return `<div class="cfg-rows-row">${cells}${mv}${ro ? '<span class="cfg-rows-del"></span>' : `<button type="button" class="cfg-rows-del">${escapeHtml(osT('cfgRowsDel'))}</button>`}</div>`;
 }
 /** 读回：全空的行跳过；行名重复 ⇒ 报错（⛔ 悄悄后者覆盖前者）；空的可选格不写进值。 */
+// ── 〔TD-1262〕Hub 首页版面卡：纯函数（渲染／读回／校验共用；形状与库内 fn_hub_* 对拍，⛔ 在此写死数值上下限）──
+const CFG_HUB_TYPES = ['institutions', 'mall'];            // 板块类型＝服务端契约枚举（固定两槽），⛔ 是运营参数
+const CFG_HUB_RULES = ['newest', 'rotate_daily'];          // 机构板块的排序规则＝服务端契约枚举
+function cfgHubLocOk(x) {
+  return !!x && typeof x === 'object' && !Array.isArray(x) && Object.keys(x).length === 2
+    && typeof x.zh === 'string' && typeof x.en === 'string' && x.zh.trim() !== '' && x.en.trim() !== '';
+}
+function cfgHubSectionsCheck(v) {
+  if (v === null) return null;
+  if (!Array.isArray(v) || v.length === 0) return 'hubSections';   // 空数组≠未设定；两块都不显示 ⇒ 读回为 null
+  const seen = [];
+  for (const r of v) {
+    if (!r || typeof r !== 'object' || Array.isArray(r)) return 'hubSections';
+    if (!CFG_HUB_TYPES.includes(r.type) || seen.includes(r.type)) return 'hubSections';
+    seen.push(r.type);
+    if (!cfgHubLocOk(r.title) || !cfgHubLocOk(r.see_all_label)) return 'hubSections';
+    if (r.type === 'institutions') {
+      if (!Number.isInteger(r.item_count) || r.item_count < 1) return 'hubSections';
+      if (!CFG_HUB_RULES.includes(r.rule)) return 'hubSections';
+    } else {
+      if ('rule' in r) return 'hubSections';
+      if ('item_count' in r && (!Number.isInteger(r.item_count) || r.item_count < 1)) return 'hubSections';
+    }
+  }
+  return null;
+}
+function cfgHubSectionsRead(node) {
+  const slots = {};
+  node.querySelectorAll('.cfg-hub-slot').forEach((sl) => { if (sl.querySelector('.h-on').checked) slots[sl.dataset.type] = sl; });
+  const types = Object.keys(slots);
+  if (!types.length) return { v: null };
+  let ord = types;
+  if (types.length === 2) {
+    const o = node.querySelector('.cfg-hub-order').value;
+    if (!o) return { v: undefined, err: 'hubOrder' };   // 「未选」＝默认不预选，⛔ 悄悄按某个顺序存
+    ord = o === 'mall_first' ? ['mall', 'institutions'] : ['institutions', 'mall'];
+  }
+  const out = [];
+  for (const ty of ord) {
+    const sl = slots[ty];
+    const g = (c) => sl.querySelector(c).value.trim();
+    const o = { type: ty, title: { zh: g('.h-title-zh'), en: g('.h-title-en') }, see_all_label: { zh: g('.h-all-zh'), en: g('.h-all-en') } };
+    const cnt = g('.h-count');
+    if (ty === 'institutions') {
+      o.item_count = /^[0-9]+$/.test(cnt) ? Number(cnt) : (cnt === '' ? null : cnt);   // 非整数原样带进 check ⇒ 报错，⛔ 悄悄取整
+      o.rule = g('.h-rule') || null;
+    } else if (cnt !== '') o.item_count = /^[0-9]+$/.test(cnt) ? Number(cnt) : cnt;
+    out.push(o);
+  }
+  return { v: out };
+}
+function cfgHubSlotHtml(ty, cur, ro) {
+  const on = !!cur;
+  const lc = (o, k) => escapeHtml(o && typeof o[k] === 'string' ? o[k] : '');
+  const loc = (cls, o) => `<input type="text" class="${cls}-zh" placeholder="${escapeHtml(osT('cfgHubZh'))}" value="${lc(o, 'zh')}" ${ro} /> <input type="text" class="${cls}-en" placeholder="${escapeHtml(osT('cfgHubEn'))}" value="${lc(o, 'en')}" ${ro} />`;
+  const cnt = cur && Number.isInteger(cur.item_count) ? String(cur.item_count) : '';
+  const rule = cur && typeof cur.rule === 'string' ? cur.rule : '';
+  return `<div class="cfg-hub-slot ${on ? '' : 'off'}" data-type="${ty}">
+    <label class="cfg-hub-slot-h"><input type="checkbox" class="h-on" ${on ? 'checked' : ''} ${ro} /> ${escapeHtml(osT(ty === 'mall' ? 'cfgHubSlotMall' : 'cfgHubSlotInst'))}</label>
+    <div class="cfg-hub-body">
+      <div class="cfg-hub-row"><span class="cfg-hub-lbl">${escapeHtml(osT('cfgHubTitle'))}</span>${loc('h-title', cur && cur.title)}</div>
+      <div class="cfg-hub-row"><span class="cfg-hub-lbl">${escapeHtml(osT('cfgHubSeeAll'))}</span>${loc('h-all', cur && cur.see_all_label)}</div>
+      <div class="cfg-hub-row"><span class="cfg-hub-lbl">${escapeHtml(osT('cfgHubItemCount'))}</span><input type="number" class="h-count" min="1" step="1" value="${escapeHtml(cnt)}" ${ro} />${ty === 'mall' ? `<span class="muted">${escapeHtml(osT('cfgHubCountOptional'))}</span>` : ''}</div>
+      ${ty === 'institutions' ? `<div class="cfg-hub-row"><span class="cfg-hub-lbl">${escapeHtml(osT('cfgHubRule'))}</span><select class="h-rule" ${ro}><option value="">${escapeHtml(osT('cfgHubNone'))}</option>${CFG_HUB_RULES.map((r) => `<option value="${r}" ${r === rule ? 'selected' : ''}>${escapeHtml(osT(r === 'newest' ? 'cfgHubRuleNewest' : 'cfgHubRuleRotate'))}</option>`).join('')}</select></div>` : ''}
+    </div></div>`;
+}
+function cfgHubSectionsHtml(cur, id, ro) {
+  const by = {}; (cur || []).forEach((r) => { if (r && CFG_HUB_TYPES.includes(r.type)) by[r.type] = r; });
+  const ord = (cur || []).map((r) => r && r.type);
+  const ordVal = ord.length === 2 ? (ord[0] === 'mall' ? 'mall_first' : 'inst_first') : '';
+  return `<div class="cfg-hub" id="${id}">`
+    + `<div class="cfg-hub-row"><span class="cfg-hub-lbl">${escapeHtml(osT('cfgHubOrder'))}</span><select class="cfg-hub-order" ${ro}>`
+    + `<option value="" ${ordVal === '' ? 'selected' : ''}>${escapeHtml(osT('cfgHubNone'))}</option>`
+    + `<option value="inst_first" ${ordVal === 'inst_first' ? 'selected' : ''}>${escapeHtml(osT('cfgHubOrderInstFirst'))}</option>`
+    + `<option value="mall_first" ${ordVal === 'mall_first' ? 'selected' : ''}>${escapeHtml(osT('cfgHubOrderMallFirst'))}</option></select>`
+    + `<span class="muted">${escapeHtml(osT('cfgHubOrderHint'))}</span></div>`
+    + CFG_HUB_TYPES.map((ty) => cfgHubSlotHtml(ty, by[ty], ro)).join('')
+    + `<div class="cfg-notice-inline">${escapeHtml(osT('cfgHubAllOffNote'))}</div></div>`;
+}
+const CFG_HUB_SRC_NAME_RE = /^[a-z][a-z0-9_]*$/;   // 与库内 fn_hub_recruit_shape_check 同一正则
+const CFG_HUB_SRC_VALUE_RE = /^[a-z0-9_]+$/;
+function cfgHubRecruitCheck(v) {
+  if (v === null) return null;
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return 'hubRecruit';
+  if (!cfgHubLocOk(v.title) || !cfgHubLocOk(v.cta_label)) return 'hubRecruit';
+  if ('body' in v && !cfgHubLocOk(v.body)) return 'hubRecruit';
+  if (typeof v.url !== 'string' || !/^https:\/\/[^\s"<>#]+$/.test(v.url)) return 'hubRecruit';
+  if (!v.src || typeof v.src !== 'object' || Object.keys(v.src).length !== 2
+    || typeof v.src.name !== 'string' || !CFG_HUB_SRC_NAME_RE.test(v.src.name)
+    || typeof v.src.value !== 'string' || !CFG_HUB_SRC_VALUE_RE.test(v.src.value)) return 'hubRecruit';
+  return null;
+}
+function cfgHubRecruitHtml(cur, id, ro) {
+  const nm = `${id}_rec`;
+  const o = cur || {};
+  const lc = (x, k) => escapeHtml(x && typeof x[k] === 'string' ? x[k] : '');
+  const loc = (cls, x) => `<input type="text" class="${cls}-zh" placeholder="${escapeHtml(osT('cfgHubZh'))}" value="${lc(x, 'zh')}" ${ro} /> <input type="text" class="${cls}-en" placeholder="${escapeHtml(osT('cfgHubEn'))}" value="${lc(x, 'en')}" ${ro} />`;
+  const opt = (st, on) => `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="${st}" ${on ? 'checked' : ''} ${ro} /> ${escapeHtml(osT(st === 'unset' ? 'cfgUnset' : 'cfgHubRecruitSet'))}</label>`;
+  const row = (k, inner) => `<div class="cfg-hub-row"><span class="cfg-hub-lbl">${escapeHtml(osT(k))}</span>${inner}</div>`;
+  return `<div class="cfg-hub" id="${id}">` + opt('unset', cur === null) + opt('set', cur !== null)
+    + row('cfgHubRecTitle', loc('r-title', o.title)) + row('cfgHubRecBody', loc('r-body', o.body))
+    + row('cfgHubRecCta', loc('r-cta', o.cta_label))
+    + row('cfgHubRecUrl', `<input type="text" class="r-url" value="${escapeHtml(typeof o.url === 'string' ? o.url : '')}" ${ro} />`)
+    + row('cfgHubRecSrcName', `<input type="text" class="r-src-name" value="${escapeHtml(o.src && typeof o.src.name === 'string' ? o.src.name : '')}" ${ro} />`)
+    + row('cfgHubRecSrcValue', `<input type="text" class="r-src-value" value="${escapeHtml(o.src && typeof o.src.value === 'string' ? o.src.value : '')}" ${ro} />`)
+    + '</div>';
+}
+function cfgHubRecruitRead(node) {
+  const sel = node.querySelector('input[type=radio]:checked');
+  if (!sel) return undefined;
+  if (sel.value === 'unset') return null;
+  const g = (c) => node.querySelector(c).value.trim();
+  const out = { title: { zh: g('.r-title-zh'), en: g('.r-title-en') } };
+  if (g('.r-body-zh') !== '' || g('.r-body-en') !== '') out.body = { zh: g('.r-body-zh'), en: g('.r-body-en') };   // 两格都空 ⇒ 不带 body
+  out.cta_label = { zh: g('.r-cta-zh'), en: g('.r-cta-en') };
+  out.url = g('.r-url');
+  out.src = { name: g('.r-src-name'), value: g('.r-src-value') };
+  return out;
+}
 function cfgRowsRead(node, rs) {
   const o = {};
   for (const r of node.querySelectorAll('.cfg-rows-row')) {
@@ -15413,6 +15800,22 @@ function cfgRowsDiffHtml(d) {
 }
 
 // ---- end TD-904 rows helpers ----
+// 〔TD-1540 A〕点数 ⇒ ≈ S$（点数以分记账，1 点＝S$0.01；空／非正整数 ⇒ 不显示金额）
+function cfgPointsSgdText(v) {
+  const n = Number(String(v ?? '').trim());
+  return String(v ?? '').trim() !== '' && Number.isInteger(n) && n >= 0 ? osT('cfgPointsSgdHint').replace('{sgd}', () => (n / 100).toFixed(2)) : '';
+}
+let cfgSgdHintWired = false;   // 只在真有点数框时才挂一次全局监听（⛔ 在脚本顶层碰 document：离线测试抽这段时没有 DOM）
+function cfgWireSgdHint() {
+  if (cfgSgdHintWired || typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
+  cfgSgdHintWired = true;
+  document.addEventListener('input', (ev) => {
+    const t = ev.target; if (!t || !t.id) return;
+    const hint = document.querySelector(`.cfg-sgd-hint[data-for="${CSS.escape(t.id)}"]`);
+    if (hint) hint.textContent = cfgPointsSgdText(t.value);
+  });
+}
+
 function cfgGet(value, path) {
   if (!path) return value;
   return path.split('.').reduce((o, k) => (o === null || o === undefined ? undefined : o[k]), value);
@@ -15869,9 +16272,11 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
   // 🔴 `FIN-5`：带 `configuredPath` 的字段，**⛔ 没被显式设定过 ⇒ 一律按「未设定」显示**，
   //   ⚠️ 📌 哪怕库里存的是 `0`。⭐ ⛔ 否则「占位的 0」与「决定为 0」在界面上**⛔ 无区别**。
   const notConfigured = f.configuredPath ? cfgGet(value, f.configuredPath) !== true : false;
+  // ⚠️ TD-1550：下面这段判据在 cfgFieldIsUnset 里有一份逐字相同的副本（保存成功后刷新徽标用）；改这里必须同改那里——td1550 测试逐字比对
   const isUnset = raw0 === null || raw0 === undefined || notConfigured
     || (f.emptyIsUnset && Array.isArray(raw0) && t.toInput(raw0).length === 0)   // TD-398 补丁 20：空板块表＝变体未定义
-    || (t.input === 'rowtable' && raw0 && typeof raw0 === 'object' && Object.keys(raw0).length === 0);   // TD-616：空表＝未设定
+    || (t.input === 'rowtable' && raw0 && typeof raw0 === 'object' && Object.keys(raw0).length === 0)   // TD-616：空表＝未设定
+    || (t.input === 'tierset' && raw0 && typeof raw0 === 'object' && raw0.mode !== 'all' && raw0.mode !== 'list');   // TD-1535：档位资格 mode 为空＝未设定
   const raw = isUnset && notConfigured ? null : raw0;
   const id = `cfg_${btoa(unescape(encodeURIComponent(keyName + '|' + f.path))).replace(/[^A-Za-z0-9]/g, '')}`;
   const ro = disabled || f.readonly ? 'disabled' : '';
@@ -15906,12 +16311,13 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
     // 〔TD-607-7 6/8〕一档一行的百分比框；档位清单异步取（cfgTierSchedule），取到前容器 data-loaded="0"，读回时据此拒（⛔ 把没加载出来读成「全空＝未设定」而抹掉已存值）
     control = `<div class="cfg-tierpct" id="${id}" data-loaded="0" ${ro ? 'data-ro="1"' : ''} data-base="${escapeHtml(JSON.stringify(t.toInput(raw0)))}"><span class="cfg-unset">${escapeHtml(osT('cfgMallTierLoading'))}</span></div>`;
   } else if (t.input === 'tierset') {
-    // 〔TD-607-7 7/8〕两选一（不限档位／仅所列档位）＋档位勾选（异步取清单）；读回时「仅所列」而清单未加载 ⇒ 拒（⛔ 读成空数组而抹掉已存值）
+    // 〔TD-607-7 7/8；TD-1535〕三选一（未设定／不限档位／仅所列档位）＋档位勾选（异步取清单）；读回时「仅所列」而清单未加载 ⇒ 拒（⛔ 读成空数组而抹掉已存值）
     const cur = t.toInput(raw0);
     const nm = `${id}_mode`;
-    control = `<div class="cfg-tierset" id="${id}" data-loaded="0" ${ro ? 'data-ro="1"' : ''} data-base="${escapeHtml(JSON.stringify(cur))}">`
-      + `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="all" ${cur === null ? 'checked' : ''} ${ro} /> ${escapeHtml(osT('cfgMallElTierModeAll'))}</label>`
-      + `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="listed" ${cur !== null ? 'checked' : ''} ${ro} /> ${escapeHtml(osT('cfgMallElTierModeListed'))}</label>`
+    control = `<div class="cfg-tierset" id="${id}" data-loaded="0" ${ro ? 'data-ro="1"' : ''} data-base="${escapeHtml(JSON.stringify(cur.tiers))}">`
+      + `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="unset" ${cur.mode === null ? 'checked' : ''} ${ro} /> ${escapeHtml(osT('cfgMallElTierModeUnset'))}</label>`
+      + `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="all" ${cur.mode === 'all' ? 'checked' : ''} ${ro} /> ${escapeHtml(osT('cfgMallElTierModeAll'))}</label>`
+      + `<label class="cfg-tri-opt"><input type="radio" name="${nm}" value="listed" ${cur.mode === 'list' ? 'checked' : ''} ${ro} /> ${escapeHtml(osT('cfgMallElTierModeListed'))}</label>`
       + `<div class="cfg-ts-list"><span class="cfg-unset">${escapeHtml(osT('cfgMallTierLoading'))}</span></div></div>`;
   } else if (t.input === 'orderedToggle') {
     // ⭐ 全集 ＝ 启用（有序）∪ 停用；⚠️ 渲染顺序＝启用项按当前顺序在前，停用项在后。
@@ -15958,6 +16364,10 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
       + (rs.hintKey ? `<div class="cfg-notice-inline">${escapeHtml(osT(rs.hintKey))}</div>` : '')
       + (cur !== null && Object.keys(cur).length === 0 ? `<div class="cfg-notice-inline">${escapeHtml(osT('cfgRowsEmptyNote'))}</div>` : '')
       + '</div>';
+  } else if (t.input === 'hubsections') {
+    control = cfgHubSectionsHtml(t.toInput(raw0), id, ro);
+  } else if (t.input === 'hubrecruit') {
+    control = cfgHubRecruitHtml(t.toInput(raw0), id, ro);
   } else if (t.input === 'platrows') {
     // ══════════════════════════════════════════════════════════════
     // ⭐ 一行一个**已登记的**交易平台 —— 🔴 行集合来自 `value.platforms` 自己
@@ -16083,6 +16493,9 @@ function cfgFieldInput(keyName, f, value, disabled, all) {
     control = `<textarea id="${id}" rows="6" ${ro}>${escapeHtml(t.toInput(raw))}</textarea>`;
   } else {
     control = `<input type="${t.input}" id="${id}" step="${t.step || ''}" value="${escapeHtml(t.toInput(raw))}" ${ro} />`;
+    // 〔TD-1540 A〕点数类字段旁显示 ≈ 新加坡元：点数在账本里就是「分」（1 点＝1 分），这是单位换算，⛔ 汇率参数
+    if (f.pointsSgdHint) cfgWireSgdHint();
+    if (f.pointsSgdHint) control += ` <span class="muted cfg-sgd-hint" data-for="${id}">${escapeHtml(cfgPointsSgdText(t.toInput(raw)))}</span>`;
   }
   const unit = t.unit(f);
   // ⭐ **政策区间**（创始人 2026-09-11）—— 📌 只显示，⚠️ **⛔ 在这里拦**
@@ -16896,6 +17309,12 @@ function cfgReadField(el) {
       if (rd.err) return { v: rd.rows, err: pick(CFG_ERR[rd.err]) };
       v = t.parse({ state: 'set', rows: cfgRowsAsVal(f.rows, rd.rows) });
     } else v = t.parse(sel ? { state: sel.value } : null);
+  } else if (t.input === 'hubsections') {
+    const rd = cfgHubSectionsRead(node);
+    if (rd.err) return { v: rd.v, err: pick(CFG_ERR[rd.err]) };
+    v = t.parse(rd.v);
+  } else if (t.input === 'hubrecruit') {
+    v = t.parse(cfgHubRecruitRead(node));
   } else if (t.input === 'platrows') {
     // ⭐ 🔴 **⛔ 许丢掉 `status` 等⛔ 在本界面上的字段** —— ⚠️ 📌 本界面只管那五项，
     //   而 `platforms.<key>` 里还有 `status`（由「市场开通收款」那张卡片翻）。
@@ -17224,6 +17643,7 @@ async function renderRevenueConfigSection(host, configs, myPerms, saveOutcome) {
           return;
         }
         byKey[key].value = rb.value;   // ⭐ 回读值为准，后续再改从它出发
+        cfgRefreshUnsetBadges(card, key, rb.value);   // TD-1550：徽标随回读值刷新
         statusEl.classList.toggle('error', outcome === 'saved_no_audit');
         statusEl.textContent = osT(outcome === 'saved_no_audit' ? 'adminCfgSavedNoAudit' : 'adminCfgSavedVerified').replace('{key}', () => key);
         return;
@@ -17297,16 +17717,62 @@ function cfgDomainDiffHtml(d, warnText) {
 }
 // ---- end H3 domain helpers ----
 
+// TD-1550：字段「未设定」判据——与 cfgFieldInput 里 isUnset 那段逐字相同（变量名 raw0 在此写作 v0，避免其它测试的变异锚点出现两处；那边被 38 个卡片测试单独抽取执行，⛔ 便改成调用本函数）；td1550 测试换回变量名后逐字比对两处，防漂移
+function cfgFieldIsUnset(f, value) {
+  const t = CFG_TYPES[f.type];
+  const v0 = cfgGet(value, f.path);
+  const notConfigured = f.configuredPath ? cfgGet(value, f.configuredPath) !== true : false;
+  return v0 === null || v0 === undefined || notConfigured
+    || (f.emptyIsUnset && Array.isArray(v0) && t.toInput(v0).length === 0)   // TD-398 补丁 20：空板块表＝变体未定义
+    || (t.input === 'rowtable' && v0 && typeof v0 === 'object' && Object.keys(v0).length === 0)   // TD-616：空表＝未设定
+    || (t.input === 'tierset' && v0 && typeof v0 === 'object' && v0.mode !== 'all' && v0.mode !== 'list');   // TD-1535：档位资格 mode 为空＝未设定
+}
+// TD-1550：直改保存成功（回读一致）后，按回读值重算卡内每个字段的「未设定」徽标（原先只改状态文字，徽标停在旧状态）
+function cfgRefreshUnsetBadges(card, key, value) {
+  const spec = CFG_SPEC[key];
+  const fields = spec ? (spec.dynamic ? buildDynamicFields(spec, value) : spec.fields) : null;
+  if (!fields) return 0;
+  let n = 0;
+  card.querySelectorAll('.cfg-field').forEach((el) => {
+    const f = fields.find((x) => x.path === el.dataset.path && x.type === el.dataset.type);
+    const box = el.querySelector('.cfg-field-input');
+    if (!f || !box || !CFG_TYPES[f.type]) return;
+    const unset = cfgFieldIsUnset(f, value);
+    const badge = box.querySelector(':scope > .cfg-unset');
+    if (unset && !badge) box.insertAdjacentHTML('beforeend', `<span class="cfg-unset">${escapeHtml(osT('cfgUnset'))}</span>`);
+    if (!unset && badge) badge.remove();
+    n++;
+  });
+  return n;
+}
+// TD-1550：核准页具名展示的小工具（对象型值⛔ 许落成 [object Object]）
+function cfgFmtLoc(x) { return x && typeof x === 'object' ? [x.zh, x.en].filter((s) => typeof s === 'string' && s).join(' / ') : ''; }
+function cfgFmtNamed(rows) {
+  return '<div class="cfg-fmt-named">' + rows.map(([k, val]) => `<div><span class="cfg-hub-lbl">${escapeHtml(osT(k))}</span>：${escapeHtml(val === '' || val === null || val === undefined ? '—' : String(val))}</div>`).join('') + '</div>';
+}
+function cfgFmtJson(v) { return `<pre class="cfg-fmt-json">${escapeHtml(JSON.stringify(v, null, 2))}</pre>`; }
+
 function cfgFmt(v, type) {
+  if (type === 'HUBRECRUIT' && v && typeof v === 'object' && !Array.isArray(v)) {   // TD-1550：Hub 招募卡按具名字段展示（核准人看得清自己在核准什么）
+    return cfgFmtNamed([['cfgHubRecTitle', cfgFmtLoc(v.title)], ['cfgHubRecBody', cfgFmtLoc(v.body)], ['cfgHubRecCta', cfgFmtLoc(v.cta_label)],
+      ['cfgHubRecUrl', typeof v.url === 'string' ? v.url : ''], ['cfgHubRecSrcName', v.src?.name], ['cfgHubRecSrcValue', v.src?.value]]);
+  }
   if (type === 'ROWS' && v && typeof v === 'object') return escapeHtml(osT('cfgRowsCount').replace('{n}', () => String(Array.isArray(v) ? v.length : Object.keys(v).length)));
   if (type === 'THEMETXT' && v && typeof v === 'object' && !Array.isArray(v)) return escapeHtml(CFG_TYPES.THEMETXT.toInput(v));
   if (type === 'TPAIRS' && Array.isArray(v)) return escapeHtml(CFG_TYPES.TPAIRS.toInput(v));
   if (type === 'XLINES' && Array.isArray(v)) return escapeHtml(v.length ? v.map((e) => (e && (e.zh || '')) + ' / ' + (e && (e.en || ''))).join(' ｜ ') : osT('cfgUnset'));   // TD-1459
   if (type === 'T10' && Array.isArray(v)) return escapeHtml(osT('cfgDomainsCount').replace('{n}', () => String(v.length)));
+  if (type === 'TIERSET' && v && typeof v === 'object' && !Array.isArray(v)) {   // TD-1535：核准页用人话显示三态（⛔ 裸 JSON）
+    const m = CFG_TYPES.TIERSET.toInput(v);
+    if (m.mode === 'all') return escapeHtml(osT('cfgMallElTierModeAll'));
+    if (m.mode === 'list') return escapeHtml(osT('cfgMallElTierModeListed') + '：' + m.tiers.join('、'));
+    return `<span class="cfg-unset">${escapeHtml(osT('cfgMallElTierModeUnset'))}</span>`;
+  }
   if (v === null || v === undefined) return `<span class="cfg-unset">${escapeHtml(osT('cfgUnset'))}</span>`;
   if (typeof v === 'boolean') return v ? '✔' : '✘';
-  if (Array.isArray(v)) return escapeHtml(v.join('、'));
+  if (Array.isArray(v)) return v.some((e) => e && typeof e === 'object') ? cfgFmtJson(v) : escapeHtml(v.join('、'));   // TD-1550：元素是对象 ⇒ 格式化 JSON
   if (type === 'T2' && typeof v === 'number') return escapeHtml(String(Math.round(v * 10000) / 100)) + ' %';
+  if (typeof v === 'object') return cfgFmtJson(v);   // TD-1550：没有专门格式的对象型值 ⇒ 格式化 JSON（⛔ [object Object]）
   return escapeHtml(String(v));
 }
 
@@ -19723,27 +20189,189 @@ function renderSfkOsToolsTab(el) {
   });
 }
 
+// ==================== TD-1540 B：审核演示账号（标记／发放／撤销清零）——纯函数（admin/tests/td1540_mall_review_ui.test.mjs 现场抽取）
+// 契约：任务归属/SFK_TD1527b_后台接口契约与具名卡要求_线3给线4_20261124.md v0.3.1。状态码一律取库函数返回原文，界面只做「码 ⇒ 文案」，⛔ 另造状态。
+const MRV_MARK_LABEL = { marked: 'mrvMarkDone', already: 'mrvMarkAlready', remark_limit_not_set: 'mrvRemarkLimitNotSet', remark_limit_reached: 'mrvRemarkLimitReached' };
+const MRV_GRANT_LABEL = { granted: 'mrvGrantDone', already: 'mrvGrantAlready', not_configured: 'mrvGrantNotConfigured', not_marked: 'mrvNotMarked', not_demo: 'mrvGrantNotDemo' };   // 取值与 fn_mall_review_grant（20261124190100）逐个对齐，契约测试 check_td1540_mall_review_contract.ts 钉
+const MRV_ERROR_LABEL = { INVALID_TARGET: 'mrvErrInvalidTarget', INVALID_EMAIL: 'mrvErrInvalidEmail', NOT_FOUND: 'mrvErrNotFound', NOT_DEMO: 'mrvErrNotDemo',
+  REASON_REQUIRED: 'mrvErrReasonRequired', REASON_TOO_LONG: 'mrvErrReasonRequired', UNKNOWN_ACTION: 'mrvErrUnknown', PERMISSION_DENIED: 'mrvErrPermission' };   // 对照线3 Edge（term/l3-td1527b 53a2925e0）实际错误码
+const MRV_REASON_MIN = 2, MRV_REASON_MAX = 500;   // 🔵 与 Edge 校验同口径（契约 v0.2「理由 2–500 字」；界面先拦，判据仍在服务端）
+function mrvReasonOk(r) { const n = Array.from(String(r ?? '').trim()).length; return n >= MRV_REASON_MIN && n <= MRV_REASON_MAX; }   // 按码点计，与库里 char_length 同口径（Edge 侧由线3 对齐，设计窗口 11-25 复核第 5 项）
+// 结果 ⇒ {key, n, ok}：key 是文案键（未知状态 ⇒ null，调用方原样显示码，⛔ 吞成「成功」）；ok 只在真成功时为 true
+function mrvMarkResult(r) { const st = r?.status; return { key: MRV_MARK_LABEL[st] ?? null, ok: st === 'marked', raw: st }; }
+function mrvGrantResult(r) { const st = r?.status; return { key: MRV_GRANT_LABEL[st] ?? null, ok: st === 'granted', raw: st }; }
+function mrvReleaseResult(r) {
+  const st = r?.status;
+  if (st === 'released') return { key: 'mrvReleaseDone', ok: true, raw: st, n: Number.isInteger(r.cleared) ? r.cleared : null };
+  if (st === 'open_orders') return { key: 'mrvReleaseOpenOrders', ok: false, raw: st, n: Number.isInteger(r.open_orders) ? r.open_orders : null };
+  if (st === 'paid_orders_unreversed') return { key: 'mrvReleasePaidUnreversed', ok: false, raw: st, n: Number.isInteger(r.orders) ? r.orders : null };
+  if (st === 'not_marked') return { key: 'mrvNotMarked', ok: false, raw: st, n: null };
+  return { key: null, ok: false, raw: st, n: null };
+}
+function mrvText(res) { if (!res.key) return osT('mrvUnknownStatus').replace('{s}', () => String(res.raw ?? '-')); const t = osT(res.key); return res.n == null ? t : t.replace('{n}', () => String(res.n)); }
+function mrvErrorKey(err) { const code = String(err?.errorCode ?? String(err?.message ?? '').split(':')[0]).trim(); return Object.prototype.hasOwnProperty.call(MRV_ERROR_LABEL, code) ? MRV_ERROR_LABEL[code] : null; }
+// 超期：库内按工作日判，列表行带 overdue（布尔）；界面⛔ 自己用日历天数算
+function mrvOverdue(item) { return item?.overdue === true && !item?.released_at; }
+// overdue 为 null 时写明原因（⛔ 显示成「未超期」）：unset＝期限未设定、inactive＝已撤销／非活跃、check_failed＝判定失败；其余 ⇒ 不写
+const MRV_OVERDUE_REASON_LABEL = { unset: 'mrvOverdueUnset', inactive: 'mrvOverdueInactive', check_failed: 'mrvOverdueCheckFailed' };
+function mrvOverdueNoteKey(item) { return item?.overdue === null || item?.overdue === undefined ? (MRV_OVERDUE_REASON_LABEL[item?.overdue_reason] ?? null) : null; }
+// 账号已删：user_id 为 null，改认 user_id_snapshot；这种行⛔ 给操作按钮（没有可操作的账号）
+function mrvRowUser(item) { return item?.user_id ?? null; }
+// 再标上限：remark_max_set===false 或 remark_max 为 null ⇒ 未设定（与 0 不同）
+function mrvRemarkMaxText(d) { return d?.remark_max_set === true && Number.isInteger(d?.remark_max) ? osT('mrvRemarkMax').replace('{n}', () => String(d.remark_max)) : null; }
+// 已标记次数：null＝统计失败（⛔ 当 0）
+function mrvMarkCountText(item) { return Number.isInteger(item?.mark_count) ? String(item.mark_count) : osT('mrvMarkCountFailed'); }
+// 找号结果回显：页面自己对输入的邮箱脱敏（首字符＋***＋@域名），⛔ 回显全文
+function mrvMaskEmail(e) { const s = String(e ?? '').trim(); const at = s.lastIndexOf('@'); return at > 0 ? s[0] + '***' + s.slice(at) : '***'; }
+// 发放确认：N 取 list 的 points_amount（当前配置值）；未设定／非正整数 ⇒ null（⛔ 让发放）
+function mrvGrantConfirmText(points, email) {
+  if (!Number.isInteger(points) || points <= 0) return null;
+  return osT('mrvGrantConfirm').replace('{email}', () => String(email || '-')).replace('{n}', () => String(points)).replace('{sgd}', () => (points / 100).toFixed(2));
+}
+// 已发过额度的行⛔ 再给「发放」按钮
+function mrvCanGrant(item) { return !item?.released_at && !!item?.user_id && !(Number(item?.granted_amount) > 0); }
+// 只有 demo 号可标（find 返回的 markable 是唯一判据）
+function mrvCanMark(found) { return found?.markable === true; }
+// ==================== TD-1540 B 纯函数结束
+
+async function mrvCall(body) { return callFn('sfk-admin-mall-review-account', body); }
+function mrvNum(v) { return (typeof v === 'number' && Number.isFinite(v)) ? String(v) : '-'; }
+function mrvSayErr(el, err) {
+  el.classList.add('error');
+  const k = mrvErrorKey(err);
+  el.textContent = k ? osT(k) : osT('adminCommonFailed') + (err?.message ?? '');
+}
+function mrvSay(el, res) { el.classList.toggle('error', !res.ok); el.textContent = mrvText(res); }
+function mrvRowHtml(it) {
+  const active = !it.released_at;
+  const uid = mrvRowUser(it);
+  const note = mrvOverdueNoteKey(it);
+  return `<tr data-mrv-user="${escapeHtml(uid || '')}" class="${mrvOverdue(it) ? 'mrv-overdue' : ''}">
+    <td>${uid ? escapeHtml(it.email || '-') : `${escapeHtml(osT('mrvAccountDeleted'))} <span class="muted mono">${escapeHtml(it.user_id_snapshot || '')}</span>`}</td>
+    <td class="muted">${it.marked_at ? formatDate(it.marked_at) : '-'}${mrvOverdue(it) ? ` <span class="status error">${escapeHtml(osT('mrvOverdue'))}</span>` : ''}${note && active ? ` <span class="muted">${escapeHtml(osT(note))}</span>` : ''}</td>
+    <td>${escapeHtml(mrvMarkCountText(it))}</td>
+    <td>${escapeHtml(mrvNum(it.granted_amount))}</td><td>${escapeHtml(mrvNum(it.scoped_available))}</td><td>${escapeHtml(mrvNum(it.open_orders))}</td>
+    <td class="muted">${active ? escapeHtml(osT('mrvActive')) : `${escapeHtml(osT('mrvReleasedAt'))}${formatDate(it.released_at)} · ${escapeHtml(osT('mrvCleared'))}${escapeHtml(mrvNum(it.cleared_amount))}`}</td>
+    <td>${active && uid ? `${mrvCanGrant(it) ? `<button class="ghost-btn" data-mrv-act="grant" data-mrv-email="${escapeHtml(it.email || '')}">${escapeHtml(osT('mrvGrant'))}</button>` : ''}
+      <input type="text" class="mrv-release-reason" placeholder="${escapeHtml(osT('mrvReasonPh'))}" />
+      <button class="ghost-btn" data-mrv-act="release">${escapeHtml(osT('mrvRelease'))}</button>` : ''}
+      <span class="status mrv-row-status"></span></td></tr>`;
+}
+function mrvListHtml(d) {
+  const items = Array.isArray(d?.items) ? d.items : [];
+  return `${d?.max_days == null ? `<p class="status error">${escapeHtml(osT('mrvMaxDaysUnset'))}</p>` : `<p class="muted">${escapeHtml(osT('mrvMaxDays').replace('{n}', () => String(d.max_days)))}</p>`}
+    ${d?.points_set === true ? '' : `<p class="status error">${escapeHtml(osT('mrvPointsUnset'))}</p>`}
+    ${mrvRemarkMaxText(d) ? `<p class="muted">${escapeHtml(mrvRemarkMaxText(d))}</p>` : `<p class="status error">${escapeHtml(osT('mrvRemarkMaxUnset'))}</p>`}
+    ${items.length ? `<table class="data-table"><thead><tr><th>${escapeHtml(osT('mrvColEmail'))}</th><th>${escapeHtml(osT('mrvColMarkedAt'))}</th>
+      <th>${escapeHtml(osT('mrvColMarkCount'))}</th><th>${escapeHtml(osT('mrvColGranted'))}</th><th>${escapeHtml(osT('mrvColAvailable'))}</th><th>${escapeHtml(osT('mrvColOpenOrders'))}</th>
+      <th>${escapeHtml(osT('mrvColState'))}</th><th></th></tr></thead><tbody>${items.map(mrvRowHtml).join('')}</tbody></table>`
+      : `<p class="muted">${escapeHtml(osT('mrvNone'))}</p>`}`;
+}
+
+async function renderMallReviewTab(el) {
+  el.innerHTML = `<p class="loading">${escapeHtml(osT('adminCommonLoading'))}</p>`;
+  let d;
+  try { d = await mrvCall({ action: 'list' }); }
+  catch (err) { el.innerHTML = `<section class="panel"><p class="status error">${escapeHtml(osT('adminCommonFailed') + (err?.message ?? ''))}</p></section>`; return; }
+  el.innerHTML = `<section class="panel"><h2>${escapeHtml(osT('mrvTitle'))}</h2><p class="muted">${escapeHtml(osT('mrvIntro'))}</p>
+    <form class="inline-form mrv-find"><label>${escapeHtml(osT('mrvEmailLabel'))} <input type="email" name="mrvEmail" required /></label>
+      <button type="submit">${escapeHtml(osT('mrvFind'))}</button></form>
+    <div class="mrv-found"></div><p class="status mrv-find-status"></p></section>
+    <section class="panel"><h3>${escapeHtml(osT('mrvListTitle'))}</h3><div class="mrv-list">${mrvListHtml(d)}</div></section>`;
+  const reload = () => renderMallReviewTab(el);
+  // 写操作期间按钮置灰，回来再恢复（防双击发两次；设计窗口 11-25 复核第 3 项）
+  const busy = async (btn, fn) => { if (btn.disabled) return; btn.disabled = true; try { await fn(); } finally { btn.disabled = false; } };
+  // 找号：只认最后一次查询的返回；邮箱框一改就清空结果（⛔ 用旧结果去标记新输入的号；第 2 项）
+  let findSeq = 0;
+  const findForm = el.querySelector('.mrv-find');
+  const box = el.querySelector('.mrv-found'); const st = el.querySelector('.mrv-find-status');
+  findForm.elements.mrvEmail.addEventListener('input', () => { findSeq++; box.innerHTML = ''; st.textContent = ''; st.classList.remove('error'); });
+  findForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const my = ++findSeq; const email = ev.target.elements.mrvEmail.value.trim();
+    st.classList.remove('error'); st.textContent = osT('adminCommonSubmitting'); box.innerHTML = '';
+    let found;
+    try { found = await mrvCall({ action: 'find', email }); }
+    catch (err) { if (my === findSeq) mrvSayErr(st, err); return; }
+    if (my !== findSeq) return;   // 期间又查了一次或改了输入 ⇒ 丢弃这次返回
+    st.textContent = '';
+    const can = mrvCanMark(found);
+    box.innerHTML = `<p>${escapeHtml(osT('mrvFoundEmail'))}<strong>${escapeHtml(mrvMaskEmail(email))}</strong> · ${escapeHtml(osT('mrvAccountKind'))}<strong>${escapeHtml(String(found?.accountKind ?? '-'))}</strong></p>
+      ${can ? `<form class="inline-form mrv-mark"><label>${escapeHtml(osT('mrvReasonLabel'))} <input type="text" name="mrvReason" style="min-width:260px" required /></label>
+        <button type="submit">${escapeHtml(osT('mrvMark'))}</button></form>`
+        : `<p class="muted mrv-not-demo">${escapeHtml(osT('mrvOnlyDemo'))}</p>`}
+      <p class="status mrv-mark-status"></p>`;
+    box.querySelector('.mrv-mark')?.addEventListener('submit', async (e2) => {
+      e2.preventDefault();
+      const ms = box.querySelector('.mrv-mark-status'); const reason = e2.target.elements.mrvReason.value;
+      ms.classList.remove('error');
+      if (!mrvReasonOk(reason)) { ms.classList.add('error'); ms.textContent = osT('mrvErrReasonRequired'); return; }
+      await busy(e2.target.querySelector('button[type=submit]'), async () => {
+        ms.textContent = osT('adminCommonSubmitting');
+        try { const r = mrvMarkResult(await mrvCall({ action: 'mark', targetUserId: found.userId, reason: reason.trim() })); mrvSay(ms, r); if (r.ok) setTimeout(reload, 800); }
+        catch (err) { mrvSayErr(ms, err); }
+      });
+    });
+  });
+  el.querySelectorAll('[data-mrv-act]').forEach((btn) => btn.addEventListener('click', async () => {
+    const tr = btn.closest('tr'); const uid = tr.dataset.mrvUser; const rs = tr.querySelector('.mrv-row-status');
+    rs.classList.remove('error');
+    if (btn.dataset.mrvAct === 'grant') {
+      // 发放前确认：写明发给谁、发多少点（≈S$），N 取当前配置值；未设定 ⇒ 直接说明、⛔ 发（第 1 项）
+      const msg = mrvGrantConfirmText(d?.points_amount, btn.dataset.mrvEmail);
+      if (!msg) { rs.classList.add('error'); rs.textContent = osT('mrvGrantNotConfigured'); return; }
+      if (!window.confirm(msg)) return;
+      await busy(btn, async () => {
+        rs.textContent = osT('adminCommonSubmitting');
+        try { const r = mrvGrantResult(await mrvCall({ action: 'grant', targetUserId: uid })); mrvSay(rs, r); if (r.ok) setTimeout(reload, 800); }
+        catch (err) { mrvSayErr(rs, err); }
+      });
+      return;
+    }
+    const reason = tr.querySelector('.mrv-release-reason').value;
+    if (!mrvReasonOk(reason)) { rs.classList.add('error'); rs.textContent = osT('mrvErrReasonRequired'); return; }
+    if (!window.confirm(osT('mrvReleaseConfirm'))) return;
+    await busy(btn, async () => {
+      rs.textContent = osT('adminCommonSubmitting');
+      try { const r = mrvReleaseResult(await mrvCall({ action: 'release', targetUserId: uid, reason: reason.trim() })); mrvSay(rs, r); if (r.ok) setTimeout(reload, 1200); }
+      catch (err) { mrvSayErr(rs, err); }
+    });
+  }));
+}
+// ==================== TD-1540 B 结束
+
 // ---- TD-38 密码框显隐 ----
-// 给页面里每个 type=password 的输入框补一个「显示／隐藏」按钮（已有自带开关的 #authPassword 跳过）。
+// 给页面里每个 type=password 的输入框补一个显示／隐藏开关（已有自带开关的 #authPassword 跳过）。
+// 🔴 TD-1518 ②：开关改为输入框右侧的眼睛图标（与门户 TD-1223 addPasswordEyes、App 登录页同一形态）：
+//   输入框包进 span.pw-eye-wrap，按钮绝对定位在右侧；可访问名称走 aria-label，文案取键 authShowPassword／authHidePassword（⛔ 写死）。
 // 渲染是整块重绘，所以靠 MutationObserver 兜底；已处理的输入框打 data-pw-eye 标记，⛔ 重复插入。
+// 🔴 TD-1534：图标改单色 SVG（⛔ emoji），与门户 addPasswordEyes 用同一份生成块；状态与 App 一致：隐藏⇒带斜线的眼睛、显示⇒眼睛。
+// <<<PW_EYE_SVG_GENERATED — 由 tool/pw_eye_icons_sync.py 生成，⛔ 不要手改；真源 config/pw_eye_icons.json（TD-1534）>>>
+const SFK_PW_EYE_SVG = {"hidden":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M12 6c3.79 0 7.17 2.13 8.82 5.5-.59 1.22-1.42 2.27-2.41 3.12l1.41 1.41c1.39-1.23 2.49-2.77 3.18-4.53C21.27 7.11 17 4 12 4c-1.27 0-2.49.2-3.64.57l1.65 1.65C10.66 6.09 11.32 6 12 6zm-1.07 1.14L13 9.21c.57.25 1.03.71 1.28 1.28l2.07 2.07c.08-.34.14-.7.14-1.07C16.5 9.01 14.48 7 12 7c-.37 0-.72.05-1.07.14zM2.01 3.87l2.68 2.68C3.06 7.83 1.77 9.53 1 11.5 2.73 15.89 7 19 12 19c1.52 0 2.98-.29 4.32-.82l3.42 3.42 1.41-1.41L3.42 2.45 2.01 3.87zm7.5 7.5l2.61 2.61c-.04.01-.08.02-.12.02-1.38 0-2.5-1.12-2.5-2.5 0-.05.01-.08.01-.13zm-3.4-3.4l1.75 1.75c-.23.55-.36 1.15-.36 1.78 0 2.48 2.02 4.5 4.5 4.5.63 0 1.23-.13 1.77-.36l.98.98c-.88.24-1.8.38-2.75.38-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.53z\"/></svg>","shown":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z\"/></svg>"};
+// <<<END_PW_EYE_SVG_GENERATED>>>
 function sfkAttachPasswordEyes(doc, t) {
   let n = 0;
   doc.querySelectorAll('input[type="password"]').forEach((inp) => {
     if (inp.getAttribute('data-pw-eye') || inp.id === 'authPassword') return;
     inp.setAttribute('data-pw-eye', '1');
+    const wrap = doc.createElement('span');
+    wrap.className = 'pw-eye-wrap';
+    inp.parentNode.insertBefore(wrap, inp);
+    wrap.appendChild(inp);
     const btn = doc.createElement('button');
     btn.type = 'button';
-    btn.className = 'secondary pw-eye';
+    btn.className = 'pw-eye';
     btn.setAttribute('aria-pressed', 'false');
-    btn.style.margin = '-4px 0 10px';
-    btn.textContent = t('authShowPassword');
+    btn.setAttribute('aria-label', t('authShowPassword'));
+    btn.innerHTML = SFK_PW_EYE_SVG.hidden;
     btn.addEventListener('click', () => {
       const show = inp.type === 'password';
       inp.type = show ? 'text' : 'password';
       btn.setAttribute('aria-pressed', show ? 'true' : 'false');
-      btn.textContent = t(show ? 'authHidePassword' : 'authShowPassword');
+      btn.setAttribute('aria-label', t(show ? 'authHidePassword' : 'authShowPassword'));
+      btn.innerHTML = show ? SFK_PW_EYE_SVG.shown : SFK_PW_EYE_SVG.hidden;
     });
-    inp.insertAdjacentElement('afterend', btn);
+    wrap.appendChild(btn);
     n++;
   });
   return n;
